@@ -1,0 +1,211 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+#Data Frame
+
+```{marginfigure}
+En cierta forma los data frame son muy similares a una matriz o una lista, pero la mejor analogía a veces es pensar en datos guardados como una pequeña hoja de cálculo. 
+```
+
+`r tint::newthought('Un data frame es una estructura de datos tabular, ')` donde los datos se guardan en líneas y donde cada columna tiene un nombre. Los data frame son de hecho un tipo especial de lista donde cada elemento de la lista tiene el mismo tamaño (lenght). Una columna representa un elemento, y la cantidad de líneas representa su tamaño. A diferencia de las matrices, los data frame pueden almacenar diferentes tipos de clases de objetos en cada columna (si fueran una matriz tendrían que ser todos del mismo tipo).
+
+En el capítulo anterior vimos como las listas podían tener nombre a sus componentes. Los data frame tienen un atributo especial similar, y es el nombre de columnas y líneas. Este se obtiene con la función `col.names()` para las líneas y `row.names()` para las columnas. Antes de seguir con la teoría de __R__, conviene explorar un data frame y profundizar su estructura. En la Ciencia de Datos, lo más probable es que la información ya la haya recopilado un científico y está en formato de *data frame*, o que los estudiantes como científicos de datos les den la información en un formato más simple, como por ejemplo un archivo plano csv (comma separated value) y les toque transformarlo en un data frame para poder aplicar muchas de las funciones disponibles.
+
+## Revisando Data Frames
+__R__ viene precargado con varios juegos de datos, los cuales han sido usados en el mundo académico multitudes de veces por ser muy útiles y didácticos (y sto se hace extensivo a la mayoria de los tutoriales que existen en el Internet.) Para el siguiente ejemplo utilizamos uno de los más conocidos, `mtcars` con información sobre el desempeño y caracteristicas de varios automóbiles. 
+
+```{r mtcars}
+# Juego de datos mtcars
+data(mtcars)
+```
+
+```{r echo=FALSE}
+knitr::kable(
+  mtcars[1:6, 1:6], caption = 'Subconjunto de Datos mtcars.'
+)
+```
+
+Los juegos de datos que vienen pre-instalados en __R__ se cargan a sistema con la función `data()`. Para ver que hay dentro de `mtcars` usamos la función `head(mtcars)` (aunque en el texto por motivos de formato estamos utilizando una función avanzada que imprime las tablas con formatos más atractivos para la imprenta). Los lectores que tengan experiencia con una consola de Unix/Linux reconocen el comando como uno para ver las primeras líneas de un archivo. En __R__ la función arroja las primeras seis observaciones de un juego de datos, aunque esta cifra se puede modificar de la siguiente manera:
+
+`# Imprimir primeras 10 líneas del juego mtcars`
+`head(mtcars, 10)`
+```{r echo=FALSE}
+knitr::kable(
+  mtcars[1:10, 1:6], caption = 'Subconjunto de Datos mtcars.'
+)
+```
+
+```{marginfigure}
+Para saber como funciona un comando, función ó inclusive juego de datos de R, se usa el símbolo de pregunta delante del comando en la consola interactiva. Por ejemplo, si se tiene dudas sobre el juego de datos mtcars se puede escribir en la consola __?mtcars__
+```
+
+El juego de datos es de la revista Motor Trend US de 1974, y resume el consumo de gasolina y otros aspectos como cilindraje, caballos de fuerza, cambios, y demás, de treinta y dos marcas diferentes de automóviles. El año 1974 fue uno marcado por la crisis petrolera del Medio Oriente, y existía un interés especial en el rendimiento de los vehículos y como el consumo de gasolina variaba en referencia a otros aspectos de los mismos. Utilizaremos entonces este juego de datos en varias partes del texto. 
+
+Cada columna del data frame tiene un encabezado que dice que tipo de información contiene la misma. Usando la función `names()` __R__ nos devuelve los nombres.
+
+```{r namesDataframe}
+# Ver nombres de columnas del data frame
+names(mtcars)
+```
+
+Es posible pedir solo un nombre o varios utilizando los índices de columna entre corchetes.
+
+```{r namesDataframe2}
+# Ver solo el nombre de algunas columnas de interés
+names(mtcars[2])
+names(mtcars[2:4])
+```
+
+En nuestro caso cada línea es una observación y tiene un nombre. El nombre de la línea es el modelo de automóvil. Pero no siempre es así, ya que hay muchos data frames que no tienen nombre de línea (por lo general cuando son transformaciones de otro tipo de archivo). Veamos este atributo en nuestro juego actual.
+
+```{r}
+# Ver nombre de líneas de mtcars
+row.names(mtcars)
+```
+
+Es muy fácil acceder a sub-muestras dentro de un data frame. La complicación es que a veces no hay una manera, sino múltiples maneras, y es probable enredarse al principio. Dentro de los corchetes el orden de índices es `[nroLinea, nroColumna]`, similar como hacemos referencia a un vector pero con dos dimensiones. Para aquellos que vengan de C/C++ o similares, los índices en R se cuentan a partir de 1 y no 0 como en otros lenguajes de programación.
+
+```{r showSomeMtcars}
+# Ver partes del juego de datos
+mtcars[1:4, 4:6]
+```
+
+Otra forma de seleccionar datos es utilizando el símbolo de `$` y el nombre de la columna todo pegado.
+
+```{r showSomeMtcars2}
+# Ver solo HP del juego de datos
+head(mtcars$hp)
+```
+
+Inclusive podemos utilizar la notación de columna con corchetes. Como ya sabemos la columna (la reemplazo el nombre después del símbolo peso) solo tenemos que poner el rango de líneas a buscar.
+
+```{r showSomeMtcars3}
+# Ver solo HP del juego de datos
+mtcars$hp[1:6]
+```
+
+Perfectamente el rango de búsqueda se puede seleccionar con una búsqueda programada (como un _query_ al estilo SQL). Esta forma de seccionar partes de la data es muy utilizada en la programación de _scripts_ por su versatilidad. 
+
+```{r smallQuery}
+# Pequeña consulta de HP en unidades con menos de 120 HP
+mtcars$hp[mtcars$hp < 120]
+```
+
+```{marginfigure}
+En otro tipo de lenguaje de programación para obtener el promedio de una colección de datos hubieramos tenido que iterar por el mismo, acumular los valores en un registro, el número de puntos de datos, y luego dividir para obtener el promedio. Aquí el lenguaje muestra sus virtudes con una función que se aplica de forma sencillo a la estructura de datos sin tener que programar.
+```
+
+Hemos de notar que dentro del corchete tuvimos que utilizar toda la notación `mtcars$hp < 120` para que __R__ interpretara bien el _script_. Esto a veces es algo engorroso, pero una vez el científico se acostumbra a la notación se hace por costumbre. Adelantemos un poco y entremos en materia de Ciencia de Datos. ¿Cuál es el promedio de caballos de fuerza de estos 32 automóviles?
+
+```{r meanMtcars}
+# Buscar promedios de HP en mtcars
+mean(mtcars$hp)
+```
+
+Interesante ver que en 1974 el promedio era 146.7, algo que se consideraría un motor grande hoy. ¿Y la desviación estándar?
+
+```{r sdMtcars}
+# Buscar desviación estándar de HP en mtcars
+sd(mtcars$hp)
+```
+
+Es una desviación estándar bastante amplia, considerando el promedio. ¿Cómo se verá la relación entre caballos de fuerza y peso? La variable de peso es `wt` según lo que vimos arriba.
+
+```{r fig-margin, fig.margin = TRUE, fig.cap = "RELACION WT vs HP", fig.width=3.5, fig.height=3.5, cache=TRUE}
+# Gráfica WT vs. HP
+library(ggplot2)
+qplot(wt, hp, data = mtcars)
+```
+
+Uno hubiera pensando que mientras más liviano el automóvil menos HP, pero hay bastante variación en la gráfica. ¿Y si quisiera agregar un modelo de regresión lineal para poder predecir cuantos caballos de fuerza según el peso del auto? No es el más científico de los modelos, pero ciertamente en los automóviles hay bastante relación entre el peso del motor y la potencia.
+
+```{r fig-margin2, fig.margin = TRUE, fig.cap = "RELACION WT vs HP", fig.width=3.5, fig.height=3.5, cache=TRUE}
+# WT vs HP regresión 
+library(ggplot2)
+qplot(wt, hp, data = mtcars, 
+      main = "RELACION HP vs. PESO (TM)") + 
+  geom_smooth(formula = y ~ x, method = "auto")
+```
+
+Hay que admitir que hemos hecho mucho en solo dos líneas de código. La función `geom_smooth()` se encarga de calcular el mejor método de regresión y utiliza un tono de gris más oscuro para indicar intervalos de confidencia. 
+
+> NOTA: Si alguno de los lectores es muy joven y todavía no llegó a la edad o curso donde se enseña regresión lineal, solo le digo que no desespere. Hay mucho por aprender y tienen toda una vida para sumergirse en el mundo de la estadística. Por ahora solo basta con que tengan la idea que tenemos un montón de puntos que son observaciones de cómo se evalúa un automóvil comparando en el eje _x_ su peso y en el eje _y_ su potencia en _HP_. Esos puntos tienen más o menos una tendencia, y la regresión lineal es una línea que pasa lo mejor posible entre todos ellos. Quizás no sea exacta, pero pasa lo más cerca posible de todos. A los que sí saben estadística, __R__ tiene bibliotecas enteras de métodos de estadística predictiva para aplicar en la investigación científica.
+
+## Manejo Práctico de los Data Frames
+Regresemos al tema de los data frames ya habiendo visto el potencial de dicha estructura. Hay tres formas de leer uno:
+
+a. La primera es que el data frame ya está cargado en memoria o en algún paquete de __R__. En este caso solo se lee con la función `data()` como en `data(mtcars)`.
+b. La segunda forma es crearlo a mano con la función `data.frame()`.
+c. La tercera es leerlo de disco duro o de alguna URL como data frame o similar.
+
+Por ahora vamos a ver las dos primeras. No todos los paquetes de datos vienen cargados en memoria o en una versión limpia de __R__. Algunos vienen en librerías apartes, extensiones del lenguaje que no vale la pena cargar a memoria sino en el momento de usarlas. Un ejemplo es el juego de datos de diamantes.
+
+```{r diamonds}
+# Cargar a memoria el juego de diamantes
+library(ggplot2)
+data("diamonds")
+
+class(diamonds)
+```
+
+```{r echo=FALSE}
+knitr::kable(
+  diamonds[1:6, 1:7], caption = 'Muestra del juego de datos diamantes.'
+)
+```
+
+El juego de datos diamonds es una serie de valores de 53,940 diamantes con mediciones de 10 variables. Viene incluido en la librería gráfica `ggplot2` que veremos más adelante, y es de la clase `data.frame` pero también `tbl` que es una clase envuelta (una extensión de la clase primaria para facilitar su manipulación).
+
+Podemos crear un data frame desde cero con un _script_ como vemos a continuación con la función `data.frame()`.
+
+```{r createDataFrame}
+# Crear data frame equipo
+pesos <- c(100,90,85,92)
+altura <- c(1.92, 1.70, 1.82, 1.75)
+equipo <- data.frame(peso = pesos, 
+                altura = altura, 
+                nombres = c("Jose", "Juan", "Joe", "Luis"))
+equipo
+```
+
+Los nombres de las variables de cada columna son los mismos que usamos dentro del argumento de creación del data frame. Si quisiéramos ver un resumen de nuestro equipo, pudiéramos hacerlo fácilmente con la función `summary()`:
+
+```{r summaryEquipo}
+# Crear data frame equipo y ver resumen 
+pesos <- c(100,90,85,92)
+altura <- c(1.92, 1.70, 1.82, 1.75)
+equipo <- data.frame(peso = pesos, 
+              altura = altura, 
+              nombres = c("Jose", "Juan", "Joe", "Luis"))
+summary(equipo)
+```
+
+__R__ nos da un listado muy completo de promedios, mínimos y máximos, así como el primer y tercer cuartil (la razón por la cual los estadísticos aman R). Es posible - pero poco común - eliminar una columna de un data frame asignándole valor nulo:
+
+```{r}
+# Hacer columna nula
+equipo$peso <- NULL
+equipo
+```
+
+Para eliminar una observación, o sea una línea, lo más común es utilizar el signo negativo en frente del número de observación para decirle a __R__ que debe sellecionar todos los puntos de datos menos ese elemento en particular. Como es un data frame no hay que olvidarse de las columnas en la notación con corchete. Digamos que queremos borrar el cuarto miembro del equipo, Luis, y lo haremos indicando `equipo[-4, ]` con el cuatro indicando la cuarta línea y la coma significando todas las columnas de esa cuarta fila.
+
+```{r eliminar miembro}
+equipo
+
+equipo[-4, ]
+```
