@@ -1,0 +1,167 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# GRÁFICAS EN R
+`r tint::newthought('No podemos mentir: R es uno de los mejores lenguajes del mundo para hacer gráficas científicas orientadas hacia la visualización de datos y la investigación explorativa.')` En el pasado los investigadores tenían que depender de lenguajes privados por lo que había que pagar licencias para poder hacer tales tareas. Los lenguajes eran muy buenos, pero no estaban al alcance de todos. _R_ fue la respuesta del mundo del software abierto y libre para que todos los investigadores pudieran tener un lenguaje con enfoque matemático más allá de los recursos de las universidades e instituciones para las cuales trabajaban. 
+
+La comunidad de _R_ creció de la mano de los investigadores universitarios de estadística, bioestadística y ciencia. Cuando la ciencia de datos explotó en un mundo donde la información en la Internet era cuantiosa y prácticamente gratis, había dos lenguajes con el poder y las bibliotecas de comandos necesarias para sacarle provecho: _R_ y _Python_. En la comunidad de la Ciencia de Datos, los científicos son mucho más educados y no hay guerras santas sobre cual lenguaje es mejor. _R_ parece ser la opción favorita de aquellos con inclinaciones a las ciencias matemáticas, pero los que vienen de otras carreras, como la Ciencia de la Computación prefieren _Python_ (que, a decir verdad, hace cosas que _R_ no puede, ya que cuenta con bibliotecas de programación general y no necesariamente solo de ciencia). 
+
+## Introducción
+Hay tres tipos de gráficos en R al momento de escribir este libro.
+
+a. La biblioteca de gráficos incluida con la instalación base de R
+b. La biblioteca _Lattice_ de gráficos _Trellis_
+c. La biblioteca del paquete _GGPLOT_ 
+
+Veamos un resumen de cada uno de estos.
+
+* _R_ ya viene con una biblioteca bastante poderosa de gráficos que son los que vamos a ver en este capítulo. Para el científico de datos joven resuelve el 90% de los problemas y es un juego de lenguaje común para aprender. Esta biblioteca comprende una serie de gráficos amplia, desde el más común de puntos hasta algunos modelos complicados tridimensionales. 
+
+* La biblioteca _Lattice_ responde a una necesidad sencilla de ver el mismo juego de datos discriminado por una variable en especial. Por ejemplo, tengo la lectura de cien o más campos de trigo y sus rendimientos por hectárea y queremos verlos discriminados según los tres tipos de semilla de trigo que se utilizó. Esto se puede hacer con la biblioteca básica, pero es mucho más sencillo usando gráficos _Trellis_. _Lattice_ llenó una necesidad de la comunidad de investigadores, pero por alguna razón la comunidad dejó de usar _Lattice_, quizás porque aprendieron a programar bien en otras bibliotecas y ya no lo necesitaban. Vale la pena aprender a hacer gráficos _Lattice_ pero no vamos a tocar el tema en profundidad aquí. 
+
+* La biblioteca _GGPLOT_ es uno de los tantos proyectos del científico (y para muchos líder de la comunidad científica de _R_) *Hadley Wickham* y usa una metodología muy adelantada de ver graficas basada en la teoría de la gramática de gráficos, ende el *GG* en el título del paquete. La biblioteca _GGPLOT_ es un poco más difícil de usar, por lo menos hasta que el investigador se acostumbra a su sintaxis, pero es muy poderosa. Aprender a usar _GGPLOT_ pudiera ser todo un libro en sí mismo. En el siguiente texto tenemos un capítulo aparte con ejemplos de gráficas utilizando la misma. 
+
+## Scatter Plot
+El grafico más sencillo de _R_ es el gráfico de puntos o _scatter plot_ por su nombre en inglés. La idea es representar con un punto una observación en dos dimensiones: el eje X y el eje Y. Un científico de ciencias naturales puede, por ejemplo, capturar cien camarones, y medir peso y tamaño para estudiar una muestra de una población y ver los efectos de la contaminación en diferentes áreas de una playa. 
+
+El uso de este comando es relativamente sencillo:
+
+```plot(x, y, …)```
+
+Donde `plot()` es el comando en _R_, `x` es la variable que contiene las observaciones que van a medirse en el eje X, y la variable `y` contiene las observaciones que van en el eje Y. Los tres puntos significan que podemos poner argumentos adicionales.
+
+* El argumento `type = “l”` nos da una línea en vez de puntos. Podemos cambiar el tipo de gráfica usando las opciones de tipo; por ejemplo, en vez de “l” para línea usamos “h” para histograma.   
+* Para ponerle títulos la gráfica usamos la opción `main` dentro del paréntesis; por ejemplo `main = “Mi Título”`. 
+* También hay opción para subtítulos con el argumento `sub`. Se usa igual que el anterior, ejemplo `sub = “Mi Subtítulo”`.
+* Se pueden etiquetar los ejes X y Y de la gráfica con los argumentos `xlab` e `ylab` de igual forma que los títulos. 
+
+Para visualizar tomemos un ejemplo con el juego de datos `cars` que tiene información sobre la velocidad y distancia que le llevaba a un automóvil frenar en los años 1920 (no es un juego de datos muy actualizado, pero nos sirve para el caso). 
+
+```{r ejemploPlot}
+data(cars)
+summary(cars)
+
+plot(cars, main = "Velocidad VS. Frenos", xlab = "Velocidad (mph)", 
+     ylab = "Distancia de Frenado (ft)")
+```
+
+Cómo pueden ver hay una relación lineal entre la velocidad que un auto va y la cantidad de pies (feet en inglés) que le lleva frenar. Cada vez que hagamos un estudio exploratorio, vamos a querer ver este tipo de gráficas porque son muy útiles para ver si la función es monotónica (si una variable aumenta, la otra también) o no. En nuestro caso no había muchos puntos que poner en el gráfico, lo que hace la lectura sencilla, pero si hubiese miles de datos la lectura pudiera complicarse algo. 
+
+Muchos de los lectores quizás se percataron que cuando llamamos a la función no tuvimos que pasar los parámetros de qué iba en el eje x y que iba en el eje y. _R_ asumió correctamente que el juego de datos solo tenía dos variables, y que cada una iba en ese orden en los ejes cartesianos. No siempre ese será el caso, por lo que veremos un ejemplo con el juego de datos mtcars que ya usamos en otros capítulos. Este juego es más completo y no es tan evidente que variable va en cada eje cartesiano.
+
+```{r ejemploPlot2}
+data(mtcars)
+
+plot(mtcars$mpg, mtcars$hp, 
+     main = "Rendimiento VS. Caballos Fuerza", 
+     xlab = "Rendimiento MPG", 
+     ylab = "Caballos Fuerza HP")
+```
+
+No hay mucha diferencia en el código, solo que hay que llamar de forma explícita las variables para el eje X e Y con `mtcars$mpg` y `mtcars$hp`. A diferencia de la gráfica de arriba aquí podemos ver que entre más caballos de fuerza tiene un motor, menos rendimiento por galón de gasolina (por eso los carros más rendidores son los pequeños). 
+
+## Histograma
+Muchas veces en ciencia queremos contar cuantas ocurrencias de una observación hay en una muestra de datos. En el último ejemplo estábamos comparando la potencia en caballos de fuerza de los autos con su respectivo rendimiento en millas por galón. Veíamos que los carros con mayor potencia, los que tienen más caballos de fuerza, tienen rendimientos menores por galón de gasolina. Ahora bien, pensemos que nos gustaría agrupar cuantos autos tienen una cantidad dada de potencia en los motores. Es muy poco probable que dos o tres autos tengan exactamente 100 caballos de fuerza, pero podemos crear rangos de potencias y contar cuantos autos pertenecen a cada rango. 
+
+Este tipo de gráfico se conoce como histograma. En estadística, un histograma es una representación gráfica de una variable en forma de barras, donde la superficie de cada barra es proporcional a la frecuencia de los valores representados, ya sea en forma diferencial o acumulada. Sirven para obtener una "primera vista" general, o panorama, de la distribución de la población, o la muestra, respecto a una característica, cuantitativa y continua, de la misma y que es de interés para el observador (como la longitud o la masa). _R_ hace esto mismo de forma automática y crea las agrupaciones sin mucha intervención nuestra para que los histogramas queden perfectos. 
+
+```{r ejemploHist}
+hist(mtcars$mpg, main = "Histograma Potencia Motores HP", col = "gray")
+```
+
+El argumento `col = “gray”` nos ayudó a darle algo de color a la gráfica. Se puede usar muchos colores, utilizamos gris porque la impresión del libro es en blanco y negro. Si es verdad que la función `hist()` nos simplifica mucho la vida, es una función compleja con una gran cantidad de opciones. Para ver en la consola de R una lista completa de uso le pedimos el archivo de ayuda con el signo de interrogación
+
+`?hist`
+
+Según el tipo de consola que tengan van a ver un archivo completo de ayuda con ejemplos. Vamos a transcribir solo las opciones de uso de esta función para entrar en los detalles.
+
+```
+hist(x, ...)
+
+## Default S3 method:
+
+hist(x, breaks = "Sturges",
+
+     freq = NULL, probability = !freq,
+
+     include.lowest = TRUE, right = TRUE,
+
+     density = NULL, angle = 45, col = NULL, border = NULL,
+
+     main = paste("Histogram of" , xname),
+
+     xlim = range(breaks), ylim = NULL,
+
+     xlab = xname, ylab,
+
+     axes = TRUE, plot = TRUE, labels = FALSE,
+
+     nclass = NULL, warn.unused = TRUE, ...)
+```
+
+Como se puede ver son muchas opciones, algunas de ellas un tanto complicadas a menos que se conozca toda la estadística detrás de las mismas. Noten que el título de la gráfica está fijado por omisión como “Histogram of” y la variable de uso. Está en la línea que usa la función paste para fijarlo:
+
+`main = paste("Histogram of" , xname)`
+
+En nuestro caso fijamos el titulo con la opción `main` y evitamos el valor por omisión, pero es interesante ver como _R_ hace para crear títulos dinámicos. _R_ dinámicamente fijo la etiqueta del eje X como `mtcars$mpg`, pero también hubiéramos podido forzar el mismo con `xlab = “MPG”`. 
+
+```{marginfigure}
+La regla de _Sturges_, propuesta por Herbert Sturges en 1926, es una regla práctica acerca del número de clases que deben considerar al elaborarse un histograma. 
+```
+
+Otro punto interesante es el número de clases o categorías o agrupaciones. _R_ eligió por nosotros, y la mayoría de los autores de libros de estadísticas concuerdan que tres a cinco es lo correcto. Sin embargo, este parámetro se puede cambiar. Como conocimiento general, fijar estas categorías se llama en inglés *binning* (de bin, cesto) y es muy probable que se encuentren el término en literatura de programación y Ciencia de Datos. _R_ incluye la regla de _Sturges_ por omisión. Pero siempre puede haber el caso donde uno desea una escala especial de categorías. Para esto, las especificamos dentro de un vector, indicando los valores mínimos, máximo, y los puntos intermedios. 
+
+```{r ejemploHist3}
+hist(mtcars$mpg, breaks = c(10,20,30,40))
+```
+
+En este ejemplo los puntos de categoría van 
+
+a. del 10 al 20
+b. del 20 al 30
+c. del 30 al 40
+
+Queremos tres categorías y debemos entonces pasar cuatros valores. A pesar de que ningún auto en el juego de datos tenía un rendimiento de millas por galón tan alto como 40, _R_ asume que ese es el límite superior de la categoría, y no necesariamente que alguna observación tenga que cumplir con el mismo, solo estar dentro de alguno de estos. ¿Por qué quisiéramos tener una regla de categorías para los datos en vez de dejar que _R_ lo haga dinámicamente? En un estudio científico vamos a fijar valores para la medición y luego medir varias muestras. Vamos siempre a tener certeza de lo que queremos, más no necesariamente en el campo vamos a recoger los datos que queremos, sino lo que la naturaleza nos da. 
+
+## Gráficos de Barras
+Los gráficos de barras son muy comunes en los negocios y la economía, y como son ambas ciencias donde el científico de datos puede aportar mucho, vamos a ver estos con detalle. Para este ejemplo creemos nuestro propio juego de datos, uno ficticio con las ventas de nuestra empresa imaginaria. 
+
+```{r crearVentas}
+# Crear un juego de datos de ventas para el estudio
+ventas <- c(100,110,120,90,100,130)
+```
+
+Para armar un gráfico de barras usamos el formato siguiente:
+
+`barplot(datos, main = “Título”, xlab = “etiqueta eje X”)`
+
+Las gráficas del paquete básico tienen una nomenclatura más o menos estándar, y nos iremos acostumbrando a que los mismos elementos se vayan repitiendo. Como ejemplo, el uso de los argumentos para `main` y `xlab` son conocidos. Por datos damos a entender la variable que contiene los datos, por ejemplo podemos usar nuestro vector con datos de ventas para que _R_ nos ilustre visualmente si nos ha ido bien o mal. 
+
+```{r ejemploBarras}
+barplot(ventas, main = "Ventas 2010 al 2015", 
+        xlab = "Ventas USD")
+```
+
+Nuestro vector no tenía etiquetas para el eje X. Agreguémoslas de la siguiente manera:
+
+```{r ejemploBarras2}
+barplot(ventas, main = "Ventas 2010 al 2015", 
+        xlab = "Ventas USD", 
+        names.arg = c("2010", "2011", "2012", "2013", "2014", "2015"))
+```
+ 
+En el mejor de los casos, no vamos a querer agregar cosas a mano, sino que vamos a buscar que R nos dé las etiquetas de forma dinámica agrupando de alguna manera los datos. Esto se puede hacer con una matriz o estructura similar de datos con más de una dimensión. 
+
