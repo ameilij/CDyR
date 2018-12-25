@@ -1,0 +1,119 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+bibliography: skeleton.bib
+link-citations: no
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# INTRODUCCION
+`r tint::newthought('La Ciencia de Datos no es algo nuevo')`, de la misma forma que el lenguaje _R_ no es algo nuevo. Pero seguramente para el investigador novato ambos términos son recientes, y si bien uno puede tener una idea clara de lo que es cada cosa, el concepto es ambiguo y difícil de definir de forma concisa. La idea detrás de este libro no fue nunca escribir un manual del lenguaje _R_, sino escribir un libro de Ciencia de Datos enfocado en la matemátca y la estadística inherentes al enfoque multidisciplinario de la materia con el apoyo del lenguaje _R_. Nuestro objetivo es que el lector se sienta asombrado y con la misma sensación de descubrimiento científico que uno mismo sintió al dar los primeros pasos en un mundo nuevo y lleno de posibilidades. La ciencia de datos, la academia, la investigación y el lenguaje _R_ van de la mano siguiendo un mismo método. Por eso es tan importante que el siguiente no sea un libro de lectura obligatoria sino una hoja de ruta para el investigador novato que quiere aplicar el método científico en problemas de indole estadística en un mundo donde los datos abundan y las metodologías para resumirlos y sintetizarlos no son siempre obvias. 
+
+No estamos contentos con describir la sintaxis y escritura de _R_. Al contrario, nos enfocaremos en describir una cantidad mínima de funciones, estructuras y metodologías que le permitan al investigador incipiente comenzar a profundizar en la Ciencia de Datos. No dudamos que hay mucho en este libro que va a faltar. Pero nos limitamos a construir bases muy sólidas sobre las cuales el lector y alumno pueden profundizar utilizando el sistema de ayuda de _R_, los múltiples tutoriales en Internet, o simplemente buscando en Google la respuesta en el sitio Stack Overflow. 
+
+Es nuestro esfuerzo llevar a lo largo del libro un lenguaje claro y sencillo de entender por todos. Sin embargo muchos de los temas no son tan sencillos de explicar (estamos lidiando después de todo con programación y estadística en la mayoría de los casos). Si en algún momento el lector parece no entender la explicación del texto, recomendamos siempre escribir el programa en su totalidad y ejecutar el código. Estamos seguros que el 99% de los temas difíciles de entender se haran evidentes con tan solo seguir el código fuente del mismo.
+
+## La Ciencia de Datos
+La ciencia de datos \cite{zumelMount} utiliza herramientas de otras ciencias empíricas, estadística, análisis matemático, finanzas, técnicas de visualización, inteligencia de negocios, sistemas expertos, aprendizaje automatizado, bases de datos, bioestadística, y ciencia de la computación con la finalidad de procesar y extraer conocimiento de la data, ya sea que esta se encuentre estructurada o no estructurada.
+
+Previo al termino Ciencia de Datos, el matemático John W. Tukey comienza a circular la idea del análisis de datos versus la estadística en su libro *The Future of Data Analysis* \cite{tukey}. La premisa es que la estadística es una ciencia formal, mientras que el análisis de datos es una ciencia empírica ya que se basa en datos extraídos de la vida real. Tukey sostuvo que de la data debía extraerse hipótesis para evaluación, y que el análisis confirmatorio de datos debía coexistir al lado del análisis exploratorio de datos. Ambos se apoyan en la estadística como disciplina de aplicación pero estudian objetos diferentes.
+
+La ciencia de datos \cite{wikipediaDS} ha resultado para muchos una disciplina de reciente creación, pero en la realidad este concepto lo utilizó por primera vez el científico danés Peter Naur en la década de los sesenta como sustituto de las ciencias computacionales. En 1974 publicó el libro *Concise Survey of Computer Methods* donde utiliza ampliamente el concepto ciencia de datos, lo que permitió que se comenzara a utilizar más libremente entre el mundo académico \cite{naur}.
+
+Por otro lado, el matemático japonés e inventor de la *Metodología de Cuantificación* Chikio Hayashi define sucintamente \cite{hayashi} la ciencia de datos no solo como un concepto sintético para unificar las disciplinas de la estadística, el análisis de datos, y sus métodos relacionados, sino por la forma en la cual sus resultados se aplican. Esta nueva metodología incluye tres fases: diseño de la data, recolección de la data, y análisis de la misma.
+
+Muchas veces se ha criticado a la ciencia de datos como el uso disimulado de estadística bajo un nombre diferente con fines comerciales. En 2001, William S. Cleveland introdujo a la ciencia de datos como una disciplina independiente, extendiendo el campo de la estadística para incluir los avances en computación con datos en su artículo \textit{Ciencia de datos: un plan de acción para expandir las áreas técnicas del campo de la estadística}. Cleveland estableció seis áreas técnicas que en su opinión conformarían al campo de la ciencia de datos: investigaciones multidisciplinarias, modelos y métodos para datos, computación con datos, pedagogía, evaluación de herramientas, y teoría \cite{cleveland}.
+
+En abril del 2002, el *Council for Science: Committee on Data for Science and Technology* \cite{CODATA} empezó la publicación del *Data Science Journal*, enfocada en problemas como la descripción de sistemas de datos, su publicación en Internet, sus aplicaciones y problemas legales. Poco después, en enero del 2003, la Universidad de Columbia empezó a publicar \textit{The Journal of Data Science}, la cual ofreció una plataforma para que todos los profesionales de datos presentaran sus perspectivas e intercambiaran ideas \cite{wikipediaDS}.
+
+## El Científico de Datos y su Rol como Investigador
+Las personas que se dedican a la ciencia de datos se les conoce como científico de datos. El proyecto \textit{Master in Data Science} define al científico de datos como una mezcla de estadísticos, computólogos y pensadores creativos, con las siguientes habilidades:
+
+\begin{itemize}
+	\item Recopilar, procesar y extraer valor de las diversas y extensas bases de datos.
+	\item Imaginación para comprender, visualizar y comunicar sus conclusiones a los no científicos de datos.
+	\item Capacidad para crear soluciones basadas en datos que aumentan los beneficios, reducen los costos.
+\end{itemize}
+
+Los científicos de datos trabajan en todas las industrias y hacen frente a los grandes proyectos de datos en todos los niveles. La definición mas famosa de las habilidades que componen a un científico de datos se han atribuido al Dr. Nathan Yau \cite{yau}, quien precisó lo siguiente: \begin{quote} el científico de datos es un estadístico que debería aprender interfaces de programación de aplicaciones (API), bases de datos y extracción de datos; es un diseñador que deberá aprender a programar; y es un computólogo que deberá saber analizar y encontrar datos con significado. \end{quote}
+
+En la tesis doctoral de Benjamin Fry \cite{fry} explicó que el proceso para comprender mejor a los datos comenzaba con una serie de números y el objetivo de responder preguntas sobre los datos, en cada fase del proceso que él propone (adquirir, analizar, filtrar, extraer, representar, refinar e interactuar), se requiere de diferentes enfoques especializados que aporten a una mejor comprensión de los datos. Entre los enfoques que menciona Fry están: ingenieros en sistemas, matemáticos, estadísticos, diseñadores gráficos, especialistas en visualización de la información y especialistas en interacciones hombre-máquina, mejor conocidos por sus siglas en inglés “HCI” (Human-Computer Interaction). Además, Fry afirmó que contar con diferentes enfoques especializados lejos de resolver el problema de entendimiento de datos, se convierte en parte del problema, ya que cada especialización conduce de manera aislada el problema y el camino hacia la solución se puede perder algo en cada transición del proceso.
+
+## La Ciencia de Datos como Herramienta Predictiva
+Uno de los enfoques principales de la ciencia de datos es el procesamiento de datos estructurados o no estructurados para la obtención de conocimiento. Es importante destacar que la ciencia de datos trabaja en condiciones especiales que la definen de otras disciplinas (como por ejemplo, la inteligencia de negocios).
+
+\begin{itemize}
+	\item Trabaja en datos incompletos; es muy probable que hasta un setenta por ciento del tiempo de un científico de datos se utilice en recopilar y curar datos aparentemente no-relacionados, incompletos, o altamente dispersos.
+	\item Los datos suelen estar desordenados; las fuentes de los datos a utilizar pueden ser de fuentes diversas y formatos diferentes, especialmente si estos datos provienen del Internet
+	\item Analiza los datos para ver qué información obtiene; la exploración de datos no tiene garantía de hallazgo alguno como procedimiento científico, a diferencia de la inteligencia de negocios que opera sobre juegos de datos donde siempre hay certeza de al menos una conclusión
+	\item Los hallazgos impulsan decisiones sobre operaciones y productos; no solo de negocios sino dentro del mundo de la investigación de otras disciplinas, tales como la genética, biología, inteligencia artificial, etc.
+\end{itemize}
+
+Lo que distingue a la ciencia de datos de sus mismas técnicas y metodologías es su objetivo central de desplegar modelos efectivos para la toma de decisiones en un medio ambiente de producción. Así es una disciplina que que administra el proceso de transformar hipótesis y data en predicciones accionables \cite{zumelMount}. Los objetivos de predicción mas comunes incluyen la predicción de quien ganara una elección política presidencial, que productos se venderán mejor juntos, que créditos resultaran en moratoria, y cual pagina web el consumidor hará clic en la próxima hora.
+
+## Diseño de un Estudio de Ciencia de Datos
+El científico de datos es responsable de guiar el proyecto de ciencia de datos de comienzo a fin. El éxito de un proyecto de ciencia de datos no se da por la utilización de alguna herramienta en particular, sino de tener goles cuantificables, buena metodología, interacción interdisciplinaria, y un flujo de trabajo adecuado. Hay seis pasos principales en el diseño de un proyecto de ciencia de datos \cite{zumelMount}.
+
+\begin{enumerate}
+	\item \textbf{Definir el objetivo:} El primer paso en un proyecto de ciencia de datos es definir un objetivo medible y cuantificable. En esta etapa se trata de aprender todo lo posible sobre el contexto del problema. Un objetivo concreto incluye condiciones firmes para definir el éxito de la solución y criterios de aplicación.
+	\item \textbf{Recopilar y administrar la data:} El segundo paso incluye identificar los datos necesarios para alcanzar los objetivos propuestos, explorar dicha data, y acondicionarla para hacerla aplicable al análisis. Esta etapa suele ser una de las más intensiva en el uso de tiempo y recursos y es también la más importante. El investigador debe contestar las preguntas más críticas. ¿Qué datos se tienen disponibles? ¿Cuáles de estos datos son los necesarios para resolver el problema? ¿La data disponible es suficiente o se necesita más información? ¿La calidad de la data es óptima?
+	\item \textbf{Construir el modelo de predicción:} La etapa de construcción del modelo es aquella donde se extrae información relevante de los datos para alcanzar el objetivo de estudio. Dado que muchas de las técnicas y procedimientos de modelos hace uso de suposiciones iniciales sobre la distribución de la data y sus relaciones, es muy probable que el investigador tenga que retroceder a la fase anterior, curar la data, y volver a la etapa de modelo en varias interacciones.
+	\item \textbf{Evaluar y criticar el modelo:} Una vez se obtiene el modelo, es necesario ver si se ajusta al problema en cuestión. ¿Es lo suficientemente preciso? ¿Su uso se generaliza bien? ¿Su desempeño es mejor que las herramientas disponibles existentes?
+	Los resultados del modelo (coeficientes, agrupaciones, reglas, etc.) hacen sentido dentro del contexto del problema?    \item \textbf{Presentar los hallazgos y documentar:}
+	A partir del momento que el investigador aprueba el modelo de datos, es importante la presentación de los mismos con el rigor científico esperado por aquellos que tienen implicación o serán evaluadores del proyecto de investigación.    ¿ \item \textbf{Implementar el modelo en producción:} Muchos de los modelos de datos utilizados en la ciencia de datos deberán ser implementados como herramientas en la vida real. A esto se le conoce como despliegue en producción y tiene implicaciones de implementación que muchas veces salen de las manos del científico de datos y hacia el equipo de ingeniería.
+\end{enumerate}
+
+Los renombrados cientificos de Johns Hopkins University Roger Peng y Elizabeth Matsui prefieren hablar de epiciclos en su libro \emph{"The Art of Data Science"}. Un epiciclo se define como un un proceso iterativo que se aplica a todos los pasos del análisis de data. El epiciclo del análisis de datos incluye cinco pasos \cite{pengMatsui}.
+
+\begin{enumerate}
+	\item Formular y refinar la pregunta
+	\item Explorar la data
+	\item Construcción formal del modelo estadístico
+	\item Interpretación de los resultados
+	\item Comunicación de los resultados
+\end{enumerate}
+
+Estas cinco actividades pueden ocurrir en diferentes escalas de tiempo, con proyectos pequeños ejecutados en un día, y empréstitos mayores ocupando meses del tiempo de un equipo completo. Cada una de las cinco actividades del epiciclo a su vez se materializa a través de tres componentes principales.
+
+\begin{enumerate}
+	\item Establecer expectativas
+	\item Recolección de datos, comparación con las expectativas, y resolución de conflictos cuando los datos y las expectativas no concuerdan
+	\item Revisión de las expectativas, o los datos, según sea la prognosis del científico de datos
+\end{enumerate}
+
+La iteración de los tres pasos es lo que se denomina el \emph{epiciclo del análisis de datos} \cite{pengMatsui}. A medida que se avanza por cada una de las cinco fases del análisis, sera obligatorio iterar a través del epiciclo de análisis de datos para refinar la pregunta, la exploración inicial de datos, la interpretación y comunicación de los resultados. La siguiente tabla profundiza el uso de los tres pasos iterativos a través de dichas cinco fases.
+
+## Tareas Comunes en la Ciencia de Datos
+Hemos hablado de la ciencia de datos y su carácter predictivo. Las tareas mas comunes para lo cual se utiliza la ciencia de datos son las siguientes.
+
+\begin{itemize}
+	\item \textbf{Clasificación:} Decidir si algo pertenece a una categoría u otra. Harrington define la clasificación como la tarea de predecir a que tipo de clase pertenece una instancia (ejemplo) de la data propia de los métodos supervisados \cite{harrington}.
+	\item \textbf{Puntuación:} Predecir o estimar un valor numérico, tal como lo es un precio o la probabilidad de un fenómeno. Alpaydin define esto como la extracción de reglas de los datos de los cuales se puede esperar estadísticamente un comportamiento similar y por lo cual se pueden efectuar predicciones correctas para instancias nuevas \cite{alpaydin}.
+	\item \textbf{Ranking:} Aprender a ordenar objetos por preferencias
+	\item \textbf{Agrupamientos:} Agrupar objetos en grupos de características homogéneas. Las técnicas de agrupamiento son típicas de los métodos de aprendizaje automatizado no-supervisados, donde en vez de buscar clasificar en clases conocidas o puntuar con valores ciertos, se busca la características comunes de la data para la agrupación de la misma en clases, tomando en cuenta que dichas clases no son conocidas a priori \cite{harrington}.
+	\item \textbf{Relaciones:} Encontrar relaciones o causas potenciales de efecto tal cual se ven en la data. Para Alpaydin la regresión lineal es un perfecto ejemplo de búsqueda de relaciones en la ciencia de datos, donde existe una función con un juego de parámetros asociados $y = g(x \mid \theta)$, $g(.)$ es el modelo y $\theta$ son sus parámetros. $Y$ es un número dentro de una regresión y $g(.)$ es la función de la regresión \cite{alpaydin}
+	\item \textbf{Caracterizaciones:} Utilización general de visualizaciones y reportes de la data. Un ejemplo notable lo da Witten y Frank al referirse a la técnica de \emph{Market Basket Analysis} dentro de la mercadotecnia \cite{datamining}. En dicha técnica se busca que otros artículos comprarán los consumidores basados en el comportamiento registrado de sus compras pasadas. En términos matemáticos, estamos buscando $P(Y \mid X,D) = x_i$ donde $D$ es el juego conocido de datos históricos de los movimientos comerciales de los consumidores.
+\end{itemize}
+
+## Sobre el Lenguaje R
+La mejor forma de describir al lenguaje _R_ es aclarar que es la implementación en código libre del lenguaje _S_. _S_ era un lenguaje cuya finalidad era el análisis de datos desarrollado por John Chabers, Rick Becker, y otros colaboradores de Laboratorios Bell (propiedad de AT&T) en 1970. _S_ era un lenguaje propietario y los profesores del Departamento de Estadística de la Universida de Auckland Robert Gentleman y Ross Ihaka lo rediseñaron fusionando partes de _S_ y otro lenguaje conocido como _Scheme_ en el año 1993. 
+
+R proporciona un amplio abanico de herramientas estadísticas (modelos lineales y no lineales, tests estadísticos, análisis de series temporales, algoritmos de clasificación y agrupamiento, etc.) y gráficas.
+
+* Al igual que S, se trata de un lenguaje de programación, lo que permite que los usuarios lo extiendan definiendo sus propias funciones. De hecho, gran parte de las funciones de R están escritas en el mismo R, aunque para algoritmos computacionalmente exigentes es posible desarrollar bibliotecas en C, C++ o Fortran que se cargan dinámicamente. Los usuarios más avanzados pueden también manipular los objetos de R directamente desde código desarrollado en C. R también puede extenderse a través de paquetes desarrollados por su comunidad de usuarios.
+* R hereda de S su orientación a objetos. La tarea de extender R se ve facilitada por su permisiva política de lexical scoping.
+* Además, R puede integrarse con distintas bases de datos y existen bibliotecas que facilitan su utilización desde lenguajes de programación interpretados como Perl y Python.
+* Otra de las características de R es su capacidad gráfica, que permite generar gráficos con alta calidad. R posee su propio formato para la documentación basado en LaTeX.
+
+A lo largo de los años _R_ ha cultivado una audiencia compuesta por académicos y científicos que continuamente nutren a la comunidad con paquetes innovadores, tutoriales, libros, investigaciones, etc. Sin embargo _R_ no es un lenguaje sencillo de aprender. _R_ sufre de ciertas idiosincracias, como una sintáxis propia y no siempre autoevidente, y un modelo de programación que difiere mucho de otros lenguajes como el C++, Java o inclusive Python. Para aquellos que tienen experiencia programando en otros lenguajes inclusive acostumbrarse a _R_ puede ser díficil. Pensar en _R_ en pensar en un problema matemático primero, una solución matemática segundo, y en la programación de la solución en código de computación en un lejano tercer lugar. 
+
+¿Vale la pena el esfuerzo y tiempo requeridos para aprender _R_ a pesar de ser un lenguaje altamente idiosincrático? La respuesta es un rotundo si. Una vez uno logra entrar dentro del modelo mental y estructural de _R_, es clara y tajante la diferencia de sentirse un científico buscando respuestas en vez de un programador peleando contra su propio código.
