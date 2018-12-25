@@ -1,0 +1,299 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# ESTRUCTURAS DE CONTROL DE FLUJO DEL PROGRAMA
+`r tint::newthought('Cuando uno está explorando un juego de datos')` hay mucho que se puede hacer en _R_ a través de la consola interactiva sin necesidad de tener que formalmente programar. Cuando hablamos de programar, queremos decir un programa que se compone de código fuente, las instrucciones que le dicen a _R_ exactamente qué hacer y qué pasos tomar. El código fuente es muy similar a una receta de cocina, donde los ingredientes se especifican primero y luego vienen las instrucciones de cómo, en qué cantidades, y cuál de ellos mezclar. El producto final del código fuente es la ejecución del mismo, que con suerte nos dará el resultado esperado. Por lo general esto no sucede. Un programa medianamente complejo tendrá errores de codificación (llamados _bugs_ por la comunidad de programadores), errores de programación (la computadora hizo bien algo que el Científico de Datos programó mal), y muchas otras variantes de cosas que pueden ir mal, desde librerías de comandos que ya no funcionan hasta pequeños cambios en la forma de llamar una función. 
+
+```{marginfigure}
+En este capítulo estamos asumiendo que el lector sigue los ejemplos usando el ambiente de programación integrada _RStudio_, ya que no solo es libre y gratuito, es la forma más sencilla de programar en _R_ y ejecutar archivos fuentes en paralelo sin tener que cambiar ventanas múltiples. Pero los más asiduos usuarios de terminales bien pueden utilizar _Vim_ o _Emacs_ y llamar al interprete desde la línea de comandos.
+```
+
+## Las Estructuras de Control
+Las estructuras de control de _R_ nos permiten controlar el flujo de la ejecución de un programa. Las estructuras que cubriremos en este texto son las siguientes:
+
+| *estructura* | *detalle*                           |
+|--------------|-------------------------------------|
+| _if...else_  | prueba condicional de una condición |
+| _for_        | bucle fijo                          |
+| _while_      | bucle condicionado mientras         |
+| _repeat_     | ejecutar bucle repetidamente        |
+| _break_      | parar la ejecución de un bucle      |
+| _next_       | saltar a la próxima iteración       |
+| _return_     | salir de la rutina                  |
+
+Estas estructuras de control son mejor utilizadas dentro del código fuente como elementos de un programa mayor. Gran parte del trabajo de un Científico de Datos se puede hacer sin necesidad de recurrir a un programa extenso. Existirán aquellas veces, sin embargo, programas de *R* que se extienden cientos de líneas y que son un tanto más complicados de entender por la cantidad de procesosque pasan al tiempo. Vamos a ver cada una de estas estructuras de control en detalle con ejemplos para que no queden dudas.
+
+### IF…ELSE
+Supongamos un ejemplo muy sencillo. Un analista de datos tiene un juego de datos con las ventas de varios años de una empresa. Si las ventas de un año contra el otro subieron un 10% o más, se considera un buen año. Si las ventas subieron, pero no más del 10%, es un año regular. Y si las ventas bajaron, se considera un mal año.
+
+Los pasos lógicos para hacer el ejercicio serían los siguientes:
+
+1. 	Tomar la diferencia entre el año actual y el anterior
+
+1.1	Si la diferencia es positiva y mayor al 10%, catalogar ese año como bueno
+
+1.2	Si la diferencia es positiva pero menor al 10%, catalogar ese año como regular
+
+1.3	Si la diferencia no es positiva, catalogar el año como malo
+
+Exactamente este proceso es el que nos ayuda a definir `if...else` en código R.
+
+```{r ejemploIfElse}
+# datos de ventas
+ventas2015 <- 1200
+ventas2016 <- 1200
+
+# analicemos el incremento porcentual
+aumento <- (ventas2016 / ventas2015) -1
+
+if(aumento > 0.1) {
+  print("Ventas muy buenas.")
+} else {
+  if(aumento >= 0.0) {
+    print("Ventas regulares.")
+  } else {
+    print("Ventas realmente malas.")
+  }
+}
+
+```
+
+La condición a evaluar es el aumento de ventas, en este caso sí es mayor a `0.1`. Todo esto va en paréntesis justo después del condicional `if`. Aquello que se ejecuta si la condición es verdadera, se pone entre llaves (llamadas _curly braces_ en inglés). Las llaves es una forma de decirle a *R* que ese es un bloque de código que debe evaluar como un todo y no mezclar con lo que viene después.
+
+Noten que, si la condición no es verdadera, pasamos directamente a otra evaluación de `if...else`. Esto se conoce como _anidar bucles_, y se pueden anidar varios bucles uno adentro de otro sin problema. *R* puede reconocer fácilmente diez bucles anidados sin complicación, pero la mente humana por lo general se pierde después del tercero. Es muy mala práctica anidar más de tres o cuatro bucles ya que hace el programa difícil de interpretar.
+
+El lenguaje *R* tiene muchas formas de aceptar código de condiciones `if...else` y a veces es difícil mantenerlas todas en mentes. Lo que sigue abajo es válido:
+
+```{r ejemplosIfElse2}
+peso <- 100
+
+if(peso < 80){
+
+  masa <- 50
+
+} else {
+
+  masa <- 60
+
+}
+```
+
+Pero esto también es válido, asignar el resultado de una condición evaluada:
+
+```{r ejemplosIfElse3}
+peso <- 100
+
+masa <- if(peso < 80) {
+
+  50
+
+} else {
+
+  60
+
+}
+```
+
+Un programador diría que el segundo ejemplo es cuestionable, pero en matemáticas a veces es más directo plantear las soluciones y los problemas como uno lo haría en una pizarra en vez de ceñirse a condiciones de código que si bien son más fáciles de interpretar para un programador, puedan ser diferentes al enfoque matemático de un Científico de Datos.
+
+### FOR
+Pensemos cómo programar en *R* la tabla del tres. Si fuéramos a decir en voz alta, nos saldría la famosa letonia del “… tres por una tres, tres por dos seis, tres por tres nueve..” hasta llegar a treinta. En programación el proceso seguiría más o menos el esquema a continuación.
+
+1.	Contemos del 1 al 10
+2.	Multipliquemos el número por tres y digamos en voz alta el resultado
+3.	Próximo número a menos que sea 10 y ya terminamos
+
+Eso mismo hace el bucle `for`; Repite una serie de instrucciones _n_ veces, _n_ siendo un número predeterminado pero que por lo general nos asigna alguna variable importante del programa. Veamos un ejemplo en línea con la idea de generar la tabla del tres:
+
+```{r ejemploTabla3}
+tabla <- 3
+
+for(i in 1:10) {
+  print(i * tabla)
+}
+```
+
+Como todo o casi todo en *R*, hay varias formas de hacer un bucle for:
+
+```{r ejemploFOR2}
+secuenciaMuestrasLaboratorio <- c("a", "b", "c", "d")
+
+for(i in 1:length(secuenciaMuestrasLaboratorio)) {
+  print(secuenciaMuestrasLaboratorio[i])
+}
+```
+
+Como el alcance del bucle lo definimos con la notación _primero:último_ aquí definimos del 1 al tamaño de la cadena `secuenciaMuestrasLaboratorio` con la función `length(secuenciaMuestrasLaboratorio)`. Nuestro ejemplo solo tiene cuatro elementos, pero en la vida real pueden ser cientos y cambiar constantemente, y queremos automatizar la contabilidad de la cifra.
+
+Este ejemplo hace exactamente lo mismo.
+
+```{r ejemploSecuenciaFOR}
+for(i in seq_along(secuenciaMuestrasLaboratorio)) {
+  print(secuenciaMuestrasLaboratorio[i])
+}
+```
+
+En vez de definir el alcance con la notación _primero:último_ simplemente le decimos a *R* que lea de forma secuencial a lo largo del vector que le entregamos, usando la función `seq_along()`. Otra forma de haberlo hecho es la siguiente (y los que programan Python se darán cuenta que es muy similar a como un Pythonista lo haría):
+
+```{r ejemploSecuenciaFOR2}
+for(muestra in secuenciaMuestrasLaboratorio) {
+  print(muestra)
+}
+```
+
+Este ejemplo tiene un código tan sencillo que a veces cuesta entenderlo o aplicarlo. Dado que `secuenciaMuestrasLaboratorio` es un vector con cosas, y supuestamente esas cosas son muestras, le damos la instrucción a *R*: para cada muestra en `secuenciaMuestrasLaboratorio`, imprime la muestra. No tenemos que de forma explícita definir el alcance del bucle con _n:m_ ni definir que el índice del elemento es el i-enésimo elemento. *R* entiende a priori la intención de iterar por la secuencia sin explicitamente declarar punteros ni avanzar la indexación con cada avance del bucle. 
+
+Los bucles for se pueden anidar uno dentro de otro, siempre siguiendo la práctica general de no anidar muchas cosas a la vez para evitar que el código fuente sea difícil de leer.
+
+```{r ejemploAnidarBucle}
+unaMatriz <- matrix(1:10, 2:5)
+for(i in seq_len(nrow(unaMatriz))) {
+  for(j in seq_len(ncol(unaMatriz))) {
+    print(unaMatriz[i, j])
+  }
+}
+```
+
+El ejemplo es sencillo para ser didáctico, pero lo más probable es que al iterar dentro de una estructura estilo matriz busquemos hacer algo adicional con los valores dentro de la misma y modificarlos. 
+
+### WHILE
+La estructura de control `while` significa en inglés _mientras_, y es exactamente el tipo de control que ejerce. Mientras una condición sea verdadera, el programa ejecutará el bloque interno. Después de ejecutar el bloque interno, se vuelve a evaluar la condición y no salimos del bucle hasta que la condición se compruebe falsa.
+
+Veamos un ejemplo hipotético donde tenemos un sensor de calor que mide la temperatura de una maquinaria en grados Celsius, y queremos hacer algún tipo de proceso solo mientras la temperatura no suba mucho.
+
+```{r ejemploWHILE}
+temperatura <- 45
+
+while(temperatura < 50) {
+  print(paste("Temperatura actual ... ", temperatura))
+  print("Ejecutando proceso ficticio.")
+
+  # simulamos que la lectura del sensor de temperatura sube
+  temperatura <- temperatura + 1
+}
+
+print("FIN DEL PROCESO")
+```
+
+La función `paste()` es para pegar cadenas de caracteres con variables y aquí solo la usamos para que la pantalla imprima el mensaje de ejecución con el nuevo valor de la variable temperatura. Vean que el bucle se ejecutar hasta que la temperatura sube a 50 grados Celsius cómo estipulamos.
+
+Las condiciones dentro de un bucle `while` se evalúan de izquierda a derecha, y se pueden incluir múltiples condiciones utilizando los operadores lógicos que vimos al inicio del libro.
+
+```{r ejemploWHILE2}
+temperatura <- 45
+humedad <- 80
+
+while(temperatura < 50 && humedad > 70) {
+  print(paste("Temperatura actual ... ", temperatura, "  Humedad actual ...", humedad))
+  print("Ejecutando proceso ficticio.")
+
+  # simulamos que la lectura del sensor de temperatura sube y la humedad baja
+  temperatura <- temperatura + 1
+  humedad <- humedad - 3
+}
+
+print("FIN DEL PROCESO")
+```
+
+En este ejemplo el proceso se termina en el momento que la temperatura es mayor que 50 y la humedad es menor que 70 (o cuando se comprueba `false` que la temperatura es menor que 50 y la humedad mayor que 70).
+
+No queremos ser repetitivos, pero los bucles `while` pueden ser anidados uno dentro de otros sin que la complicación al código lo vuelva imposible de entender.
+
+```{r ejemploWHILE3}
+temperatura <- 45
+humedad <- 80
+
+while(temperatura < 50) {
+  while(humedad > 70) {
+    print(paste("Temperatura actual ... ", temperatura, "  Humedad actual ...", humedad))
+    print("Ejecutando proceso ficticio.")
+
+    # simulamos que la lectura del sensor humedad baja
+    humedad <- humedad - 3
+  }
+
+  # simulamos que la lectura del sensor de temperatura sube
+  temperatura <- temperatura + 1
+}
+
+print("FIN DEL PROCESO")
+```
+
+Noten que, a diferencia del bucle anterior, en este la humedad sube paulatinamente y se prueba FALSA la segunda condición. Cuando el primer bucle vuelve a aumentar la temperatura ya no hay mucho que hacer pues el segundo es FALSO y no se ejecuta nada. La temperatura vuelve a subir y así sucesivamente hasta que el bucle termina. Pudiéramos escribir el programa de nuevo para que los aumentos de sensores se den a la vez, pero no tendría entonces mucho sentido tener bucles anidados. El propósito es justamente que el corto del circuito se de en un orden específico antes de avanzar.
+
+### REPEAT, NEXT, BREAK
+Este elemento de control es peligroso, ya que da demasiada libertad de expresión, y eso a veces no es bueno en la programación. Habiendo dicho esto, puede darse el caso de que un bloque de código tenga que ejecutarse _n_ veces y que en alguna condición dada deseamos que salte el proceso y que solo en un tipo especial de condición salgamos del bucle del todo.
+
+```{r ejemplosBREAK}
+sensor1 <- 10
+sensor2 <- 24
+
+repeat {
+  sensor3 <- 13
+  if(sensor3 < sensor2 && sensor3 > sensor1) {
+    sensor1 <- sensor1 + 1
+    sensor2 <-  sensor2 - 2
+    print(sensor1, sensor2, sensor3)
+  } else {
+    break
+  }
+}
+```
+
+Este bucle pudiera en teoría correr para siempre si las condiciones no están muy bien pensadas. Es la opinión generalizada de la comunidad que no es una estructura de control que valga la pena usar mucho (o en tal caso usar, punto) pero es importante que los lectores sepan que existe. La función `next` se usa para saltearse una iteración.
+
+```{r ejemploNEXT}
+for(m in 1:50){
+  if(m <= 47) {
+    # los primeros 47 no nos interesan...
+
+    next
+  }
+
+  print(m)
+}
+```
+
+### Ejemplo de Análisis con Mtcars
+Usemos el siguiente ejemplo hipotético con el juego de datos `mtcars`. Digamos que queremos ver un reporte de la relación de millas por galón y caballos de fuerzas de todos los automóviles cuyo peso sea menor a 2.2 toneladas.
+
+```{r ejemploMTCARS}
+data(mtcars)
+
+for(autos in 1:dim(mtcars)[1]) {
+    if(mtcars[autos, "wt"] < 2.5) {
+    print(paste(row.names(mtcars[autos,]), "Rel. MPG/HP -", round(mtcars[autos, "mpg"] / mtcars[autos, "wt"],4)))
+  }
+}
+```
+
+Ahora profundicemos más clasificando los carros por tipo de cambio.
+
+```{r ejemploMTCARS2}
+data(mtcars)
+
+for(autos in 1:dim(mtcars)[1]) {
+    if(mtcars[autos, "wt"] < 2.5) {
+
+      if(mtcars[autos, "gear"] == 3) {cambios <- "3 velocidades"} else 
+        {cambios <- "4+ velocidades"}
+        print(paste(row.names(mtcars[autos,]), cambios, "Rel. MPG/HP -", 
+                  round(mtcars[autos, "mpg"] / mtcars[autos, "wt"],4)))
+  }
+}
+```
+
+Por supuesto, la condición de velocidades se puede seguir anidando para que sea más exacta, lo importante es no perderse con los corchetes, paréntesis y llaves múltiples (lo que es mucho más fácil de lo que suena.)
