@@ -1,0 +1,247 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# OPERADORES MATEMÁTICOS
+`r tint::newthought('R es un lenguaje interpretado')`, y la mayor parte de la interacción toma lugar en la consola de __R__. La consola puede parecer un lugar extraño si alguien es nuevo a la programación, y no tanto si la persona que lee viene de alguno de los lenguajes más modernos como Python o Ruby. Habiendo dicho esto, es increíble la cantidad de trabajo que se puede lograr en la consola de __R__ cuando el trabajo es pesado en el sentido matemático. Uno de los principales cambios de paradigma con R es justamente el hecho de que el científico de datos trabaja en algún problema con un juego de números y está más preocupado en la solución matemática correcta o el análisis visual de los mismos que en tener que programar.  
+
+Empecemos con un ejemplo muy trivial como sumar dos más dos. Habitualmente los libros de programación empiezan con un programa sencillo que imprime en la pantalla “Hello World!”. Pero nosotros hemos querido comenzar nuestro camino en Ciencia de Datos con un ejemplo matemático desde el primer paso. 
+
+```{r sumarDosMasDos}
+# Sumar dos números en R
+2 + 2
+```
+
+A lo largo del libro utilizaremos varias convenciones para los listados de código fuente. 
+
+* Utilizamos la notación hashtag (el símbolo #) al principio de todos los listados para diferenciar entre código fuente y el resto del texto. Las líneas con el símbolo _hashtag_ se identifican como comentarios que el intérprete de __R__ ignora en el momento de ejecutar el __script__.  El listado de los _scripts_ tiene fondo gris claro para diferenciarlo como ayuda visual secundaria.
+* El output de __R__ es visible como dos _hashtags_ estilo ## y luego casi siempre corchetes con un número 1 adentro. 
+
+El número dentro de los corchetes puede cambiar. Básicamente __R__ nos dice que la respuesta es un objeto cuyo primer componente es la salida a pantalla. Un objeto en programación tiene un significado muy especial en la programación orientada a objetos. Aquellos que conocen de principios de __OOP__ (Object Oriented Programming) entenderan que el lenguaje crea objetos de las salidas de funciones. Aquellos que no conozcan de programación orientada a objetos sin embargo no deben preocuparse de esto. Lo importante, que es que __R__ nos dió la respuesta correcta: _cuatro_. 
+
+```{marginfigure}
+Escribir operaciones en la consola sobre la línea de comandos es por lo tanto sencillo y muchas veces resuelve el tiempo de utilizar la calculadora cuando el cálculo es más complejo. El lenguaje permite combinar variables en memoria con operaciones, por lo que en el proceso de resolver problemas tiene mucho más sentido que programar y tener una calculadora cerca.  
+```
+
+Probemos ahora operaciones un poco más complicadas como suma y restas, multiplicaciones, y raíces cuadradas.
+
+```{r operacionesVarias}
+# Operación compuesta
+2 + 3 * 4 - 5 / 3
+
+# Raíz cuadrada en R
+sqrt(2)
+
+# Módulo de división en R
+10%%3
+
+# División de enteros en R
+10%/%3
+
+# Exponentes
+2 ^ 2
+```
+
+Los ejemplos son buenos para ilustrarnos la filosofía detrás del diseño del interprete. No es complicado ver como funciona R en cuanto a las reglas de operadores pero de igual forma profundicemos en los ejemplos.
+
+* En el primer ejemplo, los operadores con mayor prioridad - los que se usan para saber dónde romper los términos y que hacer primero - son la suma y la resta. Por eso primero __R__ suma dos a la multiplicación de tres por cuatro, y luego a eso le resta la división de cinco dividido tres. La regla correcta es ser prolijo y usar paréntesis cuando las operaciones se compliquen. Esto no es solo una buena costumbre, sino que puede simplificarle la vida a aquellos investigadores o colegas que más tarde quieran utilizar el código que uno escribió (o inclusive cuando uno mismo revisa el código meses o años después). 
+* El segundo ejemplo es la raíz cuadrada de 2. En este caso usamos la función __sqrt__ y pasamos entre paréntesis el número del cual queríamos la raíz, en este caso el dos. 
+* El tercer ejemplo es el módulo de división. El módulo de división es el remanente entero que queda después de dividir un número por otro. Cuando dividimos diez entre tres, y cómo diez no es divisibles por tres, nos da de resultado un tres y un restante de uno, que no se puede dividir entre tres en números enteros. Por eso __R__ nos devuelve como respuesta un uno.
+* El cuarto ejemplo es la división por enteros. Diez dividido tres da tres, que es el cociente, y un restante de 1, que ya vimos es el módulo de arriba.
+* El ejemplo final es el uso de exponenciales. Aqui elevamos 2 al cuadrado y obtenemos un 4. 
+
+Los operadores matemáticos se extienden a los operadores lógicos. Veamos de forma muy breve como funcionan solo con números concretos antes de entrar al concepto de variables. 
+
+```{r operadoresLogicos}
+# Operador mayor que
+1 > 5
+
+# Operador menor que
+1 < 5
+
+# Operador mayor o igual que
+1 >= 1
+
+# Operador menor o igual que
+1 <= 2
+
+# Operador menor o igual que alterno
+1 <= 1.0
+```
+
+Cada uno de estos casos muestra una operación lógica de igualdad nos muestra como el lenguaje procesa las mismas en términos de cierto (valor _TRUE_) o falso (valor _FALSE_). 
+
+```{marginfigure}
+Los lenguajes como Java y C utilizan tipos estrictos de datos. En el caso de R y otros lenguajes modernos como Python o Ruby se aplica el concepto de duck typing, que es una manera que tiene el lenguaje de detectar el tipo de datos por sus características en contraposición a su tipo explicito. 
+```
+
+* En el primer caso la operación arroja _FALSE_ ya que efectivamente 1 __no__ es mayor que 5.
+* En el segundo caso, el valor es _TRUE_ porque efectivamente 1 es menor que 5.
+* En el tercer caso, el valor es _TRUE_ porque 1 es igual o mayor a 1 (se cumple la condición de igual pero no la de mayor).
+* En el cuarto caso, el valor es _TRUE_ también porque 1 es menor o igual a 2 (se cumple la condición de menor pero no la de igual).
+* El quinto ejemplo puede parecer trivial y da _TRUE_ porque __R__ sabe la diferencia entre 1 (entero) y 1.0 (real) sin mayor explicación. Los lenguajes modernos por lo general manejan estos conceptos bien, pero no así los lenguajes más antiguos como _C_, _C++_, _Java_ y _FORTRAN_. Hoy en día los programadores no deben preocuparse por estos detalles que anteriormente exigían mucho cuidado en los detalles. Como científicos de datos queremos trabajar en el problema, no en la programación de tipos de datos del problema, y el lenguaje __R__ facilita mucho el uso de _scripts_ es este sentido.
+
+Un caso que amerita atención inicial ya que se presta para errores de programación (tanto para novatos como para los experimentados) es el operador de asignación. Para denotar igualdad estamos acostumbrados a utilizar el símbolo *=*. Sin embargo __R__ reserva dicho símbolo para asignación de variables y utiliza una variante para comparar si dos cantidades son iguales o no de forma lógica.
+
+```{r testIgualdad}
+# Test de igualdad
+2 == 2
+
+# Test de disimilitud
+2 != 4
+
+# Otro test de disimilitud
+5 != 5
+```
+
+La primera notación puede parecer novedosa en su uso aunque nada especial, pero la segunda notación quizás no sea tan obvia de entender. 
+
+* El primer ejemplo compara de forma matemática si 2 es igual a 2 utilizando como operador el doble símbolo de igualdad *==*. Como 2 es igual a dos la operación arroja el valor lógico _TRUE_.
+* En el segundo caso introducimos un nuevo símbolo que es la negación de igualdad con la notación *!=*. Aquí estamos evaluando si 2 no es igual a 4. Como 2 no es igual a 4, el resultado es _TRUE_.
+* El tercer caso es solo para aclarar el ejemplo del uso de *!=*. Ante la evaluación de si 5 no es igual a 5, el resultado es falso (_FALSE_) ya que de hecho 5 es igual a si mismo. 
+
+El lenguaje __R__ no es el único en utilizar el símbolo *!=* y para muchas funciones avanzadas - como por ejemplo la negación de una variable - se repite el uso del sufijo *!*.
+ 
+## Definición de Variables
+Antes de seguir avanzado con el uso de operadores es necesario entender la definición de una variable. En la vida real el investigador necesita crear variables que asumen el valor de algo, puede ser la temperatura promedio del agua, el valor de un coeficiente de correlación, o la tasa de interés de esperada del rendimiento de una inversión. El uso de variables es una de las piedras angulares de la computación. 
+
+```{r asignacionSimple}
+a = 1
+a
+```
+
+```{marginfigure}
+El lenguaje R tiene muchas idiosincracias propias y el uso del operador de asignación es una de las más controversiales. Inicialmente los operadores <- y = asignan valore dentro del ambiente en el que son evaluados. El operador <- se puede utilizar en cualquier parte, mientras que el operador = esta limitado al nivel primario (dentro de la expresión completa de la línea de comando) o como una sub-expresión dentro de un listado de expresiones en una llamada a una función. La forma más sencilla de respetar el uso es utilizando el operador <- en todas las asignaciones de variables y el operador = dentro de todas las asignaciones de valores en una función.
+```
+
+En programación decimos que __a__ es una variable. Es variable porque el valor que toma puede variar. En el ejemplo de arriba a la variable *a* le dimos el valor de uno. Piensen que una variable es un registro y que adentro del registro guardamos valores para buscarlos después. Le asignamos a la variable __a__ el valor uno utilizando el operador de asignación signo igual. Sin embargo para cumplir con la idiosincracia típica del lenguaje no utilizaremos el símbolo de asignación igual sino el símbolo de asignación oficial de __R__. Dicho operador de asignación oficial que es el símbolo __<-__. Esta constumbre viene de la programación en C (no C++ o C#, sino C a la antigua). El uso del operador en flecha es una cuestión de costumbre y para los que usen *RStudio* para escribir sus programas es bueno que sepan que si hacen *Alt* y *-* a la vez aparece en el _script_ de forma automática.
+
+La asignación de variables no solo está limitada a números, una variable puede ser muchas cosas, incluyendo letras, carácteres, y la suma de otras variables.
+
+```{r asignacionStrings}
+# Asignación de variables
+miVariable <- "mi variable de R"
+miOtraVariable <- 3.14159
+
+miVariable
+miOtraVariable
+
+# Sumando variables
+uno <- 1
+dos <- 2
+uno + dos
+
+tres <- uno + dos
+tres
+```
+
+Podemos guardar texto usando un _string_. Un _string_ es una cadena de caracteres literales y esto es constante en todos los lenguajes de programación modernos. Es importante recordar utilizar las comillas y cerrarlas para no tener error en los programas, una fuente común de *bugs*. 
+
+En R también podemos hacer lo siguiente:
+
+```{r ejemploSecuencia}
+numeros <- 10:15
+numeros
+```
+
+En el último ejemplo R acumuló los valores del diez al quince en la variable _numeros_. Para experimentos matemáticos la creación de secuencias facilita mucho dar ejemplos y crear juegos de datos de prueba. 
+
+Retomando el tema de los operadores lógicos, tiene mucho más sentido utilizarlos para comparar diferentes variables. De hecho, mucho del trabajo de programación se trata de acumular valores en variables de trabajo y luego utilizar operadores para comparar sus valores y tomar decisiones de proceso posterior. 
+
+```{marginfigure}
+Las variables bar, foo y baz son variables metasintéticas, juegos de palabras utilizadas como comodines en la ciencia de la computación para valores temporales de asignación. En la práctica real se las define con nombres mucho más explicativos como temperaturaReal o tasa_interés, pero es válido utilizarlas para los ejemplos abstractos. 
+```
+
+```{r operacionesLogicasConVariables}
+# Variables
+bar <- TRUE
+foo <- FALSE
+baz <- TRUE
+
+# Disimilitud
+bar != foo
+
+# Negación
+!bar
+
+# OR lógico
+bar | foo
+
+# AND lógico
+bar & baz
+
+# Evaluar veracidad
+isTRUE(bar == baz)
+```
+
+El uso de puertas lógicas se ejemplifica con la asignación de valores de falso o verdadero (en estos casos _FALSE_ y _TRUE_) y probando diferentes tipos de relaciones lógicas. Tomando las variables metasintéticas _bar_, _foo_ y _baz_, les asignamos los valores de verdadero, falso y verdadero. 
+
+* En el primer caso evaluamos si _bar_ es distinto de _foo_. Como una tiene el valor lógico verdadero y la segundo falso, son diferentes y la relación de disimilitud es _TRUE_ (verdadera).
+* En el segundo ejemplo, anteponemos el sufijo *!* delante de la variable _bar_, que es verdadera, y la convertimos en falso (y arroja valor _FALSE_).
+* El tercer caso es el uso de la puerta lógica *OR* utilizando el símbolo *|* o barra (en inglés se lo conoce como _pipeline_). Una variable es verdadera y otra falsa, pero como es una puerta lógica *o* el valor final es verdadero, ya que al menos una de las variables lo es. 
+* El cuarto ejemplo el uso de la puerta lógica *AND* que utiliza el símbolo *&* (en inglés _ampersand_). Ambas variables son verdaderas y por lo tanto la respuesta de la evaluación de _bar_ *y* _baz_ también lo es. 
+* Finalmente en el quinto caso utilizamos la función _isTRUE()_ que evalua la veracidad de una relación. Aquí evaluamos si _bar_ es igual a _baz_. Como ambas son verdaderas, la relación de igualdad se da, y por lo tanto la expresión es verdadera y arroja _TRUE_. 
+
+## El Lenguaje _R_ y la Evaluación Vectorial
+Hasta aquí todo el material expuesto ha sido relativamente sencillo de entender y lo que es más importante, de entender a priori. Con esto decimos que el lenguage __R__ nos ha dado resultados dentro de lo esperado como si utilizaramos la calculadora o una hoja de cálculos EXCEL. La desviación del comportamiento estándar comienza cuando la investigadora o investigador comienza a evaluar estructuras de datos apenas más complejas y los resultados no son los esperados. 
+
+Tomemos un ejemplo donde asignamos el valor 5 a la variable b, y luego le sumamos 1 (no hay que ser un científico para adivinar que da seis).
+
+```{r sumaVariables}
+# Suma simple de variables
+b <- 5
+b + 1
+```
+
+A esto le llamamos el valor esperado. Como segundo paso, creamos una variable que es una secuencia de números llamada _numeros_. Si sumamos 1 a la variable numeros, ¿qué resultado nos dará? Es una cadena de enteros del diez al quince. ¿A quién le suman el 1? ¿Al 10, al 15? ¿A todos?
+
+```{r sumaSecuencia}
+# Suma a una secuencia de números
+numeros <- 10:15
+numeros + 1
+```
+
+```{marginfigure}
+La primera lección dura de aprender de R es que hay tres formas de hacer las cosas en R: una forma como uno piensa (generalmente mal), una forma correcta (que es como R interpreta el problema), y una tercera que no es una sino una multiplicadad de formas que diferentes programadores han utilizado como hacks del lenguaje (de las cuales uno puedo siempre adoptar las partes más convenientes). Dentro de la comunidad de R, se dice que es ciencia, no democracia.
+```
+
+En el ejemplo de arriba vemos que __R__ tiene una forma de pensar muy particular. El lenguaje asume que tiene una cadena de números del diez al quince. Por lo tanto al momento de sumar a la serie un 1, adopta la metodología de vectorización, y suma 1a cada elemento indexado del vector. Por lo tanto la respuesta es una cadena de igual tamaño (número de elementos) de la original donde cada elemento ha incrementado su valor en 1 exactamente. Hay una comunidad muy grande de científicos que utilizan __R__ y que prefieren esta forma de trabajo ya que se asemeja mucho más a la matemática de un pizarrón que a programar. En otro lenguaje el problema hubiera involucrado un bucle que iterara sobre cada elemento del vector y le sumara 1. En __R__ la función es inmediata aunque no del todo intuitiva - sobre todo para los que tiene experiencia en otros lenguajes con estructuras de iteración más estrictas.
+
+## Evaluando Operaciones
+La idiosincracia de __R__ se extiende más allá de la vectorización. Muchas veces el investigador utiliza funciones con vectorización obteniendo los resultados correctos (pero no necesariamente lo que se esperaba). Revisemos el siguiente ejemplo:
+
+```{r evaluarOperacion}
+# Evaluar valores mayores que 115 de una secuencia
+masNumeros <- 100:120
+masNumeros < 115
+```
+
+En el ejemplo anterior la variable _masNumeros_ toma los valores del cien al ciento veinte. Cuando le pedimos a __R__ evaluar _masNumeros_ < (menor que) ciento quince nos devuelve una cadena de veinte valores lógicos. Los valores toman solo dos posibles resultados: _FALSE_ para cuando la evaluación es falsa (ese valor en particular no es menor que ciento quince) y _TRUE_ cuando la evaluación es real (ese valor en particular es menor que ciento quince). Cuando __R__ tuvo que evaluar si _115 < 115_ dió como resultado falso, ya que ciento quince no es menor que ciento quince (es igual, pero no menor).
+
+Este ejemplo es importante porque influye en nuestra forma de ver y programar un problema en __R__. Supongamos que tenemos en la variable _masNumeros_ veinte valores y el ejercicio es imprimir los valores que son menores que ciento quince. La solución no es tan sencilla como escribir en la consola _masNumeros < 115_ porque ya sabemos que R nos va a devolver una cadena de falsos y verdaderos, que aunque correctos, no nos ayudan en nada. La solución correcta es la de abajo:
+
+```{r returnValues}
+masNumeros[masNumeros < 115]
+```
+
+Sin embargo, si pedimos el inverso:
+
+```{r returnValues2}
+masNumeros[masNumeros > 115]
+```
+
+La solución al problema que nos hemos propuesto hace necesario adelantar algunos conceptos de forma ligera para que se pueda entender. Estamos utilizando índices del vector para devolver valores del mismo. El manejo de los índices de vectores de información es un tema recurrente en el lenguaje. Algunas veces es complicado ver cuando las funciones u operaciones devuelven valores o evaluaciones sobre dichos valores. En el mejor de los casos habremos planteado el problema para que la solución sea una evaluación y no un valor. Cualquiera sea la situación, el uso de índices nos permitirá obtener lo mejor de dos mundos al establecer un _query_ (consulta) dentro del vector que muchas veces es matemáticamente más fácil de interpretar. 
+
+Cuando comparamos las dos listas notamos que __R__ eliminó el 115 de la solución. El interpreté tiene muy claro que si pedimos evaluar la cadena entera lo tiene que listar como FALSE (hablando específicamente del número 115). Pero al listar parece no darse cuenta o no saber que exponer y no lo lista ni en una ni en otra. __R__ no es un lenguaje de ambiguedades sino que responde muy exactamente. La solución es utilizar un índice de búsqueda más exacto como _masNumeros => 115_ cuando programamos. Hacemos hincapié que la sintaxis de __R__ nos obliga a un pensamiento muy estricto matemático para no caer en errores.
