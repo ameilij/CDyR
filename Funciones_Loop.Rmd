@@ -1,0 +1,325 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# FUNCIONES DE LOOP
+`r tint::newthought('El título de este capítulo es funciones de loop')`, y _loop_ es una palabra en inglés que significa bucle. Decidimos dejar el original _loop_ para distinguir estas funciones de los bucles que logramos programar en el capítulo de Estructuras de Control porque las funciones que vamos a ver aquí son algo muy especial de *R*. En cierta forma, la filosofía de vectorización del diseño del lenguaje llega a su cúspide. 
+
+Para entender mejor el tema, tomemos nuestro juego de datos `mtcars` y busquemos transformar la variable `wt` (el peso del carro en cuestión) de toneladas inglesas a toneladas métricas multiplicando por su aproximado 2,200 (dado que las toneladas inglesas están en libras, y 2.2 libras son más o menos un kilo). Una forma de hacerlo es con el siguiente código.
+
+```{r convertirTaMT}
+# Coonvertir toneladas inglesas a toneladas métricas
+data(mtcars)
+head(mtcars$wt)
+
+for(i in 1:dim(mtcars)[1]) {
+  mtcars$wt[i] <- mtcars$wt[i] * 2200.0
+} 
+
+head(mtcars$wt)
+```
+
+Las respuestas son válidas y el código está bien escrito, pero en R tenemos maneras más eficientes de hacer esto. Sobre todo, si estamos en la consola interactiva donde lo mejor es codificar todo en una línea.
+
+```{r convertirTaMT2}
+# Coonvertir toneladas inglesas a toneladas métricas ver. 2.0
+data(mtcars)
+head(mtcars$wt)
+
+mtcars$wt <- sapply(mtcars$wt, function(x){x * 2200})
+head(mtcars$wt)
+```
+
+Lo que acabamos de hacer es aplicar la función `sapply()` en conjunción con una llamada a una función anónima (que no tiene nombre), lo que traducido de *R* cumple con tomar los valores de `mtcars$wt` y aplicar a cada uno una función temporal donde se multiplica por 2,200. Las funciones anónimas están muy bien detalladas en el capítulo de funciones, no hay necesidad de ocuparnos de ellas aquí, sin embargo, es importante saber que las funciones de _loop_ se utilizan mucho con llamadas a funciones anónimas porque es muy cómodo.
+
+```{marginfigure}
+Las funciones de _loop_ o bucle son funciones muy poderosas que nos permiten iterar por una estructura de datos ejecutando bucles en una sola línea y haciendo mucho en muy poco código. Son muy prácticas para utilizar en la consola interactiva donde no queremos por lo general ejecutar más de una línea a la vez. Pero también son totalmente válidas en el código fuente de un programa cualquiera ya que resumen una idea complicada en una más sencilla.
+```
+
+Las funciones que vamos a ver en las siguientes páginas son las siguientes.
+
+* `lapply` : ejecuta un bucle sobre una lista y evalúa una función en cada elemento
+* `sapply`: es muy similar a sapply pero trata de simplificar el resultado retornando elementos del tipo string o caracter.
+* `apply` : aplica una función sobre los márgenes de una estructura tipo array.
+* `tapply` : aplica una función sobre subconjuntos de un vector.
+* `mapply` : versión múltiple variable de lapply.
+* `split` : esta función (que en inglés significa separar o dividir) se utiliza como función auxiliar con lapply.
+
+## LAPPLY
+La forma general de utilizar `lapply` es la siguiente:
+
+`lapply(listaX, funciónX, ... otros argumentos)`
+
+Cuando utilicemos `lapply()`, la función va a estar esperando una lista como su primer argumento. Si lo que se le entrega no es una lista, *R* forzará la transformación de la estructura a una lista. Cabe mencionar como anécdota que el bucle en sí se hace en el lenguaje *C* y no en *R* (por eso también muchos programadores dicen que las funciones de _loop_ son un poco más rápidas, aunque es difícil notar la diferencia a menos que se manejen listas muy grandes).
+
+La función `lapply()` siempre retorna una lista, no importa que estructura recibió inicialmente. Los ejemplos de abajo clarifican el uso.
+
+```{r ejemploLAPPLY}
+# El siguiente ejemplo utiliza datos de:
+#  Salmon Biodata 2001-2004
+#  P.I.: E. Cokelet (U. Alaska - Fairbanks)
+#  Gulf of Alaska
+
+pesoSalmon <- list(Sockeye=c(354, 372, 461, 354, 461, 372, 60, 59, 60), 
+                   Chum=c(3690, 2700, 1860,2700, 3690, 1860, 18), 
+                   Coho=c(NA, 79, 140, 79))
+
+lapply(pesoSalmon, mean)
+```
+
+La siguiente lista de pesos de salmón tiene 3 diferentes lotes (a saber, _Sockeye_, _Coho_ y _Chum_) con diferentes lotes y diferentes números de observaciones cada uno. Si queremos saber el peso promedio de cada lote y especie, sería un bucle complicado (debe romper por clasificación) pero el uso de `lapply` lo simplifica todo mucho. El último lote tiene una lectura incompleta, un pez que no se pudo pesar y por eso sale como `NA`. La función `mean()` de *R* no puede sacar un promedio si alguna de sus observaciones es `NA`. Habiendo dicho esto, existe un argumento adicional en la función `mean()` para estos casos, que es `na.rm = TRUE`. Este argumento adicional le dice a *R* que está bien omitir valores `NA` si eso es necesario para calcular el promedio. Cuando mostramos la forma general de usar `lapply` vimos los tres puntos después de la coma que va siguiendo la función. Esos tres puntos están ahí para decirnos que opcionalmente podemos agregar argumentos adicionales a la función y `lapply` va a saber cómo utilizarlos en el cálculo. Aprovechemos y agreguemos eso a nuestra línea única de cálculo de promedio de pesos.
+
+```{marginfigure}
+Los tres puntos suspensivos en las funciones de *R* se utilizan como indicativos de que la misma acepta parametros adicionales que no necesariamente se especificaron uno por uno pero que la función puede manejar ya que hereda de alguna función madre el manejor de los mismos. Esta ventaja en el diseño de funciones utilizando la herencia de la programación orientada a objetos le da mucha flexibilidad al lenguaje para ampliar su alcance y manejo dinámico de estructuras aumentadas.
+```
+
+```{r ejemploLAPPLY2}
+# El siguiente ejemplo utiliza datos de:
+#  Salmon Biodata 2001-2004
+#  P.I.: E. Cokelet (U. Alaska - Fairbanks)
+#  Gulf of Alaska
+
+pesoSalmon <- list(Sockeye=c(354, 372, 461, 354, 461, 372, 60, 59, 60), 
+                   Chum=c(3690, 2700, 1860,2700, 3690, 1860, 18), 
+                   Coho=c(NA, 79, 140, 79))
+
+lapply(pesoSalmon, mean, na.rm = TRUE)
+```
+
+Por lo general `lapply` sabrá interpretar bastante bien nuestros deseos de usar vectorización en los elementos que le pasemos como parámetros de la función. Es posible crear cálculos incrementales de esta forma. El siguiente ejemplo busca generar una pirámide de números aleatorios uniformes que crece del 1 al 5.
+
+```{r ejemploPirámide}
+numeros <- 1:5
+lapply(numeros, runif)
+```
+
+Para que el ejemplo de arriba se entienda, la función `runif()` retorna números aleatorios de una distribución normal uniforme. Dado que podemos aplicar argumentos adicionales, pudiéramos limitar los resultados con mínimos y máximos.
+
+```{r ejemploPirámide2}
+numeros <- 1:3
+lapply(numeros, runif, min = 0, max = 3)
+```
+
+Hemos dicho que `lapply` se utiliza mucho con funciones anónimas, y para reforzar la idea, veamos un último ejemplo buscando los máximos de cada lote de salmón del ejemplo anterior.
+
+```{r ejemploLAPPLY3}
+lapply(pesoSalmon, function(esMax){max(esMax, na.rm = TRUE)})
+```
+
+## SAPPLY
+La diferencia entre la función `lapply` y `sapply` es que la segunda trata de simplificar el resultado retornando algo más sencillo que una lista. Es una diferencia sutil, pero en algunos cálculos con millones de observaciones (por ejemplo, un censo) es preferible que el sistema corra relativamente bien y sin peso adicional creado por una programación pobre.
+
+El resultado de aplicar `sapply()` varía según lo que la función considere que puede hacer con la estructura de datos que le pasaron como primer argumento.
+
+* Si el resultado es una lista donde cada elemento tiene tamaño 1, entonces `sapply` retorna un vector
+* Si el resultado es una lista de vectores todos del mismo tamaño, entonces `sapply` devuelve una matriz
+* Si el resultado no es ninguna de las dos condiciones mencionadas arriba, `sapply` retornará una lista como si fuera un `lapply`
+
+Si volvemos al ejemplo de nuestros lotes de salmón, `lapply` retornó una lista, aunque realmente solo nos preocupaban los pesos promedios. En el peso de tres tipos de salmón quizás no tengamos limitaciones de espacio en memoria, pero si quisiéramos ver el promedio de tweets en las cuentas de cien marcas famosas, donde los datos incluyendo gente que contesta pueden sumar decenas de miles cada una, vamos a querer optimizar el resultado.
+
+```{r ejemploSAPPLY2}
+# El siguiente ejemplo utiliza datos de:
+#  Salmon Biodata 2001-2004
+#  P.I.: E. Cokelet (U. Alaska - Fairbanks)
+#  Gulf of Alaska
+
+pesoSalmon <- list(Sockeye=c(354, 372, 461, 354, 461, 372, 60, 59, 60), 
+                   Chum=c(3690, 2700, 1860,2700, 3690, 1860, 18), 
+                   Coho=c(NA, 79, 140, 79))
+
+sapply(pesoSalmon, mean, na.rm = TRUE)
+```
+
+El cambio es sutil, pero con conjuntos de datos más grandes cada segundo cuenta. En los estudios científicos es común analizar juegos de datos donde losarchivos analizancon millones de líneas de información. Inclusive equipos poderosos pueden encontrar problemas analizando muestras de tal magnitud, y los cálculos pueden atrasar literlamente horas. Solo para los curiosos, habrán de notas que aplicar la función mean() a la lista pesoSalmon da error.
+
+```{r ejemploMEAN()}
+mean(pesoSalmon)
+```
+
+## APPLY
+La función `apply()` se usa para evaluar otra función (por lo general anónima) sobre los márgenes de una estructura de datos tipo `array`. Si la idea de los márgenes suena un tanto extraña, basta decir que realmente significa si la función se aplica a las líneas o columnas de la misma. 
+
+* Es muy común utilizar la función `apply()` a las columnas o líneas de una matriz.
+* Puede ser utilizada en arrays de tipo general; por ejemplo, para retornar el promedio de un array de matrices.
+* No es necesariamente más rápido que escribir el bucle a mano, pero funciona en una sola línea.
+
+La sintaxis de la función es la siguiente.
+
+`apply(algunDato, margen, función, ...)`
+
+donde:
+
+* `algunDato` es cualquier estructura de datos del tipo array
+* margen es un vector de enteros, que nos dice que margen queremos retener. Podemos utilizar 1 o 2, el 1 para aplicar la función a las líneas de la matriz, el 2 para aplicar la función a las columnas de la matriz
+* función es la función a utilizar
+* ... los tres puntos significan que podemos agregar otros argumentos
+
+Un buen ejemplo es pensar en sensores de movimiento donde queremos extraer el promedio de veinte juegos de diez lecturas cada uno. Estos están guardados en una matriz, algo común en datos que provengan de lectura electrónica.
+
+```{r ejemploSensores}
+# Ejemplo con sensores
+matrizSensoresMovimiento <- matrix(rnorm(200), 20, 10)
+apply(matrizSensoresMovimiento, 1, mean)
+```
+
+Veamos ahora como sumar las veinte observaciones, pero por columna.
+
+```{r ejemploSensores2}
+# Ejemplo con sensores 2
+matrizSensoresMovimiento <- matrix(rnorm(200), 20, 10)
+apply(matrizSensoresMovimiento, 2, sum)
+```
+
+Aquí debemos hacer un paréntesis porque para sumar y promediar columnas y líneas de una matriz no necesitamos utilizar necesariamente una función con `apply()`. En *R* esto es muy común y por eso tenemos funciones especiales para la tarea.
+
+| *FUNCION*    | *DESCRIPCION*             |
+|--------------|---------------------------|
+| rowSums()    | sumar líneas              |
+| rowMeans()   | promediar líneas          |
+| colSums()    | sumar columnas            |
+| colMeans()   | promediar columnas        |
+
+```{r EjemploColumnasLineas}
+# Ejemplo suma y promedios de líneas y columnas
+matrizSensoresMovimiento <- matrix(rnorm(200), 20, 10)
+
+# sumar líneas
+rowSums(matrizSensoresMovimiento)
+
+# promediar líneas
+rowMeans(matrizSensoresMovimiento)
+
+# sumar columnas
+colSums(matrizSensoresMovimiento)
+
+# promediar columnas
+colMeans(matrizSensoresMovimiento)
+```
+
+Por convención reservaremos el uso de `apply()` a problemas más difíciles o donde realmente apliquemos alguna función en especial fuera de sumar y promediar. Los cuartiles son los tres valores que dividen un conjunto de datos ordenados en cuatro partes porcentualmente iguales. Supongamos que tenemos diez lecturas de edad de poblaciones diferentes y que queremos medir los cuartiles de cada una - un buen ejemplo para aplicar `apply`.
+
+```{r ejemploCuartilesAPPLY}
+# Simulemos una matriz de población
+matrizPoblacion <- matrix(floor(runif(100,max = 90, min = 1)), 10, 20)
+apply(matrizPoblacion, 1, quantile, probs = c(0.25, 0.75))
+```
+
+Es interesante desde el punto de vista estadístico ver la distribución de edades de cada grupo. Inclusive podemos envolver esta llamada a `apply()` dentro de un gráfico de diagrama de caja para visualizar la misma. El siguiente ejemplo es muy simple en su confección, y lo utilizamos solo para ver como un Científico de Datos lo visualizaría. Ya más adelante veremos opciones de gráficos.
+
+```{r ejemploBoxplot}
+boxplot(apply(matrizPoblacion, 1, quantile, probs = c(0.25, 0.75))[,1:10], 
+        xlab = "Grupos", ylab = "Rango de Edad", main = "Cuartiles Q1 al Q3")
+```
+
+## MAPPLY
+La función `mapply()` es similar a las que hemos visto hasta ahora, pero es la versión multivariable. Se puede aplicar de forma paralela a un juego de argumentos. Si esto suena complicado (lo es un poco) pensemos que pasaría si quisiéramos aplicar una función que usa dos listas diferentes. Esto no funcionaría con `lapply()` pero si con `mapply()`.
+
+Veamos un ejemplo donde construimos una píramide de valores comenzando con el 1 y terminando con el 4. Podemos usar la función `rep()` en este caso que nos devuelve una repetición de valores. El truco está en decirle a la función que nos devuelva la primera vez solo un valor, la segunda vez dos valores, la tercera vez tres, y así sucesivamente. Es una construcción sencilla con un bucle, pero lo sorprendente es que es aún más sencilla en una sola línea con una función de _loop_. Le vamos a instruir a *R* que de 1 a 5 veces nos devuelva una repetición del 1 al 5, pero que vaya aumentando los números de la repetición de acuerdo al aumento del número de paso en el que estamos en el bucle. El código es sencillo y elegante.
+
+```{r ejemploMAPPLY}
+# Construcción pirámide con peldaños
+mapply(rep, 1:5, 1:5)
+```
+
+Los resultados de esta función construyen en forma de pirámide, y esto puede ser muy útil para generar simulaciones. Supongamos que estamos interesados en construir un constructor de números de una población aleatoria, pero queremos disponer que promedio y desviación estándar tendrá el número. También queremos construir de forma piramidal, quizás para ver como en cada muestra se cierne o no la normalidad de la misma (o sea que proviene de una distribución normal).
+
+```{r constructorMuestras}
+# Constructor de muestras aleatorias con media y desviación estándar dada
+constructor <- function(n, mean, sd) {
+  rnorm(n, mean, sd)
+}
+```
+
+Si queremos ver una serie de muestras que comiencen con un elemento y termine con seis, de forma que cada muestra tenga un elemento más, estaríamos tentados a hacer lo siguiente.
+
+```{r ejemploConstructorAPPLY}
+# Aplicar constructor 
+constructor(1:6, 1:6, 12)
+```
+
+Pero *R* corre los índices y nos devuelve una estructura del tipo array y no la pirámide que queríamos. Utilicemos `mapply()` para ajustar el tipo de estructura a generar.
+
+```{r ejemploConstructorMAPPLY}
+# Aplicar constructor 
+mapply(constructor, 1:6, 1:6, 12)
+```
+
+Es muy probable que no se utilice mucho la función `mapply()` pero lo bueno es que siempre está disponible para aquellas veces que la necesitemos.
+
+## TAPPLY
+La función tapply() se utiliza cuando necesitamos aplicar una función sobre subconjuntos de un vector. La forma de utilizarla es la siguiente:
+
+`tapply(X, index, FUN, ..., simplify = TRUE)`
+
+Los elementos en el esqueleto de la función significan lo siguiente: 
+
+* `X`: `X` es el vector de datos
+* `INDEX`: `index` es un factor o una lista de factores
+* `FUN`: `fun` representa la función a aplicar dentro de `tapply`
+* `...`: los tres puntos significa que podemos agregar argumentos adicionales para la función a ejecutar
+* `simplify`: el argumento `simplify` está puesto por valor de facto como `TRUE`. Si se fija en `FALSE`, `tapply` siempre retorna un array del modo _“lista”_. Si se deja en `TRUE`, si la función siempre retorna un escalar entonces `tapply` retorna un array con el modo del escalar.
+
+Es visible que `tapply` es una función un poco más complicada en su estructura. A pesar de esta complicación hay momentos donde nos conviene utilizarla.
+
+a. Cuando tenemos estructuras de datos que se pueden descomponer en grupos.
+b. Cuando queremos romper y agrupar estas estructuras.
+c. Cuando dentro de cada uno de estos grupos, queremos aplicar la función esperada dentro de `tapply`.
+
+Volvamos al ejemplo de la base de datos `mtcars`. ¿Cómo resumiríamos el promedio de millas por galón de gasolina si agrupáramos las muestras por caja de cambio (o sea el número de cambios de cada auto)?
+
+```{marginfigure}
+Noten que el número de cambios no es un factor sino un entero, y por eso en el código tuvimos que transformarlo a un factor usando la función `as.factor(mtcars$gear)`. En este caso en particular, si hubiéramos obviado esto R se hubiera dado cuenta y el resultado no se hubiera alterado, pero no siempre es seguro que R asumirá que el entero que estamos pasando debiera ser un factor, y por esa razón es un buen hábito comenzar a transformar de un tipo al otro desde temprano.
+```
+
+```{r ejemploTAPPLY}
+# Ejemplo TAPPLY
+# Visualizar rendimiento promedio de gasolina
+# agrupado por número de cambios
+
+data(mtcars)
+tapply(mtcars$mpg, as.factor(mtcars$gear), mean)
+
+```
+
+## SPLIT
+La función `split()` significa en inglés dividir o separar, y en *R* toma un vector u otro objeto y lo divide en grupos determinados por un factor o una lista de factores. Esta función siempre retorna una lista.
+
+La forma de utilizar esta función es la siguiente:
+
+`split(datos, datos$campo)`
+
+donde:
+
+* `datos`: es una estructura de datos
+* `datos$campo`: es la variable por la que queremos agrupar, o una lista de variables por la que queremos agrupar
+
+Supongamos que tenemos el juego de datos de calidad de aire `airquality` y queremos ver varias lecturas resumidas por mes.
+
+```{marginfigure}
+Varios de los resúmenes por mes retornaron como valores `NA`, porque en esos meses hay valores `NA` faltantes. Para evitar esto, podemos agregar el argumento `drop = TRUE` que elimina del cálculo las observaciones con valor nulo.
+```
+
+```{r ejemploSPLIT}
+# Ejemplos SPLIT
+# Abrir base de datos calidad del aire
+library(datasets)
+head(airquality)
+
+# busquemos promedios mensuales
+bdTemp <- split(airquality, airquality$Month)
+lapply(bdTemp, function(x) colMeans(x[ ,c("Ozone", "Solar.R", "Wind")]))
+```
+
