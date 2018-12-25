@@ -1,0 +1,463 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# TIPOS DE DATOS, OBJETOS Y ATRIBUTOS
+
+## Tipos de Datos
+`r tint::newthought('R tiene cinco tipos de datos basicos. ')`Estos tipos se llaman atómicos ya que constituyen el primer punto de construcción para cualquier otro tipo de dato. Es importante conocerlos bien antes de avanzar para evitar errores cuando hagamos exploración de datos. Dado que la función primaria que queremos de __R__ es que sirva de herramienta de análisis para la ciencia de datos, la creación de estructuras de datos y el conocimiento íntimo de los mismos es un requisito vital. 
+
+```{marginfigure}
+Es un hecho consensuado entre la academia y bibliografía de la Ciencia de Datos que el _data scientist_ gasta un 70 a 80 porciento de su tiempo en labores conocidas como _data wrangling_: recolectar, limpiar, validar, y normalizar la data para análisis. Es por eso la importancia de entender los tipos y estructuras de datos desde un inicio. El tiempo utilizado luego en el análisis es mucho menos y las herramientas del mismo muy poderosas y fáciles de aplicar si las estructuras de datos tienen una ingenieria correcta.
+```
+
+Los cinco tipos son:
+
+*	carácter
+*	numérico
+*	entero
+*	complejo
+*	lógico
+
+### Carácter
+Un carácter es cualquiera del juego posible de ASCII y más. En las versiones más modernas se ha visto la posibilidad de usar emojis (los mismos que se usan en el chat de celular) como caracteres válidos en un programa R. Sin embargo, en este texto nos vamos a limitar a los básicos como letras, números y signos de exclamación que se pueden incluir en el tipo _string_ (cadena de literales).
+
+```{r tipoCaracter}
+# Ejemplo de tipo carácter
+miNombre <- "Juan"
+miApellido <- "Perez"
+miPresentacion <- paste(miNombre, " ", miApellido)
+miPresentacion
+```
+
+### Numérico
+La clase atómica numérica incluye números con decimales. Es la clase estándar para cualquier cálculo numérico. Como nota precautoria, __R__ asignará un atributo numérico a una variable creada sea dicho valor entero o entero con decimales.
+
+```{r tipoNumerico}
+# Crear tipos numéricos
+a = 1.89
+class(a)
+
+b = 1
+class(b)
+```
+
+### Enteros
+Los números enteros en R son aquellos que no tienen mantisa, y para crearlos, es necesario apoyarse con la función `as.integer()`. Cualquier valor que pasemos dentro del paréntesis de esta función se convierte en un número entero, inclusive una cadena de números.
+
+```{r tipoEnterros}
+# Ejemplo de enteros
+a = as.integer(9.1)
+class(a)
+
+b = as.integer("6.18")
+class(b)
+
+# el siguiente ejemplo da error porque R entiende que no puede 
+# ser un número
+c = as.numeric("un entero")
+```
+
+NOTA ACLARATORIA: utilizando la función `as.integer()` todo argumento que pasemos se convierte en un entero, inclusive una cadena de números. Pero esto no aplica a la función `as.numeric()` que solo acepta como valores válidos números. Por eso el tercer ejemplo arroja un mensaje de error. 
+
+### Complejos
+Los números complejos en R se les da un componente real y un componente imaginario utilizando la notación de valor _i_.
+
+```{r}
+# Crear número imaginario
+imaginario = 4 + 2i
+imaginario
+class(imaginario)
+
+# el siguiente ejemplo da error, no es imaginario
+sqrt(-1)
+
+# esta es la forma correcta de hacerlo
+sqrt(-1 + 0i)
+```
+
+Acabamos de ver en los ejemplos anteriores que si deseamos obtener la raíz cuadrada de un valor negativo hay que usar la forma explícita de número complejo. Como en la programación quizás alguna vez tengamos que pasar un valor del cual no sabemos si es o no es imaginario - por ejemplo una variable cuyo valor es indeterminado hasta el momento del cálculo - es recomendable utilizar la función `as.complex()`.
+
+```{r}
+# Función para determinar raíces complejas
+sqrt(as.complex(-9))
+```
+
+```{marginfigure}
+El lector observador habrá notado que hay muchas funciones que comienzan con el prefijo _as._ como _as.complex()_ o _as.numeric()_. Si lo necesitan en algún momento, es probable que ya exista la conversión que el investigador busca en __R__ utilizando esa misma sintaxis.
+```
+
+__R__ se encarga de ajustar el tipo de numérico a imaginario. 
+
+### Lógico
+Los valores lógicos de __R__ son __TRUE__ (verdadero) y __FALSE__ (falso). Cada vez que se evalúe una relación lógica __R__ va a devolver el resultado de la misma con alguna de estas dos opciones. Se debe tener cuidado en los casos que la relación es lógica, pero uno piensa que porque estar utilizando números el interpreté nos va a devolver otro tipo de resultado. En tales situaciones el programador se da cuenta cuando el programa no funcione (o no funcione como se esperaba).
+
+```{r tipoLogico}
+# Tipo lógico
+unValor <- 10
+otroValor <- 5
+
+resultado <- unValor < otroValor
+resultado
+```
+
+En el caso de necesitar hacer algún tipo de operación lógica con valores es muy probable que se utilice operadores lógicos __Y__ u __O__ (en inglés *AND* y *OR*). La lógica de circuitos y el álgebra de Boole los usa de forma habitual. Los más utilizados en R son:
+
+*	el operador *Y* es el símbolo *&*
+*	el operador *O* es el símbolo *|*
+*	para comparar una variable de otra (como en `a = b`) debemos usar doble signo igual en vez de solo uno. Esto es sencillo, pero lamentablemente la fuente de error de más de un programa porque al principio suele olvidarse. En vez de la notación `a = b` utilizar `a == b`.
+* eloperador de negación usa el signo de exclamación *!* delante de una variable o inclusive de cualquier operador, hasta el signo igual como en `a != b`.
+
+A modo aclaratorio veamos varios ejemplos.
+
+```{r tipoLogico2}
+estatusA <- FALSE
+estatusB <- TRUE
+
+estatusA & estatusB
+
+estatusA | estatusB
+
+!estatusA
+
+estatusA == estatusB
+
+estatusA != estatusB
+```
+
+## Tipos de Objetos
+Los objetos son estructuras que contienen datos de ciertos tipos. Por ejemplo, un objeto puede ser un vector de números, y otro objeto puede ser un vector pero de nombres de ciudades. Los cuatro tipos de objetos en los que nos enfocaremos en este texto son:
+
+1. vectores
+2. listas
+3. matrices
+4. data frame
+
+Los tres primeros se revisarán en detalle a continuación. Sin embargo hablaremos poco de los _data frame_ ya que por su importancia tienen un capítulo aparte.
+
+Antes de avanzar, vale la pena reforzar los conceptos de númericos como tipo de dato y tipos de números en __R__. Hemos mencionado que los números se tratan como si fueran objetos numéricos. Para especificar un entero en el momento de hacer la asignación podemos hacerlo con el sufijo *L* de la siguiente forma: `a <- 10L`. Como *R* es un lenguaje para la ciencia de datos, es muy probable que nos vayamos a topar con valores que no son números o valores infinitos. Los valores que no son números se especifican `NaN` (del inglés *not a number*). Los valores infinitos se especifican `Inf` (del inglés *infinite*).
+
+Ante la duda de que es un objeto, lo más fácil es utilizar la función `class()` para verificar como se ha hecho en los ejemplos de tipo de datos. Hay muchos más atributos que los objetos en __R__ tienen, como son los nombres, dimensiones, medidas, etc. Pero iremos viendo estos a medidas que los vayamos necesitando de verdad en el camino del texto.
+
+### Vectores
+El objeto más básico de trabajo en __R__ es el vector. De hecho, es uno de los objetos más utilizados junto con el data.frame. 
+
+> "Un vector es una especie de lista de cosas, pero todas las cosas deben ser del mismo tipo. Por ejemplo, podemos hacer un vector de numéricos o de enteros, pero no de numéricos y enteros a la vez. La excepción a la regla es la lista."
+
+Para crear un vector vacío basta utilizar la función `vector()` pero mucho más seguido vamos a utilizar la forma corta con `a <- c(1,2,3)`. Hay cierta ambiguedad en el uso de vectores y listas. La experiencia del autor con __R__ es que los vectores se usan y mucho, pero las listas son menos utilizadas y cuando se usan, es para funciones más complejas. Un vector es arreglo de objetos que son *todos de la misma clasificación*, por ejemplo, todos enteros. 
+
+```{r armarVector}
+# Armar un vector
+vectorDecimales <- c(0.12, 0.14, 0.16)
+vectorLogicos <- c(TRUE, TRUE, FALSE, TRUE)
+vectorLetras <- c("A", "C", "P")
+
+# Usemos la función vector()
+unVectorMas <- vector("numeric", length = 10)
+unVectorMas
+```
+
+¿Qué pasa si por equivocación armamos un vector con componentes que no son todos de la misma clasificación? *R* utiliza el elemento que es el más bajo denominador común (en la escala de *R*) para cohesionar el tipo.
+
+```{r castVector}
+# Cohersión de vector
+vectorMixto <- c("Roberto", 10, 12, 100.5)
+
+vectorMixto
+
+class(vectorMixto)
+```
+
+Utilizamos y guardamos información dentro de los vectores para utilizarla luego en procesos de cálculos y fórmulas. Tarde o temprano vamos a querer acceder a los contenidos de un vector por su índice, para extraer no todos los datos del vector, sino uno en particular. Por ejemplo, vamos a querer acceder al segundo elemento del vector `vectorMixto` del ejemplo anterior. Esto se hace indicando el valor del elemento entre corchetes del mode `[x]`.
+
+```{r}
+vectorMixto[1]
+
+vectorMixto[2]
+
+vectorMixto[8]
+```
+
+```{marginfigure}
+Los índices de vectores en __R__ siempre comienzan en 1, a diferencia de otros lenguajes de programación donde los índices de vectores comienzan en 0. Por eso en __R__ un vector con tres elementos tendrá tres índices, por ejemplo foo[1], foo[2] y foo[3].
+```
+
+
+Si el índice apunta a un elemento que no existe, __R__ nos retornará `NA`, que significa que no hay valor disponible. La función `append()` nos permite agregar valores al final del vector para aumentar su dimensión. Si no utilizamos la función como asignación a la variable original, el elemento se agrega al principio del vector y el vector original no muta. Si asignamos el valor nuevo a la variable original __R__ lo agrega al final de la lista del vector correctamente. 
+
+```{r appendVector}
+# Agregar un elemento adicional al vector
+bar <- c(1,2,3)
+append(5, bar)
+
+# Revisemos si bar muto
+bar
+
+# Asignando nuevo valor a bar
+bar <- append(bar, 4)
+bar
+```
+
+Puede resultar confuso, pero un comportamiento similar se obtiene utilizando la función `c()` de concatenar. Veamos el mismo ejemplo pero sustituyendo funciones.
+
+```{r appendVector2}
+# Agregar un elemento adicional al vector
+bar <- c(1,2,3)
+c(bar, 5)
+
+# Revisemos si bar muto
+bar
+
+# Asignando nuevo valor a bar
+bar <- c(bar, 4)
+bar
+```
+
+Como muchas cosas en el lenguaje __R__, pueden darse oportunidades donde varios comandos o funciones logran el mismo resultado y el uso de cada uno es la preferencia de estilo del programador. Al tener la habilidad de aumentar el tamaño de un vector y el número de elementos es probable que sea de interés la función contraria, eliminar elementos de un vector. Tal caso puede presentarse para borar elementos específicos de un vector (como el número 2 y el 4) o ubicaciones específicas del vector (la primera y tercera posición). Cada uno tiene un tratamiento diferente pero la solución tiene factores en común. Tradicionalmente se identifican las posiciones de los elementos a eliminar y se borran utilizando sus índices de posiciones. Obviamente, el conocer los índices de posición acorta la solución en un paso menos. 
+
+```{r eliminarElementoVector}
+# Crear vector de multiples del 9
+bar <- c(9, 18, 27, 36, 45)
+
+# Crear vector para borrar el 27 y el 45
+foo <- c(27, 45)
+
+# Identificar índices del vector a eliminar
+idx <- which(bar %in% foo)
+idx
+
+# Eliminar las posiciones identificadas
+bar  <- bar[-idx]
+bar
+```
+
+La solución utiliza dos funciones interesantes de __R__:
+
+* La función `which()` que retorna de una consulta aquellos valores que la satisfacen
+* La función `%in%` que es una función asistente para identificar valores _dentro_ de un rango
+
+Notemos que la eliminación de los valores se determinó asignandolé a la variable inicial sus mismos valores menos aquellas posiciones que deseamos eliminar dentro de los corchetes (ende la notación `[-idx]`). En el caso descrito los valores son un nuevo vector dentro de la variable `idx` pero de igual forma pudieramos pasar un vector creado con la función de concatenar `c()`.
+
+```{r eliminarVector2}
+# Crear vector de multiples del 9
+bar <- c(9, 18, 27, 36, 45)
+
+# Eliminar las posiciones segunda y tercera
+bar  <- bar[-c(2,3)]
+bar
+```
+
+En el caso de que deseemos eliminar todo el vector, se logra con el comando `rm()`.
+
+```{r removeVector}
+# Crear vector de multiples del 9
+bar <- c(9, 18, 27, 36, 45)
+
+# Eliminar el vector
+rm(bar)
+```
+
+### Listas
+Las listas son vectores cuyos elementos pueden ser de diferentes tipos. La forma más sencilla de armar una lista es asignarle a una variable los contenidos de la misma con la función list().
+
+```{r crearLista}
+# Crear una lista
+unaLista <- list("Objeto_1", 10, 12, 100.5, "Objeto_2")
+unaLista
+```
+
+El método de acceder a los elementos de la lista es un poco más engorroso. En vez de utilizar un corchete y un índice del elemento a acceder, notaremos que hay accesos con dos corchetes y un corchete. 
+
+* El doble corchete es el índice superior (todo lo que hay en el primer elemento).
+* El segundo corchete todo lo que hay en el primer elemento si el primer elemento llegara a tener más de una cosa. 
+
+La mejor analogía es imaginarse que el primer elemento que tiene doble corchete es el número de archivero de oficina en el que se encuentra el elemento. Al ser un juego de archiveros de oficina, algunos contienen archivos en más de un cajón disponible, y hay que explicitar cual cajón es con un número. De esa forma el elemento que buscamos puede estar en el segundo archivero, segundo cajón, de un juego de tres archiveros cada uno con cuatro cajones. 
+
+```{r accesoLista}
+otraLista = list(10, 10, c(10,15))
+otraLista
+
+otraLista[[3]][2]
+```
+
+Durante este libro utilizaremos vectores y mucho, pero no haremos gran uso de listas. Aquellos que quieran profundizar en __R__, sobre todo cuando se arman funciones, tendrán que utilizarlas y es importante saber bien como están estructuradas. Lo interesante de las listas es que podemos asignar nombres a las variables que las componen de manera de tener una estructura de datos más robusta.
+
+```{r crearListaRobusta}
+# Crear una lista como archivo para mediciones de un experimento
+experimento <- list("Paciente" = "Nombre_X", "Control" = TRUE, 
+                    "Valores_KG" = c(78.5, 79, 79.5))
+experimento
+```
+
+Dado que los valores de la lista tienen nombre, podemos llamar algún valor que nos interese por su nombre utilizando la notación `lista$elemento`. 
+
+```{r crearListaRobusta2}
+# Crear una lista como archivo para mediciones de un experimento
+experimento <- list("Paciente" = "Nombre_X", "Control" = TRUE, 
+                    "Valores_KG" = c(78.5, 79, 79.5))
+experimento$Paciente
+```
+
+Al igual que los vectores, podemos agregar valores nuevos a la lista, modificar los valores actuales, y llegado el momento eliminar algo que ya no interese.
+
+```{r crearListaRobusta3}
+# Crear una lista como archivo para mediciones de un experimento
+experimento <- list("Paciente" = "Nombre_X", "Control" = TRUE, 
+                    "Valores_KG" = c(78.5, 79, 79.5))
+experimento$Paciente
+
+# Asignar nuevos valores
+experimento[["Alergias"]] <- FALSE
+experimento[["Edad"]] <- 43
+experimento[["SS"]] <- "256.375.488"
+
+experimento
+
+# Modificar edad
+experimento$Edad <- 44
+
+# Eliminar número de seguro social
+experimento[["SS"]] <- NULL
+
+experimento
+```
+
+### Factores
+```{marginfigure}
+La existencia de los factores como tipo de datos la debemos buscar en el pasado. Hace muchos años atrás, cuando la computación era algo nuevo y los dispositivos de almacenamiento costaban millones de dólares (y podemos agregar que pesaban toneladas), un científico catalogando una muestra de población probablemente no hubiera almacenado un censo con las etiquetas soltero, casado, viudo, etc. Lo muy probable es que hubiera usado los enteros 1, 2 y 3, y en un diccionario de datos se hubiera anotado la clave para cada cosa. A medida que los años pasaron, los dispositivos de almacenamiento se han ido modernizando y haciendo cada vez más accesibles, pero las bases de datos antiguas aún tienen codificación similar al 1, 2, 3 (o peor).
+```
+Los factores son la fuente de confusión de muchos en el lenguaje __R__ ya que no siempre es obvio que tipo de objeto son o su propósito. Un factor se usa para representar datos categóricos. Estos datos categóricos pueden ser ordenados o no ordenados. Lo mejor es pensar en un factor como un vector 
+
+Es muy cómodo poder disponer de una lista de valores y que __R__ entienda que no son valores en el sentido de simple etiquetas, sino que tienen un orden o que tienen una estructura. Usar factores es mejor que usar enteros ya que los factores se auto-describen. Es mejor tener variables factores casado, soltero que 1 y 2. Por otro lado, funciones de modelos como `lm()` para hacer regresión lineal o `glm()` para modelos generales lineales le dan un tratamiento especial a los factores. Esto es importante también en la aplicación de modelos de clasificación como árboles, árboles aleatorios, etc.
+
+Veamos un ejemplo de cómo armar un vector de factores y como utilizarlos.
+
+```{r armarFactores}
+# Armar factores
+listaFactoresLogicos <- factor(c("si", "si", "no", "no", "no", "si"))
+
+table(listaFactoresLogicos)
+attr(listaFactoresLogicos, "levels")
+listaFactoresLogicos
+```
+
+Acabamos de agregar dos funciones a la lista de funciones que conocemos. 
+
+* La función `table()` toma un objeto, en este caso un vector de factores, y nos da una tabla de valores de resumen, algo muy útil cuando uno trabaja con muestras y poblaciones en estadística. 
+* La función `attr()` toma un vector de factores y nos devuelve los diferentes niveles, que en nuestro ejemplo solo eran dos, “si” y “no”. 
+
+Los factores son elementos comúnes en algunas fuentes de datos históricas y su complejidad nos puede perder un poco, por eso es bueno tener a manos ambas funciones para ayudarnos a navegar estructuras de datos de tamaño sustancial.
+
+Recordemos que hay factores donde el orden tiene importancia, sobre todo a la hora de imprimir reportes, hacer gráficas, etc. El orden de los niveles puede hacerse explícito usando el argumento `levels` dentro de la función `factor()`. Por ejemplo, si estamos trabajando en un modelo lineal el primer elemento es el que __R__ usa como nivel base del modelo, y por eso la importancia es mayor. Cuando nos referimos a argumentos, son opciones que se pueden especificar dentro de una función. Estas casi siempre van dentro de paréntesis o a veces se les asigna valor con el signo de igualdad `=`. 
+
+__IMPORTANTE:__ las asignaciones de argumentos siempre usan el signo de igualdad `=`, no equivocarse con `==` que se usa solo para comparar una relación lógica o con `<-` que se usa solo para asignar valores.
+
+Veamos un ejemplo para afianzar el concepto.
+
+```{r armarFactor2}
+# Armar una lista de prioridad utilizando factores
+listaPrioridad <- factor(c("prioridad1", "prioridad3", 
+                           "prioridad1", "prioridad2", 
+                           "pioridad1", "prioridad3", 
+                           "prioridad1" ), 
+                         levels = c("prioridad1", "prioridad2", 
+                                    "prioridad3"))
+
+table(listaPrioridad)
+attr(listaPrioridad, "levels")
+```
+
+### Matrices
+__R__ es un lenguaje matemático y dentro de la matemática las matrices tienen un lugar especial. Desde la resolución de métodos de ecuaciones hasta el análisis con PCA (Principal Component Analysis) el trabajo con matrices es extenso, y el lenguaje tiene todo un juego de funciones para facilitar el trabajo al científico.
+
+Las matrices son vectores con un atributo adicional de dimensión. Dicho atributo de dimensión es un vector de enteros de medición 2 `(nrow, ncol)`. La función para construir una matriz es `matrix()`.
+
+```{r armarMatriz}
+# Armar una matrix de 2 x 3
+miMatriz <- matrix(nrow = 2, ncol = 3)
+
+# Verificar dimensión
+dim(miMatriz)
+miMatriz
+```
+
+En el ejemplo que acabamos de ver la matriz está vacía y no tiene nada. 
+
+* Las matrices se construyen comenzando por el lado de la columna. 
+* De esta forma las entradas se deben pensar como comenzando de la porción superior izquierda y corriéndose de columna a columna a medida que se llenan las líneas.
+
+```{r armarMatriz2}
+# Armar y popular una matriz
+otraMatriz <- matrix(1:6, nrow = 2, ncol = 3)
+otraMatriz
+
+# Armar una segunda matriz
+otraMatriz <- matrix(1:6, ncol = 2, nrow = 3)
+otraMatriz
+```
+
+Es posible crear una matriz dándole dimensiones especificas a un vector. No es la mejor manera, pero es posible (algunas personas en el medio académico argumentan que no es la forma correcta pero sigue siendo válida desde el punto de vista que funciona).
+
+```{r armarMatriz3}
+# Forma alterna de popular una matriz
+matriz <- c(1:10)
+dim(matriz) <- c(2,5)
+matriz
+```
+
+Para multiplicar dos matrices hay dos opciones: multiplicar los elementos de ambas matrices, o la multiplicación real de dos matrices que es más que la multiplicación de sus elementos.
+
+La primera opción es bastante directa:
+
+```{r multiplicarMatriz}
+# Crear dos matrices
+matriz1 <- matrix(1:9, 3,3)
+matriz2 <- matrix(10:18, 3,3)
+
+# Multiplicarlas
+matriz1 * matriz2
+```
+
+La segunda opción se logra con el símbolo especial `%*%`:
+
+```{r multiplacarMatriz2}
+# Crear dos matrices
+matriz1 <- matrix(1:9, 3,3)
+matriz2 <- matrix(10:18, 3,3)
+
+# Multiplicarlas
+matriz1 %*% matriz2
+```
+
+De igual manera, __R__ tiene funciones para la creación de la matriz inversa, matriz transpuesta, y el vector diagonal de una matriz. Todas estas operaciones son bastante sencillas (y realmente menos complicada que cuando uno las tiene que hacer a mano en clase).
+
+```{r operacioMatrices}
+# Operaciones con matrices
+unaMatriz <-matrix(c(3,6,12,8,1,1,8,3,4), ncol = 3, nrow = 3)
+
+# Matriz Inversa
+solve(unaMatriz)
+
+# Matriz Transpuesta
+t(unaMatriz)
+
+# Vector Diagonal
+diag(unaMatriz)
+
+# Producto Cruzado
+crossprod(unaMatriz)
+```
+
+Obviamente, no pueden resolver la inversa de una matriz que sea exactamente singular o irregular.
