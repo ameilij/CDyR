@@ -1,0 +1,120 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# VALORES NA Y MISCELANEOS
+
+## Los Problemas de la Data Incompleta
+Un juego de datos valiosos puede verse invalidado porque tiene algunos datos del tipo `NA`. Uno solo de estos a veces basta para que nuestro modelo de aprendizaje computarizado falle. Y en la vida real, sobre todo trabajando con sensores, no suele haber un valor `NA` sino cientos.
+
+R viene equipado con varias funciones para facilitarnos la búsqueda de valores NA en un vector de datos.
+
+```{marginfigure}
+En la Ciencia de Datos - y en la estadística en general - la recolección de información no es perfecta. Muchas veces un sensor no funciona, no detecta nada, o el científico de campo no encuentra lo que busca. Inevitablemente se encontrarán campos con el valor `NA`. Es algo muy común no solo en la ciencia sino en las hojas de cálculo de oficinas, que invalida muchas fórmulas porque el programa no sabe cómo resolver los valores inexistentes.
+```
+
+```{r valoresNA}
+# Crear vector de valores, con algunos NA
+datos <- c(1, 0.5, 1, 1, 2, 1, 1, NA, 1, 1, 
+           NA, 0.5, 0.25, 0.5, NA, 1, 1)
+
+# el siguiente fallará porque hay demasiados NA
+mean(datos)
+
+# digamos a R que ignore los NA
+mean(datos, na.rm = TRUE)
+```
+
+La mayoría de las funciones acepta el argumento `na.rm = TRUE` y elimina valores `NA` del cálculo. Esto puede ser bueno, pero desde el punto de vista estadístico quizás querramos no eliminar sino imputar valores `NA` con otros más útiles (no lo veremos en este texto, pero es una técnica válida de exploración analítica de datos).
+
+¿Cómo testear si un dato es NA?
+
+```{r testNA}
+# Test datos NA
+listaNA <- is.na(datos)
+
+listaNA
+```
+
+Como ya hemos establecido desde un principio, __R__ tiene la tendencia de devolvernos valores lógicos cuando a veces esperábamos otra cosa. Uno hubiera pensado que lo que queríamos era la lista de los valores que no son `NA` o los que son `NA`, no una lista de lógicos de los que son `NA`. Si deseamos devolver la lista de valores que no son `NA`, usaremos un vector de índices adecuados para crear un subconjunto.
+
+```{r noSonNA}
+# Subconjunto de no NA
+noSonNA <- datos[!listaNA]
+
+noSonNA
+```
+
+Vamos a explicar un poco el racional detrás del código. Al juego de datos le aplicamos un índice entre corchetes. Tenemos una lista lógica que los que son `NA` (si dice `TRUE` es porque son `NA`). Como queremos la inversa, solo hay que agregar el sufijo de negación `!` para que __R__ nos devuelva lo opuesto de son `NA`, o sea NO son `NA`. Como esta es una regla de subconjuntos dentro de corchetes, __R__ retorna solo los valores que son opuestos a son `NA`, y los guarda en `noSonNa`. Así obtenemos los valores, y con reglas sencillas resolveremos los más complicados problemas de matemáticas y estadísticas en __R__.
+
+Habiendo programado una metodología válida para descubrir que valores son `NA` y eliminarlos del análisis de datos, hay una función en __R__ que facilita el análisis si la queremos utilizar. Se trata de la función `complete.cases()`, que retorna de un juego de datos solo los casos que no son `NA`.
+
+```{r}
+# completeCases
+cifrasCenso <- c(100, 140, NA, 150, 175, NA, 89, 101, 78, 120)
+gruposCenso <- c("ciudadA", NA, "ciudadB", "ciudadC", NA, 
+                 "ciudadA", NA, NA, 
+                 "ciudadA", "ciudadB")
+
+casosCompletos <- complete.cases(cifrasCenso, gruposCenso)
+```
+
+El ejemplo de arriba es no solo un buen ejemplo para buscar grupos de datos completos (sin NA), sino un excelente ejemplo de cómo utilizar un vector de lógicos como punteros para devolver del vector original solo la información que está completa. ¡Cuidado! El vector `casosCompletos` es solo un vector de lógicos, no los valores completos en sí. Esto se visualiza fácilmente en la consola.
+
+```{r casosCompletos}
+# Ver casos completos
+casosCompletos
+```
+
+El vector `casosCompletos` es perfectamente bien conformado, pero por si solo no dice mucho. Usemos este índice de valores para devolver solo los datos que no son `NA` de sus fuentes originales.
+
+```{r verCasosCompletos}
+# Utilizar índices de casos completos
+cifrasCenso[casosCompletos]
+
+gruposCenso[casosCompletos]
+```
+
+Esta forma de índice de datos se usa mucho cuando los científicos de datos separan grupos de datos en sets de entrenamiento y validación para procesos de _Machine Learning_, igual que los que usa Google y Facebook en sus métodos predictivos.
+
+## Operaciones Vectorizadas
+Muchas operaciones en __R__ son vectorizadas. Lo que acabamos de ver arriba es un buen ejemplo, y esto puede confundir a algunas personas, sobre todo si vienen con algo de experiencia en otros lenguajes donde las operaciones vectorizadas no son tan visibles.
+
+Veamos varios ejemplos de vectorización de operaciones para ir familiarizándonos con la forma de proceso de __R__.
+
+```{r operacionesVectorizadas}
+a <- 5:8
+b <- 10:13
+
+a + b
+```
+
+Vectores de igual tamaño se suman de objeto en objeto. Si los vectores son de diferentes tamaños R hará lo mejor posible de sumarlos (o restarlos, o multiplicarlos, el ejemplo se aplica igual) o en el peor de los casos el interpreté arrojará un mensaje de error.
+
+```{r testVectorizado}
+# Test a menor que 7
+a < 7
+```
+
+Las operaciones de validación de una condición lógica tienen resultados lógicos y no númericos. O sea, __R__ no retornará como respuesta ante la pregunta `a < 7` un vector `5 6` sino un vector de lógicos `TRUE TRUE FALSE FALSE`. Es importante que hagamos hincapié en este punto, porque la experiencia dice que los primeros veinte programas serios van a sufrir de resultados donde se esperaba un número y __R__ devuelve un valor Boolean tipo `FALSE` o `TRUE.
+
+Habiendo dicho esto, el siguiente ejemplo es predecible (y arroja valores numéricos).
+
+```{r testNumerico}
+# Multiplicar vectores
+a * b
+```
+
