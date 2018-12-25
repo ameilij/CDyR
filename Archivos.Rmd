@@ -1,0 +1,255 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+
+# ARCHIVOS EN R
+
+## Introducción a los Archivos de Datos en R
+`r tint::newthought('La ciencia de datos se basa muchas veces en el análisis de datos que alguien más investigó')`. Hay varias ramas de la ciencia de datos. Una parte importante de estos científicos trabajan en las empresas de Internet (desde Facebook y Swiftkey hasta Etsy pasando por Basecamp) analizando datos de producción: clics en botones, preferencias de uso y compra, perfil de consumidores, predicción de gustos, etc. Otra parte de los científicos de datos fungen como analistas de negocios (muy comúnmente en Wall Street llamados _quants_) revisando el comportamiento de los mercados, y tratando de predecir el movimiento de elementos bursátiles como acciones y bonos. Finalmente, un tercer grupo se dedica a las ciencias naturales como Bioestadistas ayudando a validar los estudios de investigación de químicos, ingenieros, físicos, etc.
+
+Las fuentes de datos son múltiples. Hemos vistos juegos de datos cuidadosamente curados que cargamos en la memoria de R con la función `data()`. Otros archivos pueden leerse desde disco, como los archivos planos cuyos campos vienen separados por comas (conocidos como *.csv o _comma separated value_) o aquellos que se leen desde una base de datos como MySQL o Postgres. También hay datos que se pueden leer directamente desde Internet: una descarga de archivos en línea o leer en línea los contenidos de un sitio web para descubrir patrones dentro del código.
+
+Las fuentes de datos son múltiples, y si bien no son infinitas, son muchas. En este texto vamos a cubrir las más básicas de ellas, suficiente como para comenzar a trabajar y avanzar en el lenguaje *R* cómodamente.
+
+* juegos de datos empaquetados
+* archivos planos
+* archivos de fuentes en el Internet
+* archivos de MySQL
+* archivos de Excel
+
+También veremos lo fácil que es leer campos en un archivo y volver a escribirlo al disco duro en caso de ser necesario.
+
+## Cómo leer datos empaquetados
+Hemos estado leyendo juegos de datos empaquetados por varios capítulos, pero igual lo volvemos a describir aquí por propósitos didacticos. Utilicemos la función `data()` para cargar un juego de datos en memoria, y usemos el operador `?` para que *R* nos de datos valiosos sobre el mismo.
+
+```
+data(iris)
+?iris
+iris {datasets} R Documentation
+Edgar Anderson's Iris Data
+
+Description
+
+This famous (Fisher's or Anderson's) iris data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+Usage
+
+iris
+iris3
+Format
+
+iris is a data frame with 150 cases (rows) and 5 variables (columns) named Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, and Species.
+
+iris3 gives the same data arranged as a 3-dimensional array of size 50 by 4 by 3, as represented by S-PLUS. The first dimension gives the case number within the species subsample, the second the measurements with names Sepal L., Sepal W., Petal L., and Petal W., and the third the species.
+
+Source
+
+Fisher, R. A. (1936) The use of multiple measurements in taxonomic problems. Annals of Eugenics, 7, Part II, 179–188.
+
+The data were collected by Anderson, Edgar (1935). The irises of the Gaspe Peninsula, Bulletin of the American Iris Society, 59, 2–5.
+
+References
+
+Becker, R. A., Chambers, J. M. and Wilks, A. R. (1988) The New S Language. Wadsworth & Brooks/Cole. (has iris3 as iris.)
+
+See Also
+
+matplot some examples of which use iris.
+
+Examples
+
+dni3 <- dimnames(iris3)
+ii <- data.frame(matrix(aperm(iris3, c(1,3,2)), ncol = 4,
+                        dimnames = list(NULL, sub(" L.",".Length",
+                                        sub(" W.",".Width", dni3[[2]])))),
+    Species = gl(3, 50, labels = sub("S", "s", sub("V", "v", dni3[[3]]))))
+all.equal(ii, iris) # TRUE
+```
+
+Como podemos ver estos juegos de datos han sido curados. Curar data es un término con un significado muy específico dentro de la ciencia, y abarca la administración de data a través de su ciclo de vida, desde la creación y su almacenaje inicial hasta el momento en el cual se archiva para la posteridad o se vuelve obsoleta y se elimina. El propósito principal de la curación de datos es asegurar que la misma sea altamente confiable para uso de investigación futura.
+
+```{marginfigure}
+De hecho los comandos `head()` y `tail()` son similares a los de línea de comandos en `bash`, usando Linux o FreeBSD.
+```
+
+Si queremos ver los primeros registros del juego de datos iris podemos utilizar el comando `head()`.
+
+```{r ejemploHead()}
+# ejemplo comando head()
+head(iris, 10)
+```
+
+El valor por defecto de `head()` son los primeros seis registros, pero esto se puede variar agregando después de la coma el número de registros que nos gustaría ver. También podemos ver los últimos registros con la función `tail()`.
+
+```{r ejemploTail()}
+tail(iris, 10)
+```
+
+Si nos interesa saber la estructura de campos de un juego de datos, lo mejor es utilizar el comando `str()` que nos devuelve su estructura.
+
+```{r ejemploStr}
+str(iris)
+```
+
+Una pregunta válida es qué tipo de estructura de datos es iris. Con esto nos queremos referir como una estructura curada de datos, pero eso no nos dice mucho desde el punto de vista del lenguaje *R*. Ante la duda, es fácil utilizar la función `class()` que nos devuelve el tipo de estructura (no solo con el juego iris sino con prácticamente cualquier otra variable en uso).
+
+```{r ejemploClass}
+class(iris)
+```
+
+El juego de datos iris ha sido empaquetado como un `data.frame` y quizás esa sea una de las mejores opciones disponibles. Sin embargo, no es la única disponible.
+
+## Cómo leer archivos de texto
+Hay dos métodos muy comunes de lectura de archivos de texto. El primero es leer un archivo usando la estructura de datos `read.table()`. Usemos esta forma de lectura para datos muy poco estructurados, como el que vamos a ver a continuación.
+
+`Estructura de nombres.txt`
+`Juanito sobrino`
+`Jorgito sobrino`
+`Jaimito sobrino`
+`Donald pariente`
+
+El que vemos es un archivo muy primitivo y donde nos conviene usar el poder de `read.table()` para que *R* nos devuelva una estructura ordenada.
+
+```{ejemploReadTable()}
+# veamos en que directorio estamos
+getwd()
+
+# no es donde quiero leer mis datos, cambiemos el directorio
+setwd(/Users/ameilij/Documents/Publications/Ciencia de Datos con R/CDyR)
+
+library(data.table)
+nombres <- read.table("nombres.txt")
+nombres
+
+str(nombres)
+
+for(i in 1:dim(nombres)[1]) {
+  print(paste("Nombre: ", nombres[i, 1], "- Estatus: ", nombres[i, 2]))
+}
+```
+
+El valor de cada columna viene sin nombre y R le asigna V1, V2… Vx. Usar este formato es cómodo para hacer búsquedas dentro de los índices.
+
+```{r ejemploBusquedaArchivoTable}
+nombres[nombres$V2 == "sobrino", ]
+```
+
+No todos los formatos son tan primitivos. Uno muy común es el de archivo plano cuyos campos se separan con comas. Estos archivos son la forma más fácil de compartir información de bases de datos o hojas de cálculo como EXCEL para que todo el mundo los pueda leer. Veamos un ejemplo de estos.
+
+```
+Estructura de lotes.csv
+Lote, Valor
+"1AA", 100
+"1AD", 90
+"1AB", 100
+"1AB", 80
+"1AC", 50
+"1AD", 85
+"1AA", 90
+"1AC", 200
+```
+
+Pensemos en esta estructura de lotes como el peso promedio de recolección de café y que cada canasta tiene un identificador de lote especial. Lo que queremos hacer es estudiar un poco este lote para ver los rendimientos de cada parcela.
+
+```{r ejemploReadCSV}
+lotes <- read.csv("lotes.csv", header = TRUE)
+head(lotes, 3)
+
+str(lotes)
+
+class(lotes)
+```
+
+Noten que a pesar de ser un archivo de formato `comma separated value` ya *R* lo transformó en una estructura del tipo `data.frame`. No todos los archivos `.cvs` tienen nombres de columna. Como este los tenía le instruimos a *R* leerlos correctamente con el argumento `header = TRUE`. Veamos un poco más de la información en lotes.
+
+```{r ejemploLOTES}
+summary(lotes)
+```
+
+Bien, por lo que vemos hay cuatro lotes, del 1AA al 1AD y tres lecturas por cada uno. En total, los valores de los lotes van de 50 kilos hasta 200 kilos, pero eso no nos dice mucho sobre cada lote en particular. Veamos una gráfica de la distribución de pesos por lote.
+
+```{r verificarLOTES}
+boxplot(Valor ~ Lote, data = lotes, main = "Rendimiento de Kg/Cafe por Lote", xlab = "Lote", ylab = "Kgs.")
+```
+
+Cada rectángulo del gráfico nos da los valores promedios y rangos de cuartil de cada lote. Las líneas más pequeñas por encima y por debajo son los valores extremos de cada lote. Como pueden ver, los lotes 1AA, 1AB, y 1AD son relativamente similares, pero el lote 1AC tiene rendimientos promedios muy superiores a los demás.
+
+## Archivos de Internet
+El Internet se creo inicialmente para el intercambio de conocimiento y datos científicos. La cantidad de información disponible es impresionante, pero no solo de datos modernos como los provenientes de las redes sociales, sino juegos de datos curados para la investigación científica. Cuando uno lee un archivo, lo correcto es abrir una conexión y utilizar esa conexión para la lectura. Un ejemplo claro es el siguiente.
+
+```{r ejemploReadWeb1}
+conexion <- file("lotes.csv")
+miArchivo <- read.csv(conexion)
+head(miArchivo)
+```
+
+La razón por la cual no vemos mucho código de este tipo es que el lenguaje ha crecido y evolucionado y hacemos lo siguiente en vez.
+
+```{r ejemploReadWeb2}
+myArchivo <- read.csv("lotes.csv")
+head(miArchivo)
+```
+
+```{marginfigure}
+Los programadores son propensos a buscar la mejor forma de reducir la tarea a mano, y los de R por lo general están más interesados en la matemática del asunto que en la programación del asunto. Esto no afecta mucho la exploración de datos, pero en otros entornos dejar una conexión abierta pudiera ser inseguro por lo bajo y hasta catastrófico si la mala suerte ataca.
+```
+
+Leer un archivo de Internet no es sino abrir una conexión con un `URL` (la dirección de Internet de donde está ubicada la base de datos que nos interesa) y leer el archivo con esa conexión como si fuera cualquier otro archivo. Veamos un ejemplo de cómo leer un sitio web y descargarlo en disco duro. Al momento de escribir el siguiente libro, como medida de control de versión, ibamos guardando los diferentes borradores en *Github*. *Git* es un sistema de control de versiones: guarda el trabajo de a poco, versión a versión, para que no se vaya perdiendo los cambios que uno hace. Es mucho más útil cuando varias personas están trabajando en un proyecto y deben cooperar. *Github* es un sitio en la nube para guardar proyectos, y es muy usado por la comunidad de *R*. Cada capítulo del libro era un archivo en formato `.Rmd`, que usa `R Mark-Down` para transformar el texto en un *PDF* con forma muy pulida, similar a lo que resulta de usar Word, pero con la facilidad de ejecutar el código dentro del texto. A manera de agregado, *Github* le permite a uno tener una página web (solo una por proyecto) para documentar el proyecto, y esa es precisamente la página web que vamos a leer.
+
+```{r ejemploLeerGithub}
+setwd("~/Documents/Publications/IntroDSandR/Draft/")
+ubicacionURL <- "https://ameilij.github.io/IntroDSandR/"
+download.file(ubicacionURL, destfile = "testSitioWeb.html")
+```
+
+Veamos el código línea por línea:
+
+1. La primera línea usa la función `setwd()` que fija el directorio de trabajo. El código está editado para Mac usando OS X, pero es casi igual para Windows.
+2. La segunda línea simplemente crea una variable con la dirección del sitio donde está guardada la información. Esto no es necesario, se puede utilizar la dirección directamente en el siguiente comando, pero es una buena práctica de uso ya que la dirección puede cambiar varias veces en un mes, sobre todo si es un sitio que tiene mucho movimiento o que está generado dinámicamente por algún programa adicional y los enlaces no son fijos.
+3. La tercera línea usa la función `download.file()` para descargar el archivo desde una ubicación en la web (que le pasamos a través de la variable `ubicacionURL`) y lo descarga a un archivo de destino que en este caso le pasamos con una dirección que solo contiene el nombre del archivo sin ninguna ubicación de carpeta.
+
+Lo que hemos hecho es básicamente descargar del Internet todo el código *HTML* que compone el sitio del libro y colocarlo como un archivo en nuestro disco duro. Podemos accesar a la información con la función `readLines()` ya que este no es un archivo con columnas o variables bien estructuradas, sino un archivo de texto con lineas variables llenas de tags *HTML*.
+
+```{r ejemploReadLines}
+miDocumento <- readLines("testSitioWeb.html")
+miDocumento[1:5]
+```
+
+Es muy probable que en el futuro tengan que descargar un archivo de datos bien estructurado de algún sitio web científico para un análisis. Esto se puede descargar al disco duro a través del explorador (Firefox, Safari, Chrome, etc.) pero lo ideal es ya hacerlo desde *R* para que quede el código fuente registrado paso por paso. Los siguientes datos son del libro *CASE STUDIES IN BIOMETRY*, escrito por Nicholas Lange, Louise Ryan,Lynne Billard, David Brillinger, Loveday Conquest, Joel Greenhouse, (1994) de editorial Wiley. Los datos que vamos a bajar del mismo son del capítulo 11, cuyo título en inglés es *Time-Series Analyses of Beaver Body Temperatures* (Análisis de Series de Tiempo de Temperatura Corporal de Castores).
+
+```{r ejemploFREAD}
+# Cargar la función fread() con el paquete data.table
+library(data.table)
+datosCastores <- fread('http://www.stats.ox.ac.uk/pub/datasets/csb/ch11b.dat')
+head(datosCastores)
+
+# Guardar en el disco duro como datos en formato .txt
+write.table(datosCastores, file = "datosCastores.txt")
+```
+
+Ya que tenemos este juego de datos, veamos su utilidad. ¿Cómo varía la medición de los castores y su temperatura corporal? ¿Podemos resumir el estudio en un gráfico de caja?
+
+```{marginfigure}
+En el ejemplo siguiente utilizamos la función `par(mfrow=c(1.2))` para decirle a *R* que coloque los dos gráficos en una línea de dos columnas. Es una forma conveniente de diagramar la ubicación de los gráficos.
+```
+
+```{r graficaBoxplot}
+par(mfrow=c(1,2))
+plot(datosCastores$V3, datosCastores$V4, main = "Muestras Temp. Corp.", 
+     xlab = "muestra", ylab = "Temp.C.")
+boxplot(datosCastores$V4, main = "Resumen Temp. Corp")
+```
+ 
