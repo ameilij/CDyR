@@ -16,11 +16,11 @@ options(htmltools.dir.version = FALSE)
 ```
 
 # LA CONSOLA DE R
-`r tint::newthought('En cierta forma, trabajar con el lenguaje R tiene caracteristicas iteractivas')`, a diferencia de otros lenguajes, que le dan un toque distintivo. Los lengujes tradicionales como C, Java y FORTRAN son lenguajes compilados. El analista escribe un programa en un archivo conocido como código fuente, y luego transforma dicho juego de instrucciones en código maquina ejecutable a través de un compilador. Este proceso permite obtener ejecutables mucho más compactos y rápidos pero es a la vez un proceso tedioso y más propio de un ambiente de producción que uno de investigación. A diferencia, el lenguaje _R_ es interpretado. En cualquier momento podemos ejecutar una línea de codigo mientras lo vamos escribiendo, viendo los resultados en tiempo real, agregando o quitando a medida que exploramos un problema. 
+`r tint::newthought('En cierta forma, trabajar con el lenguaje R tiene caracteristicas iteractivas')`, a diferencia de otros lenguajes, que le dan un toque distintivo. Los lengujes tradicionales como C, Java y FORTRAN son lenguajes compilados. El analista escribe un programa en un archivo conocido como código fuente, y luego transforma dicho juego de instrucciones en código maquina ejecutable a través de un compilador. Este proceso permite obtener ejecutables mucho más compactos y rápidos pero es a la vez un proceso tedioso y más propio de un ambiente de producción que uno de investigación. A diferencia, el lenguaje _R_ es interpretado. En cualquier momento podemos ejecutar una línea de codigo mientras lo vamos escribiendo, viendo los resultados en tiempo real, agregando o quitando a medida que exploramos un problema.
 
 Esto se hace evidente en el proceso de análisis de un científico de datos. Si imaginamos un problema sencillo, el análisis de un juego de datos para ver la factibilidad de calzar una regresión lineal con miras a generar un modelo predictivo, vemos la diferencia abismal entre ambos tipos de lenguaje.
 
-En un lenguaje tradicional, debieramos crear un programa que lea los datos, grafique los datos, calce un modelo de regresión lineal, y luego imprima en la consola ciertos parámetros para verificar si el modelo es viable o no. Una vez creado el programa se compila, y si está libre de errores, se ejecuta sobre la base de datos. Este proceso es inflexible y debe seguirse al pie de la letra aunque con solo la visualización del juego de datos quede en evidencia que no existe una tendencia a la regresión. 
+En un lenguaje tradicional, debieramos crear un programa que lea los datos, grafique los datos, calce un modelo de regresión lineal, y luego imprima en la consola ciertos parámetros para verificar si el modelo es viable o no. Una vez creado el programa se compila, y si está libre de errores, se ejecuta sobre la base de datos. Este proceso es inflexible y debe seguirse al pie de la letra aunque con solo la visualización del juego de datos quede en evidencia que no existe una tendencia a la regresión.
 
 En el lenguaje _R_ la investigación y el análisis visual y exploratorio de datos viene primero, y la programación pasa a segundo plano. Utilicemos el juego de datos `mtcars` y verifiquemos visualmente si existe una posible regresión entre el desplazamiento de un motor y su peso.
 
@@ -36,16 +36,13 @@ Con solo tres líneas de código _R_ hemos podido:
 2. cargar la librería `ggplot2`para obtener mejores visualizaciones
 2. visualizar la relación de 32 marcas diferentes de carros, sus desplazamientos del motor y pesos respectivos de los mismos
 
-Antes de proceder con el resto del programa, podemos visualizar el juego de datos y su relación para determinar la factibilidad de un modelo de regresión lineal. Si miramos fijamente el gráfico es evidente que hay una relación lineal pero es débil, ya que se visualiza tres diferentes poblaciones de datos, pero para propósitos del ejemplo sigamos pensando que a pesar de débil, vale la pena calzar el modelo de regresión y apliquemos el mismo. 
+Antes de proceder con el resto del programa, podemos visualizar el juego de datos y su relación para determinar la factibilidad de un modelo de regresión lineal. Si miramos fijamente el gráfico es evidente que hay una relación lineal pero es débil, ya que se visualiza tres diferentes poblaciones de datos, pero para propósitos del ejemplo sigamos pensando que a pesar de débil, vale la pena calzar el modelo de regresión y apliquemos el mismo.
 
 ```{r ejemploEDA2, message=FALSE, warning=FALSE, fig.height=3}
-qplot(mtcars$disp, mtcars$wt) + 
+qplot(mtcars$disp, mtcars$wt) +
   geom_smooth(method = "lm", se = FALSE)
 ```
 
-En una sola línea de código - utilizando el poder de la librería `ggplot2` - hemos incorporado una línea representativa de la regresión lineal del juego de datos e indicativo de un probable modelo predictivo. No vamos a profundizar todavía en los modelos de regresión lineal para los cuales dedicamos un capítulo aparte del libro. Por ahora solo queremos dar un preámbulo del poder del lenguaje para rápidamente explorar y analizar juegos de datos de forma matemática. 
+En una sola línea de código - utilizando el poder de la librería `ggplot2` - hemos incorporado una línea representativa de la regresión lineal del juego de datos e indicativo de un probable modelo predictivo. No vamos a profundizar todavía en los modelos de regresión lineal para los cuales dedicamos un capítulo aparte del libro. Por ahora solo queremos dar un preámbulo del poder del lenguaje para rápidamente explorar y analizar juegos de datos de forma matemática.
 
-
-
-
-
+Avancemos hacia el emocionante mundo de la ciencia de datos.
