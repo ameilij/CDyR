@@ -1,0 +1,218 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# FUNCIONES EN R
+`r tint::newthought('En la mayoría de los lenguajes de programación, el analista no está limitado a las funciones o bibliotecas de uso disponibles.')` Hay mucho que se puede hacer en _R_ a través de la consola interactiva sin necesidad de tener que formalmente inventar funciones propias. Mientrás más cerca uno se mantenga de las fórmulas matématicas conocidas en la ciencia de datos, menos probable es que la necesidad de crear algún tipo de comando o método particular surja. Habiendo dicho esto, _R_ está en plena capacidad de satisfacer la mayoría de las necesidades del científico de datos con especificaciones de investigación mucho más precisas. 
+
+```{marginfigure}
+Los lenguajes de programación como Java, C++ y C# tienen una sintaxis muy rica en este sentido. Estos lenguajes han sido diseñados como lenguajes de propósito general y el programador probablemente quiera empezar de cero. Las guerras de lenguajes son muy famosas entre programadores, y no vamos a entrar en ese terreno porque al final del día este libro es para el Científico de Datos que recién comienza, pero que es Científico de Datos primero y ve sus habilidades de programación como una herramienta, no una cruzada.
+```
+
+Cuando el científico confronta algún tipo de proceso, hipótesis o trabajo a mano en el cual no le va a alcanzar las funciones disponibles en _R_, tendrá que crear funciones nuevas. Los paquetes de R guardados en CRAN (CRAN: _The Comprehensive R Archive Network_) suman 9,528 en el momento de escribir este libro (cuyo manuscrito comenzó noviembre 14, 2016), o si están leyendo el libro en varios años de su publicación decenas de miles. Pero un científico siempre está en búsqueda de nuevo conocimiento y proponiendo nueva ciencia. Por eso es importante aprender a escribir funciones que se ajusten a nuestra descripción de cómo funciona el mundo.
+
+El concepto de función puede no ser necesariamente evidente para todos, por lo que vale la pena explicarlo en detalle. Hablamos de una función cuando nos referimos a una serie de instrucciones que utiliza una serie opcional de datos y/o parámetros de entrada para ejecutar cierta tarea. 
+
+* Si por cualquier razón queremos obtener un número aleatorio del 1 al 10, podemos escribir una función con un nombre descriptivo (por ejemplo, `getRandom10` o `retornarAleatorio1al10`) que no requiera de ningún dato o parámetro de entrada y retorne un número cualquiera del uno al diez. 
+* Podemos extender el caso de arriba a una función que reciba un rango de parámetro y devuelva un  número aleatorio si el parámetro es dígito, un número aleatorío del 1 al 99 si el parámetro es decena, o un número aleatorio del 1 al 999 si es centena. Haríamos esto con una función que actúe recibiendo como entrada tres posibles parámetros, `getRandom(digito)`, `getRandom(decena)`, o `getRandom(centena)`.
+* Es totalmente lícito pensar que preferimos una función más flexible y que en vez de un parámetro reciba de entrada un número como límite superior, y retorne un número aleatoria entre el 1 y dicho número, al estilo de `getRandom(200)` para un número al azar entre 1 y 200.
+
+La necesidad de programar una función en particular crece con la complejidad y especificación de la investigación a mano. Muchas veces no se trata solamente de programar algo único, sino de crear una función que realice en un juego de datos una serie extensa de pasos intermedios para los cuales ya existen comandos disponibles, pero que al agruparlos simplifican el flujo de trabajo de investigación. 
+
+Una función tiene la siguiente plantilla de uso:
+
+`nombreFunción <- function(argumentos) { cuerpo de la función }` 
+
+Existe libertad relativa para el nombre de una función en _R_ mientras se utilice una serie de letras y/o números. Por ejemplo, `fun1` es tan válido como `leerArchivo` o `fla` como diminutivo de _función leer archivo_. Es buena práctica de programación que elnombre de la función deba ser algo descriptivo que siempre esté a mano para facilitar su uso. Cada función debe tener su propio nombre descriptivo. Es posible tener dos funciones o más con el mismo nombre a través de una técnica de programación conocida como _overloading_ pero no vamos a entrar en temas avanzados en este libro y para própositos prácticos limitar a nombres únicos las funciones reduce el potencial de errores.
+
+1. Los argumentos de una función pueden ser ninguno, uno o varios. Estos toman la forma de variables que la función utilizará y procesará dentro del cuerpo de la misma.
+
+2. El cuerpo de la función es el código que realmente hace algo. Este cuerpo por lo general usa las variables que le pasamos a la función como argumentos. Noten que el cuerpo de la función va dentro de llaves (en inglés _curly braces_). Es muy común que el programa a veces no funcione porque nos olvidamos de cerrar las llaves.
+
+Veamos una función mínima: la función `hagoNada()`.
+
+```{r hagoNada}
+hagoNada <- function() {
+
+  print("Realmente no hago nada... no soy una función muy útil...")
+
+}
+
+hagoNada()
+```
+
+Cómo puede ver el lector es una función con poco uso. Pero si quisieramos escribir varias veces en el programa “Realmente no hago nada… soy una función inútil…” es mucho más fácil llamar a la función hagoNada() que escribir todo de nuevo.
+
+```{r ejemploHagoNadaLoop}
+for(n in 1:3) {
+  hagoNada()
+}
+```
+
+## Funciones con Argumentos y Cuerpo
+Busquemos varios ejemplos de funciones que nos pueden interesar más en el campo de la ciencia. Supongamos que en un proceso tenemos que constantemente sumar dos números y multiplicar la suma por un tercero. No sabemos qué número nos van a pasar y por lo tanto queremos tener lista una función que nos devuelva el cálculo a mano para aplicar en nuestra investigación. Una idea es codificarlo de la siguiente manera:
+
+```{r calculoEspecial}
+calculoEspecial <- function(suma1, suma2, multiplicador) {
+
+  respuesta <- (suma1 + suma2) * multiplicador
+
+  return(respuesta)
+
+}
+```
+
+Fíjense que en el cuerpo de la función la última línea especifica `return (respuesta)`. Esto significa que _R_ retornará al salir de la función el valor de respuesta que calcule en el cuerpo de la misma. De forma automática _R_ *siempre retornará lo último que se calculó en la función*. De esta manera, hubiera sido correcto dejar por fuera la última línea, pero personalmente nos parece que es más sencillo agregar la función de retorno para que el día de mañana al revisar nuestro trabajo sepamos que quisimos hacer. Por otro lado, una función puede retornar más de una cosa dentro del cuerpo de la función. Tampoco es obligatorio usar la palabra clave return cuando retornamos múltiples valores pero es más claro.
+
+```{r devolverMasAlto}
+
+devolverMasAlto <- function(valorA, valorB, normalizador) {
+
+  if(valorA/normalizador > valorB/normalizador) return(valorA) else return(valorB)
+}
+
+devolverMasAlto(4, 5, 6)
+
+devolverMasAlto(4, 5, -2)
+```
+
+Veamos una función más complicada que retorna el promedio de cada columna de una matriz.
+
+```{r promedioColumna}
+
+# Función para retornar el promedio de la columna de una matriz
+promedioColumna <- function(matriz, remove.NA = TRUE) {
+
+  numeroColumna <- ncol(matriz)
+  promedio <- numeric(numeroColumna)
+
+  for(i in 1:numeroColumna) {
+    promedio[i] <- mean(matriz[i], na.rm = TRUE)
+  }
+
+  return(promedio)
+}
+
+# Probemos la función
+miMatriz <- matrix(1:10, 2, 5)
+promedioColumna(miMatriz)
+
+```
+
+## Algo de Teoría Sobre las Funciones
+Las funciones en R son objetos de primera clase. Ser objetos de primera clase significa que:
+
+* Pueden ser pasadas como argumentos de otras funciones
+* Pueden anidarse una adentro de otras
+
+Las funciones tienen argumentos nombrados que potencialmente pudieran tener valores por defecto. Uno pudiera mezclar argumentos nombrados con argumentos anónimos, pero es una práctica bastante mala y poco recomendable. R sigue soportando emparejamiento parcial de variables si no se recuerdan todo el nombre del argumento completo.
+
+```{r calculoEspecial2}
+
+calculoEspecial2 <- function(suma1, suma2, multiplicador = -1.5) {
+
+    respuesta <- (suma1 + suma2) * multiplicador
+  return(respuesta)
+
+}
+
+# Probar con dos argumentos, usar multiplicador por defecto
+calculoEspecial2(2, 5)
+
+# Probar con dos argumentso, usar un multiplicador especial
+calculoEspecial2(2, 5, multiplicador = -3)
+
+```
+
+## El Argumento ...
+El argumento de tres puntos suspensivos ... indica que es el lugar de una variable que a su vez toma el lugar de uno o más argumentos que serán pasados en la función a otras funciones. Se utiliza por lo general cuando se extiende el uso de una función y no queremos copiar toda la lista de argumentos de la función original. Si bien el concepto es algo abstracto de explicar, es mucho más fácil verlo puesto en práctica, donde se entiende como un _place holder_ para aceptar funciones que ya otro programó y especificó su uso.  
+
+Supongamos que queremos crear una función que siempre nos dé una gráfica de línea tomando dos vectores: uno para el eje x y otro para el eje y. Podríamos utilizar la función `plot()` que ya está programada en _R_, pero habría que especificar siempre que es del tipo lineal, agregando esto como parámetro. La solución alterna es ahorrar tiempo y ser más específicos creando nuestra propia función, pasando los argumentos necesarios, y dejando que R se encargue de todo lo que viene después.
+
+```{r miGrafica}
+# Función para obtener una gráfica de línea de 
+# dos vectores de datos
+miGrafica <- function(x, y, type = "l", ...) {
+
+  plot(x, y, type = type, ...)
+
+}
+
+# Probemos la función
+y = rep(1:10,2)
+x = 1:20
+
+miGrafica(x, y)
+```
+
+En el caso de la función `miGrafica()` pudieramos, gracias a los tres puntos seguidos, pasar cualquier tipo de parámetro que se utiliza en la función `plot()` y _R_ sabría como reaccionar. Lo único especial que hemos hecho es forzar el tipo de la gráfica al tipo de líneas cuando estipulamos como parámetro de entrada `type = "l"` en la declaración de la función y lo estipulamos de forma precisa en el cuerpo con `type = type`. Esto es idéntico a decirle al lenguaje que utilice un gráfico de línea pero que puede esperar otros parámetros típicos de la función `plot()`, como lo pueden ser títulos de la gráfica, colores, etc. 
+
+El argumento de tres puntos suspensivos también es necesario cuando no se sabe el número de argumentos exactos que vamos a pasar a una función a priori. El mejor ejemplo es pensar en la función `paste()`. Ya la hemos usado en este libro en otros capítulos para pegar textos. ¿Cómo sabe la función `paste()` cuantos argumentos le vamos a pasar para pegar? La respuesta es *no sabe*, por eso usa los tres puntos suspensivos para indicar que pueden sumarse más argumentos. Ante la duda _R_ tiene la función `args()` para ver cuantos argumentos tiene cualquier otra función.
+
+```{r ejemploArgs}
+args(paste)
+```
+
+No todo es perfecto. Cualquier argumento que pasemos dentro de una función después de los tres puntos suspensivos debe ser un argumento nombrado y no puede haber emparejamiento parcial.
+
+## Funciones Anónimas
+Es raro pensar en una función anónima cuando al principio de este capítulo dijimos que las funciones tienen que nombrarse con cuidado. Pero de hecho existen. Las funciones anónimas son funciones sin nombre y se usan por lo general dentro de las funciones de bucle donde con poco espacio se logra mucho. El hecho de que no tengan nombre tiene mucho que ver con idiosincracia del idioma y de los programadores más que con alguna regla específica. En el lenguaje _Python_ las funciones anónimas se usan mucho también y reciben el nombre de funciones _Lambda_. Es útil pensar que si se necesita una función dentro de un _loop_ del tipo `mapply` o `tapply` las funciones anónimas llenan el espacio muy bien.
+
+```{r ejemploFuncionAnonima}
+vectorNumeros <- c(1,2,3,5,8,9)
+
+# Aplicar la función x + 2, pero sin nombre
+sapply(vectorNumeros, function(x) x + 2)
+```
+
+## Reglas de Alcance
+El siguiente tema es un poco más complicado y que no necesariamente tiene que ver con el mundo de la Ciencia de Datos sino con los mecanismos internos de _R_ para identificar correctamente los nombres de las cosas. En la programación casi todo es posible, aunque a veces con efectos nefastos. Supongamos que un programador quiere crear una función nueva llamada `print()` que suma dos números. Lo puede hacer de la siguiente forma.
+
+```{r ejemploPrint()}
+print <- function(a, b) {
+  return(a + b)
+}
+
+print(2,3)
+```
+
+Hasta ahora todo bien, ya que el código hace exactamente lo que se le pidió. Pero existe en _R_ una función llamada `print` y la hemos utilizado varias veces en este mismo texto. En otros lenguajes se habla de palabras reservadas, palabras con el nombre de funciones que el lenguaje tomó para si solo y que no podemos utilizar de otra forma sino como fue su intención original en el diseño del mismo. _R_ no es estricto en este sentido y como vemos nos permite re-escribir la función `print` a nuestro gusto.
+
+¿Cómo supo _R_ cuál de las dos versiones de `print` utilizar? _R_ lo supo utilizando las reglas de alcance. Las reglas de alcance no son sino reglas que determinan como se manejan los espacios de nombres (en inglés namespaces) dentro del intérprete de _R_. Para tal fin, R busca en los diferentes medioambientes (en inglés environments) hasta encontrar el valor apropiado.
+
+El orden de estas búsquedas es:
+
+1. _R_ busca primero en el ambiente global
+2. Luego busca en cada uno de los espacios de nombres de las librerías de cada paquete
+
+Tomemos nota de que cuando _R_ busca en las librerías de paquetes (por ejemplo, si usamos el paquete `ggplot2` y luego el paquete `caret`) el orden en el cual se cargaron los paquetes si tiene mucho que ver. Cada vez que la función `library()` carga un paquete en el sistema, ese paquete toma la posición número dos en la lista, y desplaza a todos los demás abajo. Inclusive, si un paquete necesita de otro paquete como dependencia, ese paquete se carga en tercer lugar y desplaza a todos los demás en la lista. La libreria principal del lenguaje siempre tiene orden uno.
+
+Veamos esto mismo visualmente en un ejemplo. Utilizaremos la función `search()` para ver que paquetes están cargados en memoria.
+
+```{r ejemploPaquetes}
+# Busquemos en memoria
+search()
+
+# Carguemos en memoria una librería de paquetes y veamos que pasa
+library(ggplot2)
+search()
+
+# Carguemos un tercer paquete y veamos como ocupan su lugar en la lista
+library(caret)
+search()
+```
+
+Es inusual que tengamos la mala suerte de repetir el nombre de una función que ya existe, pero en caso de que nuestro programa arroje error, es importante saber que, aunque poco probable, es posible que hayamos repetido un nombre que otra biblioteca de algún paquete ya está utilizando.
+
