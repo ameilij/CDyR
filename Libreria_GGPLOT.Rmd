@@ -1,0 +1,385 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintBook
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# LA BIBLIOTECA GRAFICA GGPLOT
+`r tint::newthought('La biblioteca gráfica GGPLOT es un punto aparte en lo que concierne al análisis exploratorio visual en R,')` y una forma rotundamente diferente de pensar en visualizaciones desde el punto de vista gramático. Cuando pensamos en gráficas no es común pensar en la gramática del lenguaje o que una gráfica pueda tener una gramática que la sustenta. La biblioteca `GGPLOT` es justamente eso; está basada en el uso de la grámatica de los gráficos (por eso la denominación *GG* del inglés _grammar of graphics_) y la construcción de visualizaciones en capas. 
+
+Al comienzo dicha gramática de construcción no es ni aparente ni fácil de recordar. Pero no lleva mucho tiempo entender el sólido concepto de armar una gráfica en capas, algo que una vez se denomina abre el paso hacia el diseño de visualizaciones complejas y robustas. El concepto básico en si gira entorno a la idea que un gráfico tiene un juego de datos que deseamos explorar a través de una visualización, y una serie de estéticas que son independiente de los datos en si. Dicha estética se puede ir construyendo en capas (en inglés _layers_) para ir sumando a la complejidad y número de elementos de la visualización. 
+
+Anteriormente en este texto hemos tocado en la serie de gráficos básicos que el lenguaje contiene en su núcleo sin necesidad de llamar librerias externas. La diferencia entre ambas formas de trabajar es grande: los comandos internos de gráficos son perfectos para una visualización rápida, pero la biblioteca `GGPLOT` es necesaria para cualquier trabajo que requiera mayor capacidad de análisis, complejidad de elementos o diseño gráfico atractivo.
+
+## Introducción a GGPLOT
+El comando `ggplot()` es la base de la construcción del gráfico y por lo general se complementa con el uso del operador `+` para agregar elementos en forma de capas. 
+
+De forma general, `ggplot()` tiene un esqueleto de llamado que es siempre el mismo y no varía pero que realmente es muy general sino para la construcción misma de la función:
+
+`ggplot(data = NULL, mapping = aes(), ..., environment = parent.frame())`
+
+No vamos a profundizar mucho en esta sintáxis, solo vale la pena repetir que la función `ggplot()` esta profundamente basada en el uso de un juego de datos y un mapeo de los mismos en una serie de capas estéticas (o en inglés _aesthetics_). No hay necesidad de prestar atención a la parte del `environment` ya que ha sido relegada en la base del código y solo se mantiene por motivos de _backward compatibility_. 
+
+Hay tres maneras diferentes de invocar `ggplot()` La primera forma es:
+
+`ggplot(df, aes(x, y, otros elementos de la estética))`
+
+En nuestro esqueleto `df` representa los datos o el juego de datos que vamos a utilizar en el gráfico, y tiene la caracteristica de ser un juego de datos en la forma de `data frame`. Si por casualidad los datos no están en formato de _data frame_, el comando `ggplot` los convierte en _data frame_ a través de la función `fortify()`. La experiencia nos dictamina que esta transformación es transparente al usuario el 99% del tiempo, con un 1% donde `ggplot` tiene problemas transformando el juego de datos y pudiera dar error. Cómo explicabamos al principio, es mejor llegar a este punto con un juego de datos robusto y necesidades de análisis concretas, por lo que el juego de datos ya debiera estar en formato _data frame_ para evitar errores de interpretación. 
+
+Los elementos más notorios dentro de la primera capa de estéticas es el mapeo de las variables de la ordena y abscisa. Estas se pueden explicitar de forma estricta o casual, con la ventaja de que al detallar la forma explicita de las variables no quedan dudas cual es la ordenada y cual la abscisa. Otros elementos que pueden agregarse dentro de la capa de estética tienen que ver con los colores, tamaño de las líneas, etc.
+
+La segunda forma de hacer la llamada a la función tiene la siguiente sintáxis:
+
+`ggplot(df)`
+
+No es la más común, pero es útil cuando se conoce el juego de datos en forma de _data frame_ a utilizar más no la estética que continúa. Si la tarea es de exploración visual de datos, este será el punto de partida de muchos gráficos. Se iran agregando capas de estéticas a medida que el científico de datos visualice, analice y haga cambios en tiempo real. 
+
+La tercera forma de hacer el llamado a la función es:
+
+`ggplot()`
+
+Esta forma es muy general y se utiliza para invocar múltiples juegos de datos con diferentes estéticas en gráficos altamente complejos que no serán cubiertos en este libro. 
+
+Como todo en *R*, existen múltiples formas de llamar a un mismo gráfico con resultados practicamente iguales, y ya depende del gusto personal de cada analista como programar el código fuente para mejor documentar los resultados esperados. 
+
+## Gráfica de Puntos (Scatter Plot)
+Las gráficas de puntos (en inglés __scatter plot__) son muy comúnes en la Ciencia de Datos, ya que nos permiten la relación de dos variables en una serie extensa de puntos de datos. Si bien muchos paquetes gráficos pueden manejar este tipo de visualización - inclusive EXCEL puede hacerlo de forma relativamente sencilla para series pequeñas - el paquete *GGPLOT2* tiene funciones especiales para manejar grandes cantidades de puntos de datos.
+
+```{marginfigure}
+Los gráficos de puntos son especialmente útiles para visualizar tendencias en los datos, y aplicar procedimientos estadísticos como modelos de regresión lineal.
+```
+
+Tomemos como juego de datos el ejemplo de `Orange`, una base de datos con 35 observaciones de 3 variables, con las mediciones de edad y circunferencia del tronco de 5 árboles de naranja diferentes. Este juego de datos viene en la versión core de *R* y es fácil de acceder. Veamos la diferencia entre crear la visualización utilizando la biblioteca de comandos básica y la biblioteca ampliada *GGPLOT2*.
+
+```{r crearScatterPlotBasic}
+data("Orange")
+
+# Scatter Plot con biblioteca básica
+plot(Orange$age, Orange$circumference)
+```
+
+Por el momento obviaremos analizar la visualización y solamente nos concentraremos en mejorar la calidad de la misma con la biblioteca *GGPLOT2*. El mismo resultado se obtiene de la siguiente forma. 
+
+```{r crearScatterPlotGGPLOT2}
+data("Orange")
+library(ggplot2)
+
+# Scatter Plot con biblioteca GGPLOT2
+ggplot(data = Orange, aes(x = age, y = circumference)) + 
+  geom_point()
+```
+
+De forma casi inmediata podemos ver las mejoras en la diagramación y diseño típico de la biblioteca *GGPLOT2*. Los desarrolladores han invertido mucho tiempo y esfuerzo en lograr gráficas visualmente atractivas pero a la vez representativas al momento de transmitir contenido. Es cierto que la biblioteca exige una sintáxis más profunda, pero este precio es pequeño en relación a la cantidad de opciones y poder con el que cuenta el científico al momento de crear visualizaciones complejas. Analicemos en profundidad el código para entender cada uno de sus componentes. 
+
+```{marginfigure}
+La idiosincracia de R de tener dos o más formas alternas de hacer algo no escapa a la biblioteca *GGPLOT*. Hubiera sido perfectamente legal en el lenguaje haber obviado los calificadores (_tags_) para especificar fuente de datos, ordenada, abscisa, y escribir en su lugar `ggplot(Orange, aes(age, circumference)) + geom_point()`. Mientras los elementos estén correctamente asignados *GGPLOT2* entenderá que va donde. Sin embargo estresamos el uso de la función completa para facilitar la lectura del código por otro científico, alumno, o inclusive el mismo autor revisando sus fórmulas tres meses después.
+```
+
+* el conjunto de datos a utilizar se especifica en el segmento `data = Orange`. 
+* las variables que van en la ordenada y la abscisa para cada punto de datos se explican dentro de la capa de estética en el segmento `aes(x = age, y = circumference)`. Cómo se detalla la fuente de datos no hay necesidad de especificarlo con el formato completo (por ejemplo, no hay necesidad de escribir `Orange$age` como en el gráfico base).
+* la segunda capa es la que determina el tipo de datos y es el segmento `+ geom_point()` para el tipo de gráficos de puntos. Dentro del paréntesis pudiéramos extender la lista de parámetros y crear una gráfica aún más compleja y con más opciones. 
+
+Sin cambiar el juego de datos, ampliemos las opciones disponibles para crear un gráfico muy completo de la relación entre la edad del árbol de naranja y la circunferencia del mismo. Incluyamos títulos a cada eje, título al gráfico, color a los puntos, etc.
+
+```{r crearScatterPlotGGPLOT2_V2}
+data("Orange")
+library(ggplot2)
+
+# Scatter Plot con biblioteca GGPLOT2
+ggplot(data = Orange, aes(x = age, y = circumference)) + 
+  geom_point(col = "orange", size = 2) +
+  xlab("EDAD") +
+  ylab("CIRCUNFERENCIA") +
+  labs(title = ("Relación Entre Edad y Circunferencia en Naranjos"), 
+       subtitle = ("Draper, N. R. and Smith, H. (1998), Applied Regression Analysis (3rd ed), Wiley)."))
+```
+
+Hemos agregado algunos elementos, cuya lectura en fácil pero de igual manera pasamos a explicar. 
+
+* las opciones `xlab` y `ylab` son etiquetas que especifican el texto que acompaña a las ejes de la ordenada y la abscisa. El texto dentro va entre comillas. 
+* la opción `labs` indica el título y subtítulo de la gráfica. Cada uno de estos de detalla usando los parámetros `title = ` para título y `subtitle = ` para subtítulo. 
+* para darle un poco de color a la gráfica utilizamos las opciones disponibles dentro de la capa del tipo de gráfico `geom_point()` con los parámetros `col =` para el color y `size =` para el tamaño del punto. Hay una cantidad amplia de colores y combinaciones pero para propósito práctico nos limitaremos a la lista de "red", "blue", "green", "yellow" y "orange" en este texto.
+
+Dado que las visualizaciones con puntos de datos se utilizan mucho para buscar relaciones entre variables, busquemos una utilizando la comodidad del comando `geom_smooth()`. Dicho comando facilita la visualización de tendencias en los datos, sobre todo cuando la superimposición de los mismos complica la visión a simple vista. 
+
+```{r crearScatterPlotGGPLOT2_V3}
+data("Orange")
+library(ggplot2)
+
+# Scatter Plot con biblioteca GGPLOT2
+ggplot(data = Orange, aes(x = age, y = circumference)) + 
+  geom_point(col = "orange", size = 2) +
+  xlab("EDAD") +
+  ylab("CIRCUNFERENCIA") +
+  labs(title = ("Relación Entre Edad y Circunferencia en Naranjos"), 
+       subtitle = ("Draper, N. R. and Smith, H. (1998), 
+                   Applied Regression Analysis (3rd ed), Wiley).")) +
+  geom_smooth(method = "glm", formula = y ~ x)
+```
+
+Para el caso de ejemplo hemos especificado los parámetros del suavizador utilizando `method = "glm"` para solicitar una regresión lineal general, y `formula = y ~ x` para denotar la relación de variable independiente/dependiente. La función `geom_smooth()` funciona perfectamemte bien con estos dos parámetros. Pero es totalmente válido escribir `geom_smooth(method = "auto")` y dejar que la biblioteca *GGPLOT2* solucione que tipo de método y fórmula elegir. Inclusive se puede escribir solamente `geom_smooth()`. *GGPLOT2* resolverá tipo de método y fórmula y solamente se quejará de forma elegante en la consola que ambos faltaban.
+
+* Existen varios métodos a utilizar para buscar la tendencia. Si son menos de 1,000 puntos de datos y no se especifica, *GGPLOT2* utilizará _Loess_. Para series mayores a 1,000 puntos de datos y por necesidades de uso de memoria procederá a utilizar _GAM_. Obviamente si son menos de 1,000 puntos de datos pero el científico quiere utilizar _GAM_ solo lo debe especificar como `geom_smooth(method = "gam")`. 
+* Otros métodos incluyen `geom_smooth(method = "lm")` para regresión lineal, `geom_smooth(method = "glm")` para modelos lineales generalizados, y `geom_smooth(method = "MASS::rlm")` para modelos lineales robustos. 
+* La fórmula que utilizams es la correspondiente al suavizador que esperamos, en nuestro caso `formula = y ~ x`, pero pudiera ser igualemente `y ~ x`, `y ~ poly(x, 2)` o `y ~ log(x)`. En caso de no estar seguro es mejor dejar que *GGPLOT2* la busque automáticamente. 
+* La zona gris alrededor de la linea de tendencia azul correponde al intervalo de confidencia del suavizador. En caso de no querer que se imprima, se puede obviar incorporando el parámetro `se = FALSE`. El estándar del intervalo de confidencia es 95%.
+
+## Gráficos de Barra
+Existen dos tipos de gráficos de barra en *GGPLOT2*, lo que a veces se presta para bastante confusión. 
+
+1. El primero es `geom_col()` y se utiliza cuando una serie de datos contienen toda la información necesaria para graficar el mismo. Por ejemplo, tenemos los datos del producto bruto interno para los años 1947 a 1962 en 16 observaciones. No hay necesidad de hacer más nada que visualizar los mismos. 
+2. El segundo es `geom_bar()` y se utiliza cuando hay que contar la cantidad de casos para cada clasificador dentro de un juego de datos. Dentro de la Ciencia de Datos este es el uso más comun de `geom_bar()`.
+
+La literatura de la biblioteca *GGPLOT2* prefiere explicar que `geom_bar` crea barras cuya altura es proporcional al número de ocurrencias dentro de ese grupo específico, mientras que `geom_col()` es preferible si lo que se desea es el valor de los datos solamente. 
+
+Los ejemplos son perfectos en este caso para determinar cuál de los dos utilizar en cada caso. Para el primer uso veamos el juego de datos macroeconómico de Longley, que recopila datos de la economía de Estados Unidos desde 1947 a 1962 ya sumarizados. Si queremos ver un gráfico de barras del producto bruto nacional (o GNP en inglés), y dado que los resultados están sumarizados y no hay que hacer más cálculos, utilizaremos `geom_bar()`. 
+
+```{r ejemploGeom_Col}
+data("longley")
+library(ggplot2)
+
+ggplot(data = longley, aes(x = Year, y = GNP)) + 
+  geom_col(fill = "red") +
+  labs(title = "Juego de Datos Macroeconómico de Longley",
+       subtitle = "GNP 1947-1962") +
+  xlab("AÑO") + 
+  ylab("GNP")
+
+```
+
+Para la mayoría de los cuadros de negocios una visualización de barras que cuente ocurrencias no es algo común, pero en la ciencia la recopilación de poblaciones si lo es. Veamos un ejemplo hipotético con datos de lecturas de basura (en kilogramos) medidas en diferentes zonas de playa en la República de Panamá. Por ahora no nos interesa tanto las mediciones de la basura sino el número de lectura por zona para verificar que la muestra es utilizable.  
+
+```{r ejemploGeom_Bar}
+library(ggplot2)
+
+# Crear un data.frame con lectura de basura recogida
+# en diferentes zonas de playa
+zonas <- c(1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,2,2,3,3)
+basura <- c(2.1,1.1,3.1,1,2.5,1,2,2.7,1.5,1.5,2.5,3,0.7,
+            1.2,5.6,0.5,0.6,8.0,1.6,4.3)
+datos_medicion <- data.frame(zonas,basura)
+
+ggplot(data = datos_medicion, aes(zonas)) + 
+  geom_bar(fill = "burlywood3") +
+  labs(title = "Estudio Contaminación Playas Panamá",
+       subtitle = "Número de Muestras por Zona") +
+  xlab("Zona") + 
+  ylab("Número Muestras")
+
+```
+
+Podemos modificar ligeramente este ejemplo y medir el pesode cada zona en vez del número concreto de lecturas al especificar el parámetro dentro de la estética de la forma `aes(weight = zonas)`.
+
+```{r ejemploGeom_Bar_V2}
+library(ggplot2)
+
+# Crear un data.frame con lectura de basura recogida
+# en diferentes zonas de playa
+zonas <- c(1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,2,2,3,3)
+basura <- c(2.1,1.1,3.1,1,2.5,1,2,2.7,1.5,1.5,2.5,3,0.7,
+            1.2,5.6,0.5,0.6,8.0,1.6,4.3)
+datos_medicion <- data.frame(zonas,basura)
+
+ggplot(data = datos_medicion, aes(zonas)) + 
+  geom_bar(aes(weight = basura), fill = "darkseagreen") +
+  labs(title = "Estudio Contaminación Playas Panamá",
+       subtitle = "Peso Basura por Zona (KGS.)") +
+  xlab("Zona") + 
+  ylab("Número Muestras")
+
+```
+
+Este cuadro también se hubiera podido generar utilizando el comando `geom_col()` de la sigiuente manera:
+
+```{r ejemploGeom_Col_V2}
+
+ggplot(data = datos_medicion, aes(x = zonas, y = basura)) + 
+  geom_col(fill = "deepskyblue2") +
+  labs(title = "Estudio Contaminación Playas Panamá",
+       subtitle = "Peso Basura por Zona (KGS.)") +
+  xlab("zona") + 
+  ylab("kgs. basura")
+```
+
+Cualquiera de las dos formas es correcta y en un futuro preveemos que las dos funciones se fusionen en una sola. 
+
+## Diagramas de Caja (Boxplots)
+También conocidos como *diagrama de caja y bigote* (y en inglés box plot, box-plot o boxplot), los diagarmas de caja son muy utilizados en la Ciencia de Datos, sobre todo en la bioestadística. Es un método estandarizado para representar gráficamente una serie de datos numéricos a través de sus cuartiles. De esta manera, el diagrama de caja muestra a simple vista la mediana y los cuartiles de los datos1, pudiendo también representar los valores atípicos de estos (conocidos en inglés como _outliers_). 
+
+En estos casos queremos comparar multiples (dos o más) clases de un juego de datos de una misma población y ver como se comparan la mediana y cuartiles de cada variable, al igual que cualquier punto de dato que resulte ser atípico (_outlier_). Para tal fin las variables deben ser continuas para los valores de *y* y factores o variables discretas para los valores de *x*. 
+
+El primer ejemplo lo tomaremos del juego de datos `mpg`, que reune todo tipo de clase de vehículos y su rendimiento en millas por hora. De tal forma podemos comparar la muestra dividida en variables (tipos de vehículos como sedan o camioneta) y como se distribuye el rendimiento de cada clase.
+
+```{r ejemploGeom_Boxplot_V1}
+data(mpg)
+library(ggplot2)
+
+p <- ggplot(mpg, aes(class, hwy))
+p + geom_boxplot(col = "bisque3", fill = "antiquewhite")
+
+```
+
+Un boxplot describe de forma compacta la distribución de una variable continua. La estructura de cada caja y bigote resumen de forma visual información estadística de cada variable. 
+
+* La linea gruesa en el medio de cada caja representa la mediana
+* Los bordes inferiory superior de la caja principal corresponden al primer y tercer cuartil (o sea los percentiles 25avo y 75avo).
+* Los bigotes se extienden desde el borden del cuartil hasta una medida equivalente a 1.5 del IQR (siendo el IQR el rango intercuartil).
+* Los puntos extremos o _outliers_ se grafican por si mismos.
+
+Es posible, aunque algo contraproducente en la visualización, sobreponer los puntos de datos por encima de las cajas y bigotes para un análisis más profundo. En este caso podemos utilizar la función `geom_jitter()`que es muy similar a `geom_point()` pero permitir ajustar el nivel de opacidad (denominado _alpha_) para poder sobreponer gran cantidad de puntos y mantener una noción de los niveles de densidad dentro de la muestra.  
+
+```{r ejemploGeom_Boxplot_V2}
+data(mpg)
+library(ggplot2)
+
+p <- ggplot(mpg, aes(class, hwy))
+p + geom_boxplot(col = "cornflowerblue", fill = "aliceblue") + 
+  geom_jitter(alpha = 1/5, width = 0.2)
+
+```
+
+Nuestros datos del estudio de contaminación de playas en Panamá sirven perfectamente para ilustrar el poder de estas visualizaciones al momento de comparar variables de muestras. Lo único que debemos tener en mente en este juego de datos es que la variable de zonas está codificada como un entero, y no una variable discreta. Si ejecutaramos el código que hemos visto hasta ahora tendríamos un error en el gráfico en vez del análisis esperado. La solución es agrupar como clases la variable continua de zonas para que *GGPLOT2* la utilice como una variable discreta.
+
+```{r ejemploBoxPlot_V3}
+library(ggplot2)
+
+# Crear un data.frame con lectura de basura recogida
+# en diferentes zonas de playa
+zonas <- c(1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,2,2,3,3)
+basura <- c(2.1,1.1,3.1,1,2.5,1,2,2.7,1.5,1.5,2.5,3,0.7,
+            1.2,5.6,0.5,0.6,8.0,1.6,4.3)
+datos_medicion <- data.frame(zonas,basura)
+
+ggplot(data = datos_medicion, aes(zonas, basura)) + 
+  geom_boxplot(aes(group = zonas), col = "bisque3", fill = "antiquewhite") +
+  labs(title = "Estudio de Contaminación Playas Panamá", 
+       subtitle = "Análsis Comparativo Distribución Contaminación por Zonas") +
+  xlab("Zonas") +
+  ylab("Basura KGS.")
+```
+
+Para que el gráfico funcione como esperado, solo tuvimos que agregar la estética de agrupar dentro de la función `geom_boxplot` para que se lea `geom_boxplot(aes(group = zonas), ...`. Este parámetro adicional determina que el gráfico de cajas debe agrupar por la variable zonas aunque esta sea continua. 
+
+## Gráficos de Línea
+Los gráficos de línea se utilizan en las ciencias sociales y económicas para ver la variación de una o más variables en el tiempo. Es una función con la cual se puede obtener mucho con poco código. Revisemos su uso con el juego de datos de la economía de USA que viene incorporado con la biblioteca *GGPLOT2*. 
+
+```{r ejemploGeom_Line_V1}
+library(ggplot2)
+data(economics)
+ggplot(economics, aes(date, unemploy)) + 
+  geom_line(col = "red") +
+  labs(title = "Datos Economía USA", 
+       subtitle = "Niveles de Desempleo 1967 - 2015") +
+  ylab("Desempleo") +
+  xlab("Años")
+
+```
+
+No hay ninguna razón para que las variables que se pasan como parámetros del gráfico no se les modifique de manera matemática. Por ejemplo, veamos el nivel de desempleo como razón relativa a la población de ese año para normalizar la variable. 
+
+```{r ejemploGeom_Line_V2}
+library(ggplot2)
+data(economics)
+ggplot(economics, aes(date, unemploy / pop)) + 
+  geom_line(col = "cornflowerblue") +
+  labs(title = "Datos Economía USA", 
+       subtitle = "Niveles de Desempleo Normalizado 1967 - 2015") +
+  ylab("Desempleo %") +
+  xlab("Años")
+
+```
+
+Habremos de notar que en esta segunda gráfica el desempleo alrededor de los años 1980 era tan alto como el desempleo en los años 2010, pero esto no se nota en la primera visualización. 
+
+¿Cómo podemos graficar múltiples variables dentro de un mismo gráfico de líneas? Inicialmente, la información debe estar disponible de manera que cada punto de observación tenga un valor continuo a gráfica y una variable categórica y discreta que lo clasifique dentro de un grupo específico. Estos formatos se conocen como _long_ en inglés. El juego de datos `economics` que vimos en el ejemplo anterior no cumple con este requisito.
+
+```{r viewEconomics}
+# Primeras lineas del juego economics
+data("economics")
+head(economics)
+
+```
+
+Al revisar las lineas del juego de datos, vemos que cada una contiene una fecha de registro y mediciones sobre los diferentes indicadores económicos que fungen como columnas. Pero no podemos deducir de una línea cualquiera una medición en base a una variable de clasificación. Este tipo de formato largo lo podemos ver mejor en el juego de datos adaptado `economics_long`.
+
+```{r viewEconomics_long}
+# Primeras lineas del juego economics LONG
+data("economics_long")
+head(economics_long)
+
+```
+
+Para cada linea de observación existe una fecha, una variable que identifica que indicador económico se está midiendo, y un valor asociado. De esta forma en formato largo, si podemos visualizar múltiples lineas sobre el gráfico. 
+
+```{r ejemploGeom_Line_V3}
+library(ggplot2)
+data("economics_long")
+
+ggplot(economics_long, aes(date, value01, colour = variable)) +
+  geom_line() + 
+  labs(title = "Datos Economía USA", 
+       subtitle = "Indicadores Múltiples 1967 - 2015") +
+  ylab("Indicador %") +
+  xlab("Años")
+
+```
+
+Para modificar un juego de datos y transformarlo en formato _long_, referirse al capítulo de transformaciones en la página XX.
+
+## Histogramas
+La función de un histograma es visualizar la distribución de una variable continua única dividiendo el eje equis en rangos y contando las cantidad de ocurrencias que ocurren dentro de cada uno. Los histogramas grafican la cuenta con barras. Los polígonos de frecuencia hacen lo mismo pero con lineas. El uso de los histogramas es muy recurrente en la estadistica, y la biblioteca *GGPLOT* tiene funciones muy potentes que permiten estudios visuales avanzados con muy poco código. 
+
+Utilicemos el juego de datos de diamantes de *R* para crear un histograma de la cuenta de diamantes que se han vendido por rangos de precio.
+
+```{r ejemploGeom_Histogram_V1}
+library(ggplot2)
+data("diamonds")
+
+ggplot(data = diamonds, aes(price)) + 
+  geom_histogram(binwidth = 500) + 
+  labs(title = "Análisis Diamantes",
+       subtitle = "Histograma Valor de Piedras") +
+  xlab("Precio en USD") +
+  ylab("Cuenta")
+
+```
+
+Es conveniente explicar algunos de los puntos principales del uso de este tipo de gráfico.
+
+* Cómo todo gráfico de la biblioteca *GGPLOT2*, comienza con el mismo cuerpo detallando la fuente de datos y la estética de las variables. Solamente se ha incluido una, en la línea `data = diamonds, aes(price))...` ya que el propósito de un histograma es justamente contar ocurrencias dentro de una clasificación específica. 
+
+* El ajuste del rango a 500 dólares es una medida tomada al azar. El analista puede decidir que tan grande o pequeño se hace el rango ajustando el parámetro en `geom_histogram(binwidth = VALOR_ESPECIFICADO)`. Aquí se debe tener cuidado, ya que un rango muy grande puede ocultar rasgos importantes de la distribución de las observaciones. La regla por valor default de *R* es utilizar como amplitud de rango el número de observaciones dividido 30. 
+
+A primera vista la distribución de diamantes tiene una tendencia muy sesgada hacia la izquierda, lo que tiene sentido porque estimamos que se venden muchos diamantes más económicos y muchos menos de los más caros. Ahora bien, el juego de datos no solo tiene el valor de los diamantes, sino la clasificación de los mismos según su claridad. Pudiera ser muy conveniente revisar la gráfica con dos variables de definición, aunque de por sí los histogramas se analizan en función de la cuenta y distribución de una sola variable. El código necesario no es mucho más complejo del que tenemos hasta ahora. 
+
+```{r ejemploGeom_Histogram_V2}
+library(ggplot2)
+data("diamonds")
+
+ggplot(data = diamonds, aes(price, fill = cut)) + 
+  geom_histogram(binwidth = 500) + 
+  labs(title = "Análisis Diamantes",
+       subtitle = "Histograma Valor de Piedras") +
+  xlab("Precio en USD") +
+  ylab("Cuenta")
+
+```
+
+Con solo modificar el parametro de `fill` de la línea `ggplot(data = diamonds, aes(price, fill = cut))` para que el relleno de color de cada barra sea equivalente al tipo de corte, *GGPLOT2* nos retorna una gráfica muy completa para un análisis visual detallado. 
+
+
+
+
+
+
+
