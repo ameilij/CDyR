@@ -3,7 +3,7 @@ title: "Ciencia de Datos y R"
 subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
-output: tint::tintHtml
+output: tint::tintBook
 link-citations: yes
 ---
 
