@@ -165,3 +165,50 @@ barplot(ventas, main = "Ventas 2010 al 2015",
  
 En el mejor de los casos, no vamos a querer agregar cosas a mano, sino que vamos a buscar que R nos dé las etiquetas de forma dinámica agrupando de alguna manera los datos. Esto se puede hacer con una matriz o estructura similar de datos con más de una dimensión. 
 
+## Mapas de Calor (Heatmaps)
+Un mapa de calor es una representación gráfica de un juego de datos donde los valores individuales contenidos en una matriz se representan con distintas tonalidades de color. Muchas veces el uso de mapas de colores se ha exagerado, pero en juegos más o menos grandes de datos pueden tener mayor sentido al visualizar campos opuestos de valores para el análisis explorativo. La idea de los cambios en la paleta de color es reflejar la variación de valores dentro de una muestra o población. El lenguaje **R** hace muy fácil la creación de mapas de calor utilizando el paquete base de gráficos. La única condición es que el juego de datos sea una matriz o haya sido coercionado a forma de matriz:
+
+```heatmap(data)```
+
+Se necesita muy poco para crear gráficos complejos.
+
+```{r ejemploMapaCalor_1}
+# Convertir datos en forma de matriz
+data <- as.matrix(mtcars)
+heatmap(data)
+
+```
+
+```{marginfigure}
+Un dendograma es una representación gráfica en forma de árbol que resume el proceso de agrupación en un análisis de clusters. Los objetos similares se conectan mediante enlaces cuya posición en el diagrama está determinada por el nivel de similitud/disimilitud entre los objetos.
+```
+
+Por valor de omisión, *R* grafica todos los mapas de colores con dendogramas, lo que puede ser positivo o no para el científico según lo que se quiera analizar. Los valores del dendograma se puede controlar a través de los parámetros `Colv` y `Rowv`. Por omisión ambos están activados, pero se pueden cancelar cualquiera de los dos (o ambos a la vez) de la siguiente manera:
+
+```{r ejemploMapaCalor_2}
+data <- as.matrix(mtcars)
+heatmap(data, Colv = NA, Rowv = NA)
+
+```
+
+Un efecto secundario de utilizar `Colv = NA` y/o `Rowv = NA` es la forma que *R* ordena las variables en el mapa de calor. El orden de los vehículos de `mtcars` es uno cuando se lista y otro en la gráfica. De hecho, la función `heatmap()` reordena los valores cuando produce el dendograma. Al fijar el valor de omisión por el de `NA` la gráfica utiliza el orden natural del juego de datos. 
+
+Del mapa de calor podemos detectar que hay demasiada similitud entre varias de las variables columna (nos referimos a `cyl`, `am`, etc.) ocasionando un campo de sólido color rojo que poco ayuda al análisis visual. Para evitar este efecto y conseguir transiciones con mayor contraste, es preferible normalizar la matriz. Esto se logra simplemente estableciendo los valores de las columnas o líneas como escala para normalizar. 
+
+```{r ejemploMapaCalor_3}
+data <- as.matrix(mtcars)
+heatmap(data, Colv = NA, Rowv = NA, scale = "column")
+
+```
+
+La utilización de etiquetas se hace a través de los parámetros `main`, `xlab` y `ylab`.
+
+* `main` es el título de la gráfica
+* `xlab` corresponde a la etiqueta de columnas
+* `ylab` corresponde a la etiqueta de las líneas horizontales de la matriz
+
+```{r ejemploMapaCalor_Final}
+data <- as.matrix(mtcars)
+heatmap(data, Colv = NA, Rowv = NA, scale = "column", xlab = "variables", ylab = "datos")
+```
+
