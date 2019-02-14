@@ -1,0 +1,151 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+# Un Universo Limpio
+`r tint::newthought('El concepto de Tidy Verse es la creación de Hadley Wickham')` y gira entorno a la idea de una colección de paquetes de *R* altamente opinionados. Todos los paquetes giran entorno a una filosofìa de diseño, gramática y estructuras de datos. Podemos instalar el paquete `tidyverse` de la siguiente manera. 
+
+```install.packages("tidyverse")```
+
+Al ser una colección de paquetes, hay algunos que se han tratado en este texto de forma separada, como la biblioteca de gráficos *GGPLOT2*. La colección total incluye los paquetes:
+
+* `ggplot2`, para gráficos avanzados.
+* `dplyr`, para transformar y resumir contenidos de _data frames_.
+* `tidyr`, para transformar (o mejor dicho limpiar) la estructura de datos de un _data frame_
+* `purrr`, un paquete relativamente nuevo que le agrega mayor funcionalidad de programación al lenguaje *R*
+* `tibble`, una nueva forma mejorada de _data frame_.
+
+Hemos de concentrarnos en esta introducción al concepto de datos limpios (del inglés _tidy data_) más que en el universo completo. Al hablar de datos limpios hablamos de un juego de datos que cumple las siguientes condiciones. 
+
+1. Cada variable forma una columna
+2. Cada observación de datos conforma una línea
+3. Cada tabla de datos, juego de datos o archivo de datos contiene datos de un tipo de observación
+
+En un mundo moderno y más o menos organizado, muchos datos cumplirán con estos requisitos. Empero, es probable que el investigador se encuentre con juegos de datos más antiguos que no los cumple (por ejemplo, una antigua base de datos utilizada por un banco cuyos programas se diseñaron en COBOL) o un híbrido de datos más o menos moderno que los cumple a medias (de esto último las hojas de cambio son un buen ejemplo). 
+
+## Transformado (Derritiendo) un Data Frame 
+Es difícil explicar el concepto de derretir un _data frame_ utilizando la función `melt()` sin antes explicar bien por qué uno quisiera llegar a tal punto. En la vida real del investigador la necesidad de convertir un formato de datos en otro, simplemente para facilitar la exploración, hace que valga la pena el trabajo que esto implica. El científico de datos usualmente invierte el 70% de su tiempo en convertir, limpiar y validar un juego de datos, por lo que saber transformar los mismos de forma programática es una herramienta importante en el arsenal de la Ciencia de Datos.
+
+Para entender el tema de manera más práctica, tomemos el ejemplo del juego de datos `mtcars`.
+
+```{r}
+data(mtcars)
+head(mtcars)
+```
+
+En el juego de datos original, cada línea corresponde a un modelo de carro y múltiples columnas de variables contienen una pluralidad de valores. Esto no cumple con los requisitos del modelo de data limpia del _tidyverse_ pero por ahora vamos a simplificar estos y crear un juego de datos que cumpla con otros diferentes: 
+
+* el juego de datos original debe ser `mtcars`
+* deben haber columnas identificadoras para las variables de `carname`, `gear` y `cyl`
+* las variables que queremos medir serán `mpg` y `hp`
+
+Si bien no es la única, la mejor forma de conseguir esto es con el comando `melt()` para _derretir_ el _data frame_ actual en uno de nuevas dimensiones. El uso de la función es:
+
+`melt(datos_originales, id = c("n1", ..., "nX"), measure.vars = c("var1", ..., "varN"))`
+
+donde:
+
+* `datos_originales` es el juego de datos original del cual queremos extraer las observaciones
+* `id = c("n1", ..., "nX")` es un arreglo de nombre de columnas del juego de datos original que se trasladará como identificadores al nuevo juego de datos derretido
+* `measure.vars = c("var1", ..., "varN")` en un arreglo de nombre de columnas del juego de datos original que será derretido en variables de medición, un valor por observación, en el nuevo juego de datos
+
+La función `melt()` no se encuentra en el paquete base de *R*, sino que hay que invocarla desde el paquete `reshape2`. Si aplicamos toda la teoría al caso mencionado arriba, el código queda de la siguiente forma. 
+
+```{r ejemploMelt}
+library(reshape2)
+data("mtcars")
+
+# ¡los identificadores de mtcars no son variables!
+# en realidad son los nombres de líneas (rownames)
+# hay que extraerlos y guardarlos en el data frame
+mtcars$nombres <- rownames(mtcars)
+
+# ahora si podemos derretir el juego de datos
+carros_derretido <- melt(mtcars, id = c("nombres", "gear", "cyl"),
+                         measure.vars = c("mpg", "hp"))
+
+head(carros_derretido, n = 5)
+tail(carros_derretido, n = 5)
+```
+
+Hemos listado las primeras cinco líneas y las últimas cinco para entender como varía el valor de variable de `mpg` a `hp` y como la columna `value` siempre lleva el valor correspondiente. 
+
+## El Paquete DPLYR
+```{marginfigure}
+El paquete DPLYR fue diseñado por Hadley Wickham para utilizar dentro del entorno de programación RStudio. En realidad DPLYR es el esfuerzo y optimización de un paquete anterior llamado PLYR. Aunque no agrega funcionalidad nueva provee una buena dosis de simplificación al uso de las funciones, además de una grmática común para la manipulación de data.
+```
+
+El paquete `dplyr` es una gramática de manipulación de datos que provee un juego de verbos consistentes para administrar las tareas más comunes - y por lo general más desafiantes - de la manipulación de datos.
+
+Hay cinco verbos principales que forman parte del paquete:
+
+| *FUNCION*    | *DESCRIPCION*                                               |
+|--------------|-------------------------------------------------------------|
+| select()     | selecciona variables basadas en su nombre                   |
+| filter()     | filtra casos basados en un valor                            |
+| arrange()    | modifica el orden de las líneas                             |
+| mutate()     | agrega nuevas variables que son funciones de las existentes |
+| summarize()  | reduce el número de valores múltiples a uno resumido        |
+
+Todos estos verbos se combinan de manera natural con el argumento `group_by()` que permite ejecutar la operación sobre un juego agrupado de datos. Sin embargo el uso de `dplyr` está sujeto a ciertas propiedades:
+
+* el primer argumento siempre debe ser un _data frame_
+* los nombres de las variables debe ir sin el identificador de variable *$*
+* el resultado de la operación siempre será un nuevo _data frame_
+
+```{marginfigure}
+Aquellos lectores que provengan de ambientes Unix o Linux reconoceran el uso de canales con el caracter `|`
+```
+
+### Utilizando Flujos de Comandos
+El uso de la biblioteca `dplyr` conlleva el uso de flujos de comandos. Los flujos de comandos no son sino notaciones del lenguaje que permite concatenar una serie de comandos de programación de forma ordenada y sucinta sin tener que repetir tanto código. Esto se hace canalizando los mismos a traves del uso del carácter de canal, que en *R* es la cadena `%>%`. Hay cuatro razones importantes para utilizar canales de flujo de comandos:
+
+1. Facilita la estructura del flujo del código de izquierda a derecha, en vez de adentro hacia afuera
+2. Ayuda a eliminar llamadas a funciones anidadas
+3. Facilita agregar pasos al proceso en cualquier punto del código
+4. Minimiza el uso de variables locales y definición de funciones
+
+En su concepción más básica, cualquier función que toma un argumento del tipo `función(argumento)` puede ser escrito en *R* como `argumento %>% función()`. O dicho aún en palabras más simples:
+
+`f(x) = x %>% f()`
+
+De la misma forma
+
+`f(x, y) = x %>% f(y)`
+
+De tal manera, podemos escribir un programa en *R* donde los valores de cada línea se van pasando de una a la siguiente siguiendo un flujo designado por el canal. El intérprete del lenguaje procederá a procesar cada línea y pasar el valor de los resultados a través del flujo, siempre y cuando exista un marcador del canal (el `%>%`) que le indique que sigue algo más por hacer en la siguiente línea. 
+
+Pensemos en un proceso matemático cualquiera, en el cual hay que seguir varios pasos. Por ejemplo, utilizaremos el juego de datos `cars` que contiene la distancia y velocidad de freno de múltiples observaciones de carros, y graficaremos todas aquellas instancias en las cuales la velocidad superó las 15 millas por hora. 
+
+```{r fig-margin, fig.margin = TRUE, fig.cap = "RELACION DIST vs SPEED", fig.width=3.5, fig.height=3.5, cache=TRUE}
+# Juego de datos de distancia y velocidad de freno
+data(cars)
+
+# seleccionar todas las instancias con velocidad mayor a 15
+cars_nuevo <- cars[cars$speed > 15, ]
+
+# transformar a data frame
+cars_nuevo <- as.data.frame(cars_nuevo)
+
+plot(cars_nuevo)
+
+```
+
+
+Sigamos el siguiente ejemplo que utiliza un flujo de canal para reducir la complejidad del código:
+
+```{r fig-margin2, fig.margin = TRUE, fig.cap = "RELACION DIST vs SPEED", fig.width=3.5, fig.height=3.5, cache=TRUE}
+library(dplyr)
+library(ggplot2)
+cars_nuevo <- cars[cars$speed > 15, ] %>%
+  as.data.frame() %>%
+  plot()
+  
+```
+
