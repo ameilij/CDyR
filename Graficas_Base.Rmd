@@ -3,7 +3,7 @@ title: "Ciencia de Datos y R"
 subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
-output: tint::tintBook
+output: tint::tintHtml
 link-citations: yes
 ---
 
@@ -164,6 +164,41 @@ barplot(ventas, main = "Ventas 2010 al 2015",
 ```
  
 En el mejor de los casos, no vamos a querer agregar cosas a mano, sino que vamos a buscar que R nos dé las etiquetas de forma dinámica agrupando de alguna manera los datos. Esto se puede hacer con una matriz o estructura similar de datos con más de una dimensión. 
+
+## Diagramas de Caja (Boxplots)
+También conocidos como *diagrama de caja y bigote* (y en inglés box plot, box-plot o boxplot), los diagramas de caja son muy utilizados en la Ciencia de Datos, sobre todo en la bioestadística. Es un método estandarizado para representar gráficamente una serie de datos numéricos a través de sus cuartiles. De esta manera, el diagrama de caja muestra a simple vista la mediana y los cuartiles de los datos, pudiendo también representar los valores atípicos de estos (conocidos en inglés como _outliers_). 
+
+En estos casos queremos comparar multiples (dos o más) clases de un juego de datos de una misma población y ver como se comparan la mediana y cuartiles de cada variable, al igual que cualquier punto de dato que resulte ser atípico (_outlier_). Para tal fin las variables deben ser continuas para los valores de *y* y factores o variables discretas para los valores de *x*. 
+
+Una forma perfecta de entender el concepto de diagramas de caja es el juego de datos `chickwts`, que acumula diferentes valores de peso de diferentes pollos según el tipo de alimento (caseína, soya, girasol, etc.) Tenemos dos formas de invocar el diagrama, dependiendo de si queremos analizar una variable en particular o una variable segmentada por algún otro atributo. Para el primer caso la forma de llamar a la gráfica es la siguiente:
+
+`boxplot(datos)`
+
+donde `datos` es el juego de datos. Si tomamos el juego de datos de alimento de pollos podemos querer ver la variación de peso de todas las observaciones - sin importar el tipo de alimento - de la siguiente forma.
+
+```{r ejemploBoxplotBasico1}
+data("chickwts")
+boxplot(chickwts)
+```
+
+Hemos de notas que este juego de datos consta de dos variables, los pesos de los pollos (la variable _weight_)y el tipo de alimento (la variable _feed_). Como la variable de alimento no es númerica sino del tipo nominal, *R* no pudo generar dispersión alguna, y hubiera sido mejor aislarla de la siguiente forma. 
+
+```{r ejemploBoxplotBasico2}
+data("chickwts")
+boxplot(chickwts$weight)
+```
+
+La segunda forma de invocar el diagrama nos permite ver la variación de pesos de las observaciones de cada pollo, disgregadas por tipo de alimentación. Este ejemplo es mucho más interesante y la forma de invocarlo es de la siguiente forma.
+
+`boxplot(variable_dispersión ~ variable_agrupación, datos)`
+
+donde `variable_dispersión` es la variable que queremos ver la variación de las observaciones, `variable_agrupación` es la variable por la cual queremos agrupar, y `datos` es la fuente de datos. El códgo completo no es mucho más complejo pero sin embargo nos permite hacer un análisis visual completo comparando variaciones en los pesos de los pollos según el tipo de alimentación. 
+
+```{r ejemploBoxplotBasico3}
+data("chickwts")
+boxplot(weight ~ feed, chickwts, main = "ANALISIS COMPARATIVO ALIMENTO DE POLLOS")
+```
+
 
 ## Mapas de Calor (Heatmaps)
 Un mapa de calor es una representación gráfica de un juego de datos donde los valores individuales contenidos en una matriz se representan con distintas tonalidades de color. Muchas veces el uso de mapas de colores se ha exagerado, pero en juegos más o menos grandes de datos pueden tener mayor sentido al visualizar campos opuestos de valores para el análisis explorativo. La idea de los cambios en la paleta de color es reflejar la variación de valores dentro de una muestra o población. El lenguaje **R** hace muy fácil la creación de mapas de calor utilizando el paquete base de gráficos. La única condición es que el juego de datos sea una matriz o haya sido coercionado a forma de matriz:
