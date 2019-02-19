@@ -1,11 +1,11 @@
 ---
 title: "Ciencia de Datos y R"
-subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
 output: tint::tintHtml
-bibliography: skeleton.bib
 link-citations: yes
+subtitle: Introducción a la Ciencia de Datos con Lenguaje R
+bibliography: skeleton.bib
 ---
 
 # Un Universo Limpio
@@ -123,7 +123,7 @@ De tal manera, podemos escribir un programa en *R* donde los valores de cada lí
 
 Pensemos en un proceso matemático cualquiera, en el cual hay que seguir varios pasos. Por ejemplo, utilizaremos el juego de datos `cars` que contiene la distancia y velocidad de freno de múltiples observaciones de carros, y graficaremos todas aquellas instancias en las cuales la velocidad superó las 15 millas por hora. 
 
-```{r fig-margin, fig.margin = TRUE, fig.cap = "RELACION DIST vs SPEED", fig.width=3.5, fig.height=3.5, cache=TRUE}
+```{r ejemploFC_0, fig.width=6, fig.height=6, cache=TRUE}
 # Juego de datos de distancia y velocidad de freno
 data(cars)
 
@@ -140,7 +140,7 @@ plot(cars_nuevo)
 
 Sigamos el siguiente ejemplo que utiliza un flujo de canal para reducir la complejidad del código:
 
-```{r fig-margin2, fig.margin = TRUE, fig.cap = "RELACION DIST vs SPEED", fig.width=3.5, fig.height=3.5, cache=TRUE}
+```{r ejemploFC_1, fig.width=6, fig.height=6, cache=TRUE}
 library(dplyr)
 library(ggplot2)
 cars_nuevo <- cars[cars$speed > 15, ] %>%
@@ -149,3 +149,106 @@ cars_nuevo <- cars[cars$speed > 15, ] %>%
   
 ```
 
+### El Verbo SELECT
+El verbo `select()` nos permite seleccionar una o más variable para retornar de un juego de datos original. Por lo general la intención es generar un juego de datos más pequeño y compacto con solo las variables que le interesan al científico de datos, y no todo el juego original. La forma de invocarlo es:
+
+`select(datos, columna_1, ..., columna_N)`
+
+donde `datos` es el juego de datos original, `columna_1` es la primera (y quizás la única) columna que debemos retornar, y así hasta `columna_N` de existir más de una. Para poder utilizar ejemplos del verbo, utilizaremos el juego de datos `iris`. Este juego reune medidas de sépalos y pétalos de 50 flores de tres especies diferentes de flor de iris. Supongamos que solo nos interesa analizar el ancho de los sépalos de cada flor, pero también queremos retener la especie. 
+
+```{r ejemploSELECT_1}
+library(dplyr)
+data(iris)
+iris %>% select(Sepal.Width, Species) %>%
+  head()
+```
+
+Podemos utilizar la notación `comienzo:final` de *R* para seleccionar un rango de variables.
+
+```{r ejemploSELECT_2}
+library(dplyr)
+data(iris)
+iris %>% select(Sepal.Length:Petal.Length, Species) %>%
+  head()
+```
+
+Inclusive podemos utilizar el signo menos para excluir columnas del juego de datos si es más cómodo que incluirlas. Para que el código corra correctamente encerrar el rango en una colección con la función `c()`.
+
+```{r ejemploSELECT_3}
+library(dplyr)
+data(iris)
+iris %>% select(-c(Sepal.Length:Petal.Length)) %>%
+  head()
+```
+
+### El Verbo FILTER
+El verbo `filter()` permite filtrar juegos de datos para crear subconjuntos de datos. La diferencia grande entre `select()` y `filter()` es que mientras el primero selecciona todas las observaciones (filas) de las columnas especificadas en los parametros asignados, el segundo filtra todas las observaciones (filas) que cumplen con las condiciones de filtro asignadas a cada variable categórica (columnas). El modelo típico de la función es:
+
+`filter(datos, condición_1, ..., condición_n)`
+
+donde:
+
+* `datos` es el juego de datos
+* `condicion_1` es la primera condición para filtrar
+* `condicion_n` es la enésima condición para filtrar; pueden haber tantas condiciones como sean necesarias para el análisis, aunque demasiadas condiciones pueden enredar el código fuente si en algún momento un colega decide revisarlo (o en tal caso, uno mismo como científico meses después).
+
+Retomemos los ejemplos con el juego `iris` y veamos como se aplican las condiciones de filtro. 
+
+```{r ejemploVerboFILTER}
+library(dplyr)
+data(iris)
+
+# un ejemplo de filtro sencillo
+iris %>% filter(Species == "setosa") %>%
+  head()
+```
+
+Por supuesto, podemos tener filtros compuestos con ejemplos más complicados.
+
+```{r ejemploVerboFILTER_2}
+library(dplyr)
+data(iris)
+
+# un ejemplo de filtro compuesto
+iris %>% filter(Species == "versicolor", Sepal.Length < 5.0) %>%
+  tail()
+```
+
+```{marginfigure}
+Hemos de notas que de por si la coma que separa las diferentes condiciones de filtro es equivalente a un operador lógico Y (AND) y por lo tanto especificarlo es interesante para entender la lógica del filtro pero no es necesario. No es lo mismo con cualquier otro operador lógico como O (OR) o casos de negaciones.
+```
+
+También se puede combinar el uso de operadores lógicos *Y* y *O* dentro de las condiciones del filtro. 
+
+```{r ejemploVerboFILTER_3}
+library(dplyr)
+data(iris)
+
+# un ejemplo de filtro con operador lógico OR
+iris %>% filter(Species == "versicolor" | Sepal.Length < 5.0) %>%
+  tail()
+```
+
+### El Verbo ARRANGE
+El verbo `arrange()` se utiliza para ordenar de alguna manera particular el juego de datos, utilizando un valor como condición. El formato básico de utilización depende de si queremos ordernar de forma ascendente (valor por omisión) o descendente.
+
+`arrange(datos, condición)`
+
+o también:
+
+`arrange(datos, desc(condición))`
+
+Aunque de por si es un verbo sencillo de utilizar, veamos un ejemplo para clarificar dudas.
+
+```{r ejemploVerboARRANGE}
+library(dplyr)
+data(mtcars)
+
+mtcars %>% select(mpg) %>%
+  arrange(desc(mpg)) %>%
+  head()
+
+```
+
+### El Verbo MUTATE
+El verbo `mutate()` es muy interesante porque nos permite crear variables nuevas - o sea columnas nuevas - basadas en las existentes en el juego de datos. 
