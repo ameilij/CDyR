@@ -1,0 +1,271 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# ELEMENTOS DE ESTADISTICA EN R
+`r tint::newthought('La comunidad de la Ciencia de Datos, la Estadística y la Bioestadística ha sido la mayor usuaria y soporte del lenguaje R.')` No es de extrañar entonces la inmensidad de bibliotecas y paquetes especializados en los temas de estadística y lo sólido de los fundamentos de estadística incluidos en el paquete básico de _R_. La siguiente sección del libro ilustra las funciones específicas para alguno de los problemas más comunes de aplicación estadística, incluyendo medidas de dispersión, distribución binomial y distribución de _Poisson_.
+
+## Variación de un Juego de Datos
+En la investigación de una población es muy probable que el científico busque analizar la dispersión de los datos dentro del juego. Esta es la base de la estadística descriptiva y el comienzo de cualquier análisis profundo. Para ilustrar los ejemplos que siguen, hemos de crear un juego de datos con el peso de tres muestras de cardumenes de cobias del Atlántico de Panamá.
+
+```{r}
+set.seed(7556)
+lote <- rep(1:3, 10)
+peso <- round(abs(rnorm(30, 5, 4)), digits = 0)
+cobias <- data.frame(lote = lote, peso = peso)
+```
+
+Hemos creado la tabla con valores ficticios y aleatorios y vale la pena explicar en que manera lo hemos hecho.
+
+* La primera línea llama al comando `set.seed(7556)` que siembra un valor especifico al generador de números aleatorios del lenguaje. Esto solamente lo hemos hecho con el propósito de que siempre obtengamos los mismos valores en el experimento y que si el lector decide ejecutar el código obtenga exactamente los mismos resultados. En el mundo de la Ciencia de Datos la reproducibilidad de los experimentos es crucial, y cualquier ejemplo de algoritmo que utilice data sintética creada al azar debe ser reproducible por todos los que quieran replicar el mismo.
+* La segunda línea crea el número de los lotes con una repetición de diez veces los números del uno al tres.
+* La tercera línea es un poco más complicada y hay que leerla de adentro hacia afuera. Primeramente se crea un vector de treinta valores aleatorios pero que pertenecen a una distribución normal con treinta elementos de media cinco y desviación estándar 4. Como dicha generación pudiera arrojar valores negativos en algunos casos, devolvemos entre paréntesis el valor absoluto del resultado de la generación aleatoria de valores ya que no puede existir pesos de cobias en negativo. Finalmente redondeamos a cero mantisa los valores y los asignamos al vector cobias
+* La cuarta linea crea un *data frame* con el número de lote y pesos de las cobias, aunque fácilmente para los siguientes ejemplos hubiéramos podido utilizar solo un vector.
+
+Haremos un resumen de los pesos por lote con el comando `table()`. Para simplificar la lectura de la tabla se han redondeado los pesos con la función `round(abs(rnorm(30,5,4)))`.
+
+```{r}
+table(cobias)
+```
+
+Lo primero que vamos a querer analizar es la frecuencia de los pesos, más allá de a que lote respectivo pertenezca la cobia. Podemos utilizar una variación del comando `table()` que rápidamente nos devuelve un lector de frecuencias de peso limitando la creación de la tabulación a solamente los pesos, no los lotes. Esto se logra reduciendo el parámetro de datos de `table(cobias)` a `table(cobias\$peso)`.
+
+```{r}
+frecuencia <- table(cobias$peso)
+frecuencia
+```
+
+Si vemos la información notamos que la cobia que menos pesa tiene peso registrado 0 (probablemente pesa menos de un kilo para nuestro análisis) y la que más pesa tiene 12 kilos. La mayor frecuencia es 4, para cuatro casos de cobia que pesan 6 kilos. Si nos resulta más fácil ver la frecuencia relativa, solo debemos devolver los resultados divididos por el número total de ocurrencias.
+
+```{marginfigure}
+Nuevamente hemos redondeado los resultados para evitar mantisas excesivas. A partir de este punto haremos caso omiso de explicar el porqué del redondeo para no aburrir al lector.
+```
+
+```{r}
+round(frecuencia / sum(frecuencia), digits = 2)
+```
+
+La frecuencia relativa acumulada se obtiene sumando todos los valores en sucesión con la función `cumsum()`.
+
+```{r}
+round(cumsum(frecuencia / sum(frecuencia)), digits = 2) 
+```
+
+En una nota aparte, algo que siempre sale del estudio inicial de cualquier muestra de datos es la cantidad de los mismos. Para un vector se puede recuperar con la función `length()` que devuelve el tamaño en observaciones del mismo.
+
+```{r}
+length(lote)
+```
+
+Habiendo dicho esto, nuestro _data frame_ no aplica a la función cómo hubiéramos esperado.
+
+```{r}
+length(cobias)
+```
+
+La llamada a la función `length(cobias)` nos devuelve `[1] 2` que es el número de vectores que componen el `data frame` pero no su número de observaciones. Para obtenerlo debemos ser más específicos con _R_. Hay dos formas seguras:
+
+1. Podemos especificar uno de los vectores del _data frame_ y obtener el número de observaciones. Dado que todos los vectores tienen el mismo tamaño cualquiera dará el mismo resultado.
+2. Otra forma es la función `dim()` que retorna la dimensión del _data frame_ en un objeto de dos resultados: número de observaciones y número de vectores. Para retornar solo el número de observaciones, que es el primer elemento, podemos forzar la respuesta con el uso de corchetes.
+
+```{r}
+length(cobias$lote)
+length(cobias$peso)
+dim(cobias)[1]
+```
+
+Los siguientes elementos que nos interesan de un análisis estadístico de la muestra son el promedio, la mediana y la moda. Las funciones que corresponden al promedio y mediana para dichos cálculos en _R_ son `mean()` y `median()`. El lenguaje no tiene una función para la moda, pero podemos crear una hecha a medida para que ejerza la misma tarea.
+
+```{r}
+mean(cobias$peso)
+## [1] 5.166667
+
+median(cobias$peso)
+## [1] 5.5
+```
+
+El siguiente código crea una función que retorna la moda de una serie de datos.
+
+```{r}
+# Funcion Moda
+obtenerModa <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+obtenerModa(cobias$peso)
+```
+
+Ya hemos recaudado mucha información sobre nuestro lote de cobias, y queremos ver la dispersión de la información en la varianza y la desviación estándar para aplicarlas en otros aspectos de la investigación. Vamos a proceder primero a medir las mismas de la forma difícil (creando la función a mano) y luego de la forma sencilla (usando el comando intrínseco del lenguaje).
+
+Expresamos la varianza de una población como $s^2$ de tal forma que:
+
+\begin{equation}
+  {s^2} = \frac{\sum^{n}_{i=1}(x_i - \bar{x})}{n - 1}
+\end{equation}
+
+o en código R:
+
+```{r}
+sum((cobias$peso - mean(cobias$peso)) ^ 2) / (length(cobias$peso) -1)
+```
+
+La desviación estándar no es sino la raíz cuadrada de la varianza, lo que nos facilita el cálculo a:
+
+\begin{equation}
+  s = \sqrt{s^2}
+\end{equation}
+
+que traducido en código _R_ es igual a:
+
+```{r}
+sqrt(sum((cobias$peso - mean(cobias$peso)) ^ 2) / 
+    (length(cobias$peso) -1))
+```
+
+Obviamente, las funciones para ahorrarse todo esto son `var()` y `sd()` respectivamente:
+
+```{r}
+var(cobias$peso)
+sd(cobias$peso)
+```
+
+## Muestras de un Juego de Datos Mayor
+Los juegos de datos de cualquier investigación pueden crecer hasta ser miles, cientos de miles o millones de observaciones. Cuando la data llega a ese nivel, muchas veces es más factible analizar una muestra menor que todo el juego. Recreemos otro juego de datos del peso de cobias del Atlántico Panameño, pero esta vez aumentemos el tamaño a un millón de observaciones.
+
+```{r}
+set.seed(7556)
+cobias_BIG <- round(abs(rnorm(1000000, 5, 4)), digits = 0)
+table(cut(cobias_BIG, quantile(cobias_BIG)))
+```
+
+Dado que hemos generado una muestra mucho más grande, comenzamos a ver cobias de 26 kilos cuando el máximo eran 12 kilos en la primera medición. Para trabajar más cómodos, solo queremos una muestra de mil observaciones del juego de un millón. El lenguaje _R_ retorna una muestra aleatoria de cualquier juego de datos con la función `sample()`. El uso es:
+
+`sample(data, obs)`
+
+donde:
+
+* el parámetro `data` es el juego de datos original
+* el parámetro `obs` es el número de observaciones que se desean obtener
+
+Tomando en cuenta lo descrito anteriormente, creamos una muestra menor de de la siguiente manera:
+
+```{r}
+cobias_muestra <- sample(cobias_BIG, 1000)
+table(cut(cobias_muestra, quantile(cobias_muestra)))
+```
+
+## Probabilidad
+Utilicemos la muestra de mil observaciones de pesos de cobias del juego mayor de un millón de observaciones para calcular algunas probabilidades. ¿Cuál es la probabilidad de obtener una cobia menor a 3 kilos del total de la muestra? Sabemos que la muestra tiene exactamente 1,000 observaciones. El primer paso es averiguar cuantas observaciones cumplen la condición de ser menores a 3 kilos. Después tenemos que dividir esa cifra por mil observaciones y tendremos la probabilidad.
+
+El ejercicio no es difícil de resolver, pero antes de obtener la respuesta correcta, recordemos como funciona la vectorización de _R_ y como a veces retorno como respuesta a una condición no un número sino un valor.
+
+```{r}
+n <- cobias_muestra > 3
+head(n)
+```
+
+En la condición de arriba buscamos acumular en la variable n el número de observaciones de la muestra de cobias que pesan más que 3 kilos. Pero en vez de acumular un valor, acumulamos un vector de valores Booleanos, ya sea verdad o falso según la cobia en particular pese o no más de tres kilos. Una forma de resolver el dilema es utilizar `subsetting` dentro de los corchetes, lo que acumula el número de observaciones que cumple la condición en vez de valores Booleanos. Luego podemos dividir por 1,000 para conocer la probabilidad del que al seleccionar una cobia cualquiera en la muestra de 1,000, la misma pese más de tres kilos.
+
+```{r}
+n <- cobias_muestra[cobias_muestra >3]
+length(n)/length(cobias_muestra)
+```
+
+La respuesta es correcta pero existe una manera aún mejor de obtenerla, aunque la misma no se muy intuitiva. Se trata del siguiente código.
+
+```{r}
+mean(cobias_muestra > 3)
+```
+
+Expliquemos como funciona el código. La función promedio calcula el promedio de ocurrencias que son `TRUE` y retorna la razón a pesar que el vector de la condición `cobias\_muestra > 3` retorne valores `Boolean`. En otras palabras, en vez de acumular en n el número total de cobias que pesan más de 3 kilos, obtenemos el promedio de resultados positivos de un vector de valores `Boolean` con 1,000 observaciones totales.
+
+De forma general, si tenemos cualquier problema que cuya data se ajusta a una distribución normal, es posible calcular la probabilidad de un evento a través de la función `pnorm()`. El esqueleto de la misma es el siguiente.
+
+`pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)`
+
+donde:
+
+* la variable `q` es un valor a descubir
+* la variable `mean` es la media de la distribución que tiene valor por omisión cero
+* la variable `sd` es la desviación estándar que tiene por valor por omisión uno
+* el parámetro `lower.tail` tiene un valor por omisión `TRUE`. Este valor determina si buscamos la probabilidad hacia el lado izquierdo de la curva normal o derecho, o sea que cuando el valor es `TRUE` la función devuelve una probabilidad que es $P[X \leq x]$, de lo contrario retornará $P[X > x]$.
+* el parámetro `log.p` determina si retorna el logaritmo de la probabilidad, y el valor por omisión es `TRUE`
+
+*Ejemplo:* Una empresa de Internet tiene un sitio web cuyas visitas promedios tienen una distribución normal con media 1,020 clics y desviación estandar de 50 clics. ¿Cuál es la probabilidad de conseguir 1,160 clics en un día cualquiera?
+
+```{r}
+pnorm(1160, mean = 1020, sd = 50, lower.tail = FALSE)
+```
+
+
+## Trabajando con la Distribución Binomial
+Una distribución binomial es aquella donde la variable tiene dos posibles valores solamente. Tras un experimento de $n$ cantidad de pruebas, se dice que $p$ es la probabilidad binomial de un evento $X$ con número de pruebas $n$. Esto se expresa en términos matemáticos como:
+
+\begin{equation}
+  X \sim Binomial(n, p)
+\end{equation}
+
+El ejemplo clásico de salón académico es arrojar 10 monedas (cuyos valores solo pueden oscilar entre dos posibles: cara y sello). La probabilidad de sacar cara o sello es 0.5, por lo que la fórmula de la variable aleatoria binomial de arrojar una moneda basada en nuestro experimento de diez monedas es:
+
+\begin{equation}
+  10 Tiros de Moneda: X \sim Binomial(10, 0.5)
+\end{equation}
+
+Supongamos que queremos resolver para varios experimentos de arrojar monedas de forma simultanea. ¿Cuál es la posibilidad de obtener 2 caras si la probabilidad en 10 tiros es de 0.5? ¿Y en 4? ¿Y en 7? El lenguaje va a resolver la probabilidad para cada juego de eventos.
+
+
+```{r}
+una.muestra <- c(1,2,4,5,7,10)
+dbinom(una.muestra, 10, 0.5)
+```
+
+La primera probabilidad es muy pequeña: menos del 1% de obtener una sola cara si en diez tiros la mitad del tiempo sale cara y la otra mitad sale sello. La segunda probabilidad es de 4.4% - o sea 4.4% de que en diez tiros salga cara. A medida que tenemos más ocurrencias, la probabilidad del evento sube.
+
+```{marginfigure}
+El resultado de la función `pbinom()` es la probabilidad acumulada $P(X \leq x)$ de que la variable aleatoria es menor o igual al valor de evaluación de la misma.
+```
+
+Para obtener las probabilidades binomiales acumuladas utilicemos la función `pbinom(x, n, p)`.
+
+```{r}
+una.muestra <- c(1,2,4,5,7,10)
+pbinom(una.muestra, 10, 0.5)
+```
+
+Cuando la muestra llega a diez tiros, hay un 100% de probabilidad de que en esos diez tiros salga una cara. De hecho, ya solo con 5 tiros la probabilidad de cara es 62% y no 50% como uno pudiera pensar.
+
+## Trabajando con la Distribución de Poisson
+La distribución de _Poisson_ se utiliza como una aproximación del numero total de ocurrencias en eventos extremos (que ocurren rara vez). Si $p$ es pequeño y $N$ es grande, entonces el número de casos exitosos de $x$ tiene un valor aproximado a una _Distribución Poisson_. Esto se denota:
+
+```{marginfigure}
+El símbolo $\lambda$, adentro de los paréntesis que denota una distribución _Poisson_, se denomina lambda.
+```
+
+\begin{equation}
+  X \sim Poisson(\lambda)
+\end{equation}
+
+Revisemos como aplicar la distribución _Poisson_ en _R_ tomando como caso hipotético que un evento se da con una distribución _Poisson_ de _lambda_ igual a 2.
+
+```{r}
+casos <- 0:10
+
+# probabilidad de casos Poisson(2)
+dpois(casos, 2)
+
+# probabilidad acumulada de casos Poisson(2)
+ppois(casos, 2)
+```
