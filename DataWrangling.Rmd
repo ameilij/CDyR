@@ -1,0 +1,48 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+# DATA WRANGLING
+
+`r tint::newthought('Dentro de la literatura académica de la Ciencia de Datos, hay un consenso de que el científico de datos pasa un 70% de su tiempo recaudando, limpiando, normalizando y arreglando los juegos de datos.')` En inglés se le llama a esto _Data Wrangling_.
+
+La manipulación de datos es un resultado normal de hacer ciencia. Los juegos de datos rara vez se hayan en perfecto estado, inclusive si el estudio tuvo la precaución de diseñar las estructuras y recaudación de datos a priori. El mundo moderno está saturado en información, y a pesar de que es relativamente sencillo adquirirla, es poco probable que la forma en que la encontremos sirva para análisis serio en su estado más crudo. 
+
+Hay múltiples razones por la cual la manipulación de datos (_data wrangling_) es importante.
+
+* Todas las bases de datos antiguas van a presentar problemas. Los formatos de números suelen tener compresión para minimizar datos, al igual que las variables nominales, que se codificaban con números en vez de factores por la misma razón. 
+
+* El uso de múltiples bases de datos puede obligarnos a consolidar en una sola tabla para agilizar y optimizar el análisis. Pero los formatos o la información de dichas bases de datos puede estar dispersa, tener estructura discimil, e inclusive tener datos que a pesar de apuntar a la misma variable se contradicen entre sí. 
+
+* La información provenientes de sensores, censos, o bases de datos actuales puede presentar datos faltantes, errores de toma de datos, valores `NA`, e inclusive corrupción de datos por diferencia de formatos (por ejemplo cuando no se graba el tipo de codificación de un archivo con tildes y después se intenta leer en un editor que no identifica el tipo UTF-8).
+
+No hay una sola manera de manipular datos, pero una de las mejores en _R_ es con el uso del paquete `data.table` que viene incluido en la biblioteca `ggplot2`. Conceptualmente, las operaciones de `data.table` se pueden ver con el esqueleto:
+
+`una.tabla[i, j, cond]`
+
+Este formato tiene similitud a los comandos de _SQL_. Cada elemento cumple una función específica.
+
+* `una.tabla` es el juego de datos que leímos o transformamos a formato `data.table`.
+* `i` es la selección o subconjunto (_subsetting_)
+* `j` se utiliza para seleccionar, resumir, o mutar columnas
+* `by` es el operador de agrupación
+
+## Seleccionando o Transformando Columnas
+Podemos utilizar el índice `j` para agregar una nueva variable (columna) o modificar una existente. 
+
+```{r}
+data("mtcars")
+mtcars[, peso_kg = wt * 2200]
+```
+
