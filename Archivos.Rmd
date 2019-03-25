@@ -3,7 +3,7 @@ title: "Ciencia de Datos y R"
 subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
-output: tint::tintBook
+output: tint::tintHtml
 link-citations: yes
 ---
 
@@ -144,6 +144,8 @@ for(i in 1:dim(nombres)[1]) {
 El valor de cada columna viene sin nombre y R le asigna V1, V2… Vx. Usar este formato es cómodo para hacer búsquedas dentro de los índices.
 
 ```{r ejemploBusquedaArchivoTable}
+library(data.table)
+nombres <- read.table("nombres.txt")
 nombres[nombres$V2 == "sobrino", ]
 ```
 
@@ -210,8 +212,8 @@ Los programadores son propensos a buscar la mejor forma de reducir la tarea a ma
 Leer un archivo de Internet no es sino abrir una conexión con un `URL` (la dirección de Internet de donde está ubicada la base de datos que nos interesa) y leer el archivo con esa conexión como si fuera cualquier otro archivo. Veamos un ejemplo de cómo leer un sitio web y descargarlo en disco duro. Al momento de escribir el siguiente libro, como medida de control de versión, ibamos guardando los diferentes borradores en *Github*. *Git* es un sistema de control de versiones: guarda el trabajo de a poco, versión a versión, para que no se vaya perdiendo los cambios que uno hace. Es mucho más útil cuando varias personas están trabajando en un proyecto y deben cooperar. *Github* es un sitio en la nube para guardar proyectos, y es muy usado por la comunidad de *R*. Cada capítulo del libro era un archivo en formato `.Rmd`, que usa `R Mark-Down` para transformar el texto en un *PDF* con forma muy pulida, similar a lo que resulta de usar Word, pero con la facilidad de ejecutar el código dentro del texto. A manera de agregado, *Github* le permite a uno tener una página web (solo una por proyecto) para documentar el proyecto, y esa es precisamente la página web que vamos a leer.
 
 ```{r ejemploLeerGithub}
-setwd("~/Documents/Publications/IntroDSandR/Draft/")
-ubicacionURL <- "https://ameilij.github.io/IntroDSandR/"
+setwd("~/Documents/Publications/CDyR")
+ubicacionURL <- "https://ameilij.github.io/CDyR/"
 download.file(ubicacionURL, destfile = "testSitioWeb.html")
 ```
 
