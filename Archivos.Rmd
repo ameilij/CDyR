@@ -4,7 +4,8 @@ subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
 output: tint::tintHtml
-link-citations: yes
+bibliography: skeleton.bib
+link-citations: no
 ---
 
 ```{r setup, include=FALSE}
@@ -13,7 +14,6 @@ library(tint)
 knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
 options(htmltools.dir.version = FALSE)
 ```
-
 
 # ARCHIVOS EN R
 
@@ -32,7 +32,107 @@ Las fuentes de datos son múltiples, y si bien no son infinitas, son muchas. En 
 
 También veremos lo fácil que es leer campos en un archivo y volver a escribirlo al disco duro en caso de ser necesario.
 
-## Cómo leer datos empaquetados
+## Introducción a la Data
+Antes de seguir hablando de _data_, definamos primero lo que queremos decir cuando usamos el término.
+
+### Definición de Data
+_Data_: La _data_ son valores de variables cualitativas o cuantitativas que pertenecen a un conjunto de entes \cite{pengMatsui}.
+
+Cuando hablamos de un conjunto de entes, hablamos de cualquier población o muestra del cual surge la data, como por ejemplo la población de una ciudad, la muestra de clics de un sitio web en un día lunes, o el peso promedio de niños nacidos de embarazos prematuros en un año en particular, dividido por sexo, región, nivel sociodemográfico, y peso al nacer. 
+
+* Cualitativo: son aquellas variables de valor no-numérico como país, sexo, tipo de tratamiento, etc.
+
+* Cuantitativo: son aquellas variables de valor númerico como altura, peso, presión arterial, etc. 
+
+Para propósitos generales, un científico de datos manipula dos tipos de data: cruda y procesada. 
+
+### Distinción entre Data Cruda y Procesada
+De la misma forma que hemos definido el concepto de data, establezcamos una definición clara entre data cruda y procesada.
+
+* La data cruda es la fuente original de los datos, la cual es complicada de utilizar en el análisis. Comúnmente la data cruda necesita procesamiento para aplicarse de forma sencilla al análisis, y este procesamiento se debe hacer solo una vez. 
+
+* La data procesada es la data que está lista para el análisis. El procesamiento incluye tareas como unir, agregar y transformar datos. Pudiera ser que este procesamiento tiene estándares establecidos (como por ejemplo reglas contables, procesos de laboratorio requeridos por ley, reglas de imputación, etc.) Todos los pasos en el procesamiento de datos deben registrarse ya que la ciencia de datos es una ciencia que descansa sobre el método científico. 
+
+La data cruda existe en formatos que pueden variar de los sencillos (archivos planos) hasta los complejos (archivos binarios). Un análisis puede cubrir la unión y referencia cruzada de una hoja de cálculos con 10 pestañas, y un archivo JSON de un API de Twitter. En caso particulares hasta puede incluir notas a mano de un científico que está describiendo un fenómeno en su microscopio. 
+
+La data cruda se encuentra en el formato correcto para procesamiento si se dan las siguientes condiciones \cite{leek}:
+
+1. No se ha procesado la data aún con ningún tipo de software (esta condición no incluye el software que generó la data)
+2. No se ha manipulado los números de la data de ninguna manera
+3. No se ha removido ningún elemento de la data
+4. No se ha resumido la data en ninguna manera
+
+### Componentes de Data Limpia (Tidy Data)
+La idea detrás del procesamiento de datos es pasar de data cruda a data limpia (en inglés _tidy data_) a través de un proceso con cuatro elementos muy concretos. 
+
+i. La data cruda
+ii. La data limpia (tidy data)
+iii. Un libro de código donde se detalle de forma explícita cada variable y su valor correspondiente en el juego de datos limpio (tidy data)
+iv. Una receta explícita y detallada de como se procesó y transformó cada variable
+
+```{marginfigure}
+Algunos autores se refieren al libro de código como meta-data.
+```
+
+El concepto de data limpia no es sinónimo de data procesada, aunque los dos están estrechamente ligados. Por data limpia (tidy data) queremos decir que los datos cumplen cuatro condiciones específicas.
+
+1. Cada variable de medición debe estar en una columna de la base de datos o juego de datos
+2. Cada observación diferente de esa variable debiera estar en su propia fila
+3. Debe existir una tabla o juego de datos para cada tipo de variable
+4. Para juegos de datos con múltiples tablas, debe existir una columna como índice común de tabulación cruzada
+
+Fuera de la teoría y ya entrando en _R_, hay maneras de comenzar a aplicar estos preceptos en el código.
+
+* Incluir en los _data frame_ una fila inicial donde se incluyan los nombres de las variables (fácil de decir pero curiosamente difícil de cumplir al momento del estudio)
+
+* Hacer los nombres de las variables humanamente legibles
+
+* Guardar la data en una tabla por archivo - aunque ocupe un poco más de espacio
+
+### El Libro de Código
+El libro de código es un paso obligado en la ciencia de datos, que se apega al método científico de registrar todo lo concerniente a la investigación en curso con ánimo de dar total transparencia a la metodología y reproducción de la investigación. En su definición, un Libro de Código describe los contenidos, estructura y diseño de una colección de data. Un libro de código bien documentado contiene información cuya intención es ser completa y auto-explanatoria para cada nivel de la data en un archivo de datos del juego estudiado \cite{codebook}.
+
+Los libros de código debieran empezar con una sección de introducción que incluya el título de la investigación, el nombre de los científicos de datos, la tabla de contenidos y una reseña que describa el propósito y formato del manual. Algunos libros también incluyen detalles de la metodología utilizada, como el cálculo de los pesos estadísticos, los instrumentos de recolección de datos, y otros datos importante para la reproducción de los experimentos según y de acuerdo con la complejidad de los mismos y los datos involucrados \cite{codebook}. 
+
+El cuerpo principal del libro de código utiliza descripción y detalles específicos y no ambiguos de las variables en cada nivel de la estructura de datos. El siguiente ejemplo es del estudio National Longitudinal Survey of Youth, 1979 .
+
+![](images/codebook-01.png)
+
+*Nombre de la Variable:* El nombro o número asignado a la variable en cada colección de datos. Alguno investigadores prefieren utilizar abrevaciones mnemotécnicas (ejemplo LABOR2) mientras que otros utiizan patrones alfanuméricos (ejemplo, VARI009). Una práctica común en los estudios de encuesta es nombrar las variables con el orden correspondiente de las preguntas (ejemplo PREG001). 
+
+*Etiqueta de la Variable:* Una descripción breve pero completa que identifica la variable al lector y usuario. Cuando sea posible conviene utilizar la construcción completa de la pregunta que generó la variable (ejemplo: TRM001 - valor de la tasa de referencia de mercado del dólar USA en el sistema bancario de Colombia). 
+
+*Contenido de la Pregunta:* Por lo general se utiliza en las encuestas solamente, y es la pregunta que debe/debió hacerse para generar el contenido de la variable (por ejemplo: "Si las elecciones fueran hoy, ¿a cuáles de estos tres candidatos Usted votaría?). Puede omitirse en estudios de laboratorio seco o de recolección en campo a menos que ayude a aclarar dudas sobre el origen de la variable.
+
+*Texto de la Pregunta:* Solamente aplica a encuestas y a diferencia del contenido es la oración exacta que se utilizó en la encuesta frente al encuestado.
+
+*Valores:* Los valores actuales codificados en la data. Estos pueden ser una colección de valores específicos unidos a una tabla finita de valores ordinales (ejemplo 1,2,3) o cotas de valores discretos cuando aplique (ejemplo: medición de la humedad relativa del ambiente del 0 al 100 por ciento).
+
+*Etiqueta de los Valores:* La descripción textual de los valores utilizados en la codificación de valores ordinales (por ejemplo Excelente, Bueno, Malo). En caso de que los valores sean discretos igualmente se puede etiquetar las cotas, lo que ayuda a señalar cuáles valores se considerarán valores estadísticos átipicos (outliers). 
+
+*Resumen de Estadísticas:* Donde sea apropiado, y dependiendo del estilo del estudio y características de la variable, proveer un resumen (sin pesos ni normalización) estadístico de la misma para referencia rápida. Para variables categóricas se puede incluir las frecuencias de valores que ocurren y sus porcentajes asociados. Para variables continuas es recomendable utilizar minímos, máximos, promedios y medianas, algo que _R_ provee con el comando `summary()`. 
+
+*Datos Faltantes:* Donde aplique es importante resaltar los valores y etiquetas de data faltante (ejemplos, valores NA en una lista). La ausencia de datos puede alterar o sesgar un análisis por lo tanto se hace vital explicar las medidas de imputación de datos. Recuerde describir todos los valoresy códigos asumidos para la ausencia de datos. 
+
+*Patrones de Salto del Universo:* Los patrones de salto se presentan mucho en las encuestras, donde el encuestado puede no querer/poder responder una pregunta y el encuestador puede tener un proceso establecido de que pregunta saltar en caso de una omisión, ya sea intencional o no intencional. Dada la importancia de los patrones de salto en los estudios sociales, deben no solo registrarse, sino hacer omisión a la variable que los precede y la variable siguiente en el salto (ejemplo: próxima pregunta si el encuestado no contesta PREG010). 
+
+*Notas:* Notas adicionales, comentarios o consejos que contextualizan la información que cubre la variable o despliegan contenido adicional. Esta sección también es la indicada para adicionar mediciones y/o preguntas de instrumentos con licencias o patentes de marca especiales.
+
+El profesor Jeffrey Leek de John Hopkins University comparte algunas recomendaciones académicas para la confección del libro de código.
+
+* Siempre incluir no solo las variables sino todas las unidades asociadas de medición, extensivo para cada elemento del juego de datos. Aunque no aplica para valores ordinales, es cierto para valores reales y continuos donde no es necesariamente autoevidente en que escala se mide (ejemplo: temperatura Celsius versus Fahrenheit). 
+
+* Agregar un resumen de las decisiones que se tomaron en el estudio y diseño de la metodología de recolección de datos y las razones para tales decisiones. En el futuro otro investigador puede encontrar fallas o procesos alternativos para volver a implementar el estudio con nuevos resultados. 
+
+* Siempre agregar información sobre el diseño del estudio en si que complemente el diseño de la metodología de recolección de datos. 
+
+Una sección en la que toca Leek a diferencia de otros autores es la Lista de Instrucción [@leek]. La lista de instrucción es el _script_ generado en el código de trabajo que procesa la data. La lista de instucción funciona mucho mejor cuando el ingreso y egreso son auto-evidentes y no hay mayor parametrización de los datos. Esto no siempre es posible y algunos estudios requieren manipulación adicional del procesamiento que no se puede cubrir en un simple listado de _R_ o _Python_. En tales casos es preferible incluir la descripción total del proceso aunque manual a omitirlo.Un ejemplo didactico es el siguiente.
+
+1. Paso 1: tomar el archivo X y correr la versión 3.2.1 del software XX de procesamiento para resumir los datos con los parámetros a = 1, b = 2, y c = 3.
+2. Paso 2: ejecutar el software para cada uno de los diez archivos posibles de muestras de manera separada con los parámetros descritos en el paso 1. 
+3. Paso 3: tomar la columna 3 de cada archivo de salida por cada archivo de entrada y agregarlos en un solo archivo final de proceso en el juego de datos. 
+
+## Cómo Leer Datos Empaquetados
 Hemos estado leyendo juegos de datos empaquetados por varios capítulos, pero igual lo volvemos a describir aquí por propósitos didacticos. Utilicemos la función `data()` para cargar un juego de datos en memoria, y usemos el operador `?` para que *R* nos de datos valiosos sobre el mismo.
 
 ```
@@ -110,25 +210,31 @@ Una pregunta válida es qué tipo de estructura de datos es iris. Con esto nos q
 class(iris)
 ```
 
-El juego de datos iris ha sido empaquetado como un `data.frame` y quizás esa sea una de las mejores opciones disponibles. Sin embargo, no es la única disponible.
+El juego de datos iris ha sido empaquetado como un `data.frame` y quizás esa sea una de las mejores opciones disponibles. Sin embargo, no es la única para manipular datos.
 
 ## Cómo leer archivos de texto
 Hay dos métodos muy comunes de lectura de archivos de texto. El primero es leer un archivo usando la estructura de datos `read.table()`. Usemos esta forma de lectura para datos muy poco estructurados, como el que vamos a ver a continuación.
 
-`Estructura de nombres.txt`
-`Juanito sobrino`
-`Jorgito sobrino`
-`Jaimito sobrino`
-`Donald pariente`
+```
+Estructura de nombres.txt
+Juanito sobrino
+Jorgito sobrino
+Jaimito sobrino
+Donald pariente
+```
+
+```{marginfigure}
+Hemos de notar que `read.table()` es la función más utilizada en _R_ para leer datos (Nota del autor: por lo menos en el año que escribimos la aseveración). La función en si es robusta y flexible, pero requiere más parámetros que otras funciones. Un aspecto que debemos tener en cuentas es que la función lee todos los datos en el *RAM* del computador, por lo que puede causar problemas y poner el sistema bajo estrés si el juego de datos es grande, la memoria disponible es limitada, o una condición de los dos factores de forma simultanea. 
+```
 
 El que vemos es un archivo muy primitivo y donde nos conviene usar el poder de `read.table()` para que *R* nos devuelva una estructura ordenada.
 
-```{ejemploReadTable()}
+```{r ejemploReadTable()}
 # veamos en que directorio estamos
 getwd()
 
 # no es donde quiero leer mis datos, cambiemos el directorio
-setwd(/Users/ameilij/Documents/Publications/Ciencia de Datos con R/CDyR)
+setwd("/Users/ameilij/Documents/Publications/CDyR")
 
 library(data.table)
 nombres <- read.table("nombres.txt")
