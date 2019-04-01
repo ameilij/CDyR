@@ -36,7 +36,7 @@ También veremos lo fácil que es leer campos en un archivo y volver a escribirl
 Antes de seguir hablando de _data_, definamos primero lo que queremos decir cuando usamos el término.
 
 ### Definición de Data
-_Data_: La _data_ son valores de variables cualitativas o cuantitativas que pertenecen a un conjunto de entes \cite{pengMatsui}.
+_Data_: La _data_ son valores de variables cualitativas o cuantitativas que pertenecen a un conjunto de entes [@pengMatsui].
 
 Cuando hablamos de un conjunto de entes, hablamos de cualquier población o muestra del cual surge la data, como por ejemplo la población de una ciudad, la muestra de clics de un sitio web en un día lunes, o el peso promedio de niños nacidos de embarazos prematuros en un año en particular, dividido por sexo, región, nivel sociodemográfico, y peso al nacer. 
 
@@ -55,7 +55,7 @@ De la misma forma que hemos definido el concepto de data, establezcamos una defi
 
 La data cruda existe en formatos que pueden variar de los sencillos (archivos planos) hasta los complejos (archivos binarios). Un análisis puede cubrir la unión y referencia cruzada de una hoja de cálculos con 10 pestañas, y un archivo JSON de un API de Twitter. En caso particulares hasta puede incluir notas a mano de un científico que está describiendo un fenómeno en su microscopio. 
 
-La data cruda se encuentra en el formato correcto para procesamiento si se dan las siguientes condiciones \cite{leek}:
+La data cruda se encuentra en el formato correcto para procesamiento si se dan las siguientes condiciones [@leek]:
 
 1. No se ha procesado la data aún con ningún tipo de software (esta condición no incluye el software que generó la data)
 2. No se ha manipulado los números de la data de ninguna manera
@@ -90,9 +90,9 @@ Fuera de la teoría y ya entrando en _R_, hay maneras de comenzar a aplicar esto
 * Guardar la data en una tabla por archivo - aunque ocupe un poco más de espacio
 
 ### El Libro de Código
-El libro de código es un paso obligado en la ciencia de datos, que se apega al método científico de registrar todo lo concerniente a la investigación en curso con ánimo de dar total transparencia a la metodología y reproducción de la investigación. En su definición, un Libro de Código describe los contenidos, estructura y diseño de una colección de data. Un libro de código bien documentado contiene información cuya intención es ser completa y auto-explanatoria para cada nivel de la data en un archivo de datos del juego estudiado \cite{codebook}.
+El libro de código es un paso obligado en la ciencia de datos, que se apega al método científico de registrar todo lo concerniente a la investigación en curso con ánimo de dar total transparencia a la metodología y reproducción de la investigación. En su definición, un Libro de Código describe los contenidos, estructura y diseño de una colección de data. Un libro de código bien documentado contiene información cuya intención es ser completa y auto-explanatoria para cada nivel de la data en un archivo de datos del juego estudiado [@codebook].
 
-Los libros de código debieran empezar con una sección de introducción que incluya el título de la investigación, el nombre de los científicos de datos, la tabla de contenidos y una reseña que describa el propósito y formato del manual. Algunos libros también incluyen detalles de la metodología utilizada, como el cálculo de los pesos estadísticos, los instrumentos de recolección de datos, y otros datos importante para la reproducción de los experimentos según y de acuerdo con la complejidad de los mismos y los datos involucrados \cite{codebook}. 
+Los libros de código debieran empezar con una sección de introducción que incluya el título de la investigación, el nombre de los científicos de datos, la tabla de contenidos y una reseña que describa el propósito y formato del manual. Algunos libros también incluyen detalles de la metodología utilizada, como el cálculo de los pesos estadísticos, los instrumentos de recolección de datos, y otros datos importante para la reproducción de los experimentos según y de acuerdo con la complejidad de los mismos y los datos involucrados [@codebook]. 
 
 El cuerpo principal del libro de código utiliza descripción y detalles específicos y no ambiguos de las variables en cada nivel de la estructura de datos. El siguiente ejemplo es del estudio National Longitudinal Survey of Youth, 1979 .
 
@@ -222,14 +222,14 @@ Jorgito sobrino
 Jaimito sobrino
 Donald pariente
 ```
-
+ 
 ```{marginfigure}
 Hemos de notar que `read.table()` es la función más utilizada en _R_ para leer datos (Nota del autor: por lo menos en el año que escribimos la aseveración). La función en si es robusta y flexible, pero requiere más parámetros que otras funciones. Un aspecto que debemos tener en cuentas es que la función lee todos los datos en el *RAM* del computador, por lo que puede causar problemas y poner el sistema bajo estrés si el juego de datos es grande, la memoria disponible es limitada, o una condición de los dos factores de forma simultanea. 
 ```
 
 El que vemos es un archivo muy primitivo y donde nos conviene usar el poder de `read.table()` para que *R* nos devuelva una estructura ordenada.
 
-```{r ejemploReadTable()}
+```{r ejemploReadTable(), warning=FALSE, message=FALSE}
 # veamos en que directorio estamos
 getwd()
 
@@ -249,7 +249,7 @@ for(i in 1:dim(nombres)[1]) {
 
 El valor de cada columna viene sin nombre y R le asigna V1, V2… Vx. Usar este formato es cómodo para hacer búsquedas dentro de los índices.
 
-```{r ejemploBusquedaArchivoTable}
+```{r ejemploBusquedaArchivoTable, warning=FALSE, message=FALSE}
 library(data.table)
 nombres <- read.table("nombres.txt")
 nombres[nombres$V2 == "sobrino", ]
@@ -361,3 +361,159 @@ plot(datosCastores$V3, datosCastores$V4, main = "Muestras Temp. Corp.",
 boxplot(datosCastores$V4, main = "Resumen Temp. Corp")
 ```
  
+## Leer Archivos CSV
+El formato CSV (del inglés Comma Separated Value) es común en todo tipo de entornos, quizás por su sencillez de estructura y el poco peso de sus archivos. Exportar juegos de datos a formato CSV es un método repetido y seguro de compartir información a través de múltiples plataformas, lenguajes y sistemas operativos. Si bien vimos algo de data en archivos CSV, este tipo de formato es tan común que muchas veces conviene leerlo en su estructura natural.
+
+El lenguaje _R_ utiliza la función `read.csv()` con la siguiente sintaxis:
+
+`read.csv(file, header = FALSE, sep = "", quote = "", na.strings = "NA")`
+
+La cantidad de parámetros totales es mucho más grande que la que listamos aquí, pero ciertamente estos son los que se usan el 99% de los casos. 
+
+* `file` es el nombre del archivo que deseamos utilizar, y es conveniente para mantener legibilidad del código entre plataformas de SO ponerlo entre comillas dobles. 
+
+* `header` es una bandera (flag) que indica si la primera fila del archivo tiene o no los nombres de las variables. El valor por omisión es `FALSE` ya que generalmente este tipo de archivo es para listas sencillas de datos, pero se puede fijar a `TRUE` en caso de que el archivo que se maneje si llegara a tener una fila con los encabezamientos. 
+
+* `sep` es el parámetro que fija el separador entre campos. Si el archivo está separado por comas, no hay ni siquiera que agregarlo, y lo contradictorio de la función es que se puede fijar para leer espacios en blanco como separadores con `sep = ""`. Esto último también acepta como separadores caracteres de tabulación y de línea nueva (ENTER).
+
+* `quote` es el parámetro para alternar entre comillas y no comillas. Es preferible no tocarlo, pero en caso de querer obviar comillas en campos alfanuméricos se puede fijar como `quote = ""`. 
+
+* `na.strings = "NA"` fija por omisión el valor *NA* como el de datos no disponibles. Pudiera existir la posibilidad de que algún sistema o software utilice algún otro valor o denominador y se tenga que cambiar el valor del parámetro. 
+
+```{marginfigure}
+El formato CSV también se puede leer con la función `read.table()` y es una de esas áreas donde el lenguaje _R_ solapa funciones y usos. Sin embargo `read.table()` transforma directamente a formato _data frame_, y pudieramos querer mantener el archivo como está para simplificar análisis, o redireccionar el resultado a algún programa que debe leerlo como CSV. 
+```
+
+Podemos utilizar la función `read.csv()` con el archivo `lotes.csv` como hicimos en el ejemplo de la función `read.table()`.
+
+```{r ejemploReadCSV_2}
+data_lotes <- read.csv("lotes.csv")
+head(data_lotes)
+```
+
+## Leer Archivos de EXCEL
+Existe una noción dentro de la Ciencia de Datos que un científico de datos debe evitar el uso de EXCEL. Inclusive dentro de la comunidad de la Ciencia de Datos, hay activistas vocales contra el uso de la hoja de cálculo. Las razones para tales aseveraciones están fundamentadas en cinco puntos principales [@smith].
+
+```{marginfigure}
+Es importante conocer las debilidades de EXCEL en cuanto a la Ciencia de Datos. Al mismo tiempo es importante reconocer que casi todas las empresas del mundo usan EXCEL porque es mucho más sencillo armar una hoja de cálculo en EXCEL que programar la misma estructura de datos en un lenguaje científico. Los autores del libro utilizan EXCEL de forma diaria y para ciertas labores no tiene reemplazo por su sencillez de uso y rapidez de despliegue de prototipos. Aquí lo importante como científicos de datos es utilizar la data que otros crearon en EXCEL, un recurso precioso, y no preocuparse por las bondades o falta de ellas de EXCEL al momento de diseñar modelos complejos de análisis estadístico.
+```
+
+1. Reproducibilidad: un análisis de ciencia de datos debe ser reproducible y si bien esto es posible en EXCEL, la herramienta no se diseño con la reproducción de experimentos en mente. 
+2. Control de Versión: la hoja de cálculo tiene herramientas para registrar los cambios pero no un verdadero control de versiones, el cual solo es posible con programas como *Git* o *Subversion*.
+3. Test: es difícil programar tests en EXCEL para que con cada cambio de juegos de datos se detecten errores en la programación o la experimentación. 
+4. Mantenimiento: algunas investigaciones científicas pueden durar años o décadas. El mantenimiento del código de un programa privado se dificulta versus la flexibilidad de un lenguaje de programación Open Source. 
+5. Precisión: EXCEL tiene precisión muy exacta para ciertos campos y disciplinas, pero no lo suficiente para la Ciencia de Datos. Un ejemplo es la falta de precisión al momento de analizar gramaticalmente formatos de fecha. 
+
+```{marginfigure}
+Los autores recomiendan la libreria `readxl` diseñada por Hadley Wickham y Jennifer Bryan, ambos del equipo de RStudio, ya que es una biblioteca independiente de otras fuentes. Existen otras opciones, pero hemos encontrado que hay muchos conflictos entre sistemas operativos y las dependencias de las mismas.  
+```
+
+No importa de que lado del campo del debate se esté la realidad es que hay millones de hojas de cálculo con información disponible en EXCEL y tarde o temprano el científico de datos tendra que leer datos de las mismas. La forma de hacer esto es utilizando la biblioteca externa _xlsx_ para leer hojas de cálculo. 
+
+La mejor forma de hacer esto es con la libreria `readxl()`. La función funciona muy bien con muy pocos parámetros según la siguiente sintáxis:
+
+`read_excel(file, sheet = pestaña, range = un_rango)`
+
+donde 
+
+* `file` es el nombre del archivo entre comillas
+* `sheet =` es la forma de fijar el parámetro de pestaña a abrir de existir múltiples en una hoja de cálculo. En caso de existir múltiples pestañas pero no tener nombres (ejemplo: Sheet1, Sheet2, y sucesivo) se puede utilizar el número natural de la hoja como en `range = 2`.
+* `range =` es el rango de celdas a leer dentro de la hoja y pestaña de EXCEL. Estos pueden expresarse como un rango natural (ejemplo: "A1:D10") e inclusive se puede obviar el parámetro de pestaña y especificar todo en el rango (ejemplo: "Sheet1!A1:D10").
+
+El comando puede funcionar bien sin más que el nombre de la hoja de cálculo en el caso de que solo exista información en una sola pestaña. Es importante recordar que para manipular columnas de la hoja de datos, utilizar la nomenclatura `datos$columna`. Por ejemplo, en el script de ejemplo `mean(gastos$GASTOS)` retorna el promedio de gastos del juego de datos, pero `mean(gastos)` devuelve un error. 
+
+```{r ejemploReadXL, warning=FALSE, message=FALSE}
+library(readxl)
+ventas <- read_excel("ventas.xlsx", sheet = "2017")
+boxplot(ventas$VENTAS, main = 
+          "Ventas por Territorio 2017")
+
+gastos <- read_excel("ventas.xlsx", range = "2018!C1:C6")
+mean(gastos$GASTOS)
+```
+
+
+
+## Leer Archivos XML
+El formato XML es una forma extensible de lenguaje _mark-up_, usado muy frecuentemente para guardar datos, sobre todo en los entornos de Internet y aplicaciones relacionadas con la web [@leek]. Es importante entender el formato XML no solo por el incremento en su uso, sino porque es la base de las técnicas de _web scrapping_, o la extracción de datos de los sitios web. 
+
+Los archivos XML tienen dos componentes. 
+
+a. El código *mark-up* que son las etiquetas que le dan estructura
+b. El contenido en si mismo
+
+Este libro no es un manual de XML, pero en línea general existen etiquetas denominadas _tags_ que cumplen con la función de demarcar donde empiezan y terminan las estructuras. 
+
+* _start tags_ de comienzo como `<section>` para el comienzo de una sección
+* _end tags_ de final como `</section>` para el final de una sección
+* _tags_ vacíos para etiquetas de comentario como `<line-break />`
+
+Los elementos son el contenido específico de los _tags_ como por ejemplo:
+
+`<Sexo>macho</Sexo>`
+
+Los atributos son los componentes de la etiqueta:
+
+`<img src="imagen.png" alt="imagen" />`
+
+La mejor forma de leer archivos XML es con la librería externa `XML`. Esta librería utiliza la función `xmlTreeParse()` para cargar un documento XML y crear un análisis sintáctico en forma de árbol con los elementos del mismo (conocido en inglés como _parsing a file_). La segunda función es `xmlRoot()` la cual toma el objeto que analizó la función `xmlParseTree()` y lo aloja en un nuevo objeto empaquetado que se puede manipular y traversar libremente. Pensemos en `xmlRoot()` como un objeto del tipo `wrapper` al cual podemos acceder en _R_ ubicando las diferentes ramas como índices del tipo `[[1]]`.
+
+Transversar las ramas de un archivo XML es mucho más fácil con funciones que a simple vista, ya que la estructura _mark-up_ facilita la asimilación para los lenguajes y las máquinas pero no necesariamente para los humanos. Veamos un ejemplo simple con un archivo XML hipotético de inventarios de carros como el que figura a continuación.
+
+```
+<inventario>
+  <carro>
+    <nombre>Sedan</nombre>
+    <precio>1000</precio>
+  </carro>
+  <carro>
+    <nombre>SUV</nombre>
+    <precio>2000</precio>
+  </carro>
+    <carro>
+    <nombre>Coupe</nombre>
+    <precio>4000</precio>
+  </carro>
+</inventario>
+```
+Podemos cargar en memoria el archivo y acceder a sus componentes de la siguiente manera. 
+
+```{r ejemploReadXML}
+library(XML)
+documento <- xmlTreeParse("inventario.xml", useInternal = TRUE)
+DocumentoNodo <- xmlRoot(documento)
+
+# Ver nombre del archivo maestro
+xmlName(DocumentoNodo)
+
+# Ver nombre de los contenidos
+names(DocumentoNodo)
+
+# Ver el primer auto
+DocumentoNodo[[1]]
+
+# Ver solo el precio del tercer auto
+DocumentoNodo[[3]][[2]]
+
+```
+
+Como podemos ver las funciones son poderosas para rápidamente leer archivos XML y extraer valores y estructuras, sino fuera por el hecho de que extraemos no solo el valor, sino la etiqueta que acompaña (por ejemplo `DocumentoNodo[[3]][[2]]` retorna `<precio>4000</precio>` cuando probablemente solo queremos el valor `4000`). La librería _XML_ prevé esto y nos permite utilizar la función `xmlSApply()` para justamente solo extraer valores de los nodos de los archivos XML. La sintáxis de la función es la siguiente. 
+
+`xmlSApply(nodoRoot, valorXML)`
+
+donde:
+
+* el parámetro 
+
+
+## Leer Archivos JSON
+
+
+## Leer Archivos SQL
+
+
+## Leer Archivos HDF5
+
+
+## (Muy) Breve Introducción Web Scraping 
+
