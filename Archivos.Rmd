@@ -586,8 +586,44 @@ str(dataJSON)
 dataJSON$menu$popup
 ```
 
-
 ## Leer Archivos SQL
+```{marginfigure}
+La historia de MySQL es una llena de ventas y adquisiciones, algo inusual para el Open Software. El motor de la base de datos fue inicialmente desarrollado por MySQL AB (empresa fundada por David Axmark, Allan Larsson y Michael Widenius). MySQL AB fue adquirida por Sun Microsystems en 2008, y ésta a su vez fue comprada por Oracle Corporation en 2010, la cual ya era dueña desde 2005 de Innobase Oy, empresa finlandesa desarrolladora del motor InnoDB para MySQL.
+```
+
+MySQL es un sistema de gestión de bases de datos relacional desarrollado bajo licencia dual: Licencia pública general/Licencia comercial por Oracle Corporation y está considerada como la base datos de código abierto más popular del mundo, y una de las más populares en general junto a Oracle y Microsoft SQL Server, sobre todo para entornos de desarrollo web [@MySQL]. 
+
+La estructura de una base de datos MySQL está dividida en:
+
+* bases de datos
+* tablas que componen las bases de datos
+* campos que componen las tablas
+
+En el lenguaje de MySQL las líneas de un archivo de llaman registros. 
+
+No es la intención de este libro explicar como se maneja MySQL, porque inclusive el más pequeño de los tutoriales pudiera ocupar un capítulo por si solo. Por esa razón solo nos concentraremos en las funciones y librerías de _R_ necesarios para manejar y leer archivos en MySQL. Asumimos que el lector es proficiente en manejar `queries` en SQL para comprender los siguientes pasos. 
+
+La librería externa para manejar bases de datos MySQL en el lenguaje _R_ es `RMySQL`. A diferencia de otras librerías donde la data se lee en una estructura del lenguaje, posiblemente una lista o un _data frame_, la librería de MySQL tiene opciones muy básicas para inyectar comandos de SQL directamente a la misma. Si se cuentan con las credenciales necesarias, es posible abrir una conección a la base de datos, emitir un _query_, y luego cerrar la conexión, todo con un mínimo de comandos en _R_ y algo de comandos nativos en SQL.  
+
+```{marginfigure}
+NOTA DE ETICA DE INVESTIGACION: Siempre se debe ser respetuoso de las bases de datos públicas, sobre todo las bases de datos académicas, y no abusar con la lectura innecesaria de datos o las conexiones abiertas. Como científicos debemos utilizar los accesos públicos con responsabilidad, y cerrar todas las conexiones que dejemos abiertas tan pronto se finalice la sesión de investigación.
+```
+
+El siguiente ejemplo lee de la base de datos de genomas de la Universidad de California, Santa Cruz, y extrae una lista de las tablas que figuran actualmente [@leek].
+
+```{r readUCSC, warning=FALSE, message=FALSE, cache=TRUE}
+library(RMySQL)
+ucscDB <- dbConnect(MySQL(), user = "genome", 
+      host = "genome-mysql.cse.ucsc.edu")
+basesDatos <- dbGetQuery(ucscDB, "show databases")
+head(basesDatos)
+dbDisconnect(ucscDB)
+```
+
+Varias cosas están pasando en el _script_ anterior, más o menos emocionantes dependiendo de la experiencia del científico con bases de datos relacionales. 
+
+* La primera línea del código instala en memoria la librería externa `RMySQL`
+* abre una conexión a la base de datos de genomas de UCSC 
 
 
 ## Leer Archivos HDF5
