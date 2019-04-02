@@ -499,14 +499,92 @@ DocumentoNodo[[3]][[2]]
 
 Como podemos ver las funciones son poderosas para rápidamente leer archivos XML y extraer valores y estructuras, sino fuera por el hecho de que extraemos no solo el valor, sino la etiqueta que acompaña (por ejemplo `DocumentoNodo[[3]][[2]]` retorna `<precio>4000</precio>` cuando probablemente solo queremos el valor `4000`). La librería _XML_ prevé esto y nos permite utilizar la función `xmlSApply()` para justamente solo extraer valores de los nodos de los archivos XML. La sintáxis de la función es la siguiente. 
 
-`xmlSApply(nodoRoot, valorXML)`
+`xmlSApply(nodoRoot, nodo, valorXML)`
 
 donde:
 
-* el parámetro 
+* el parámetro `nodoRoot` es la variable donde se ha leído y extraído el arbol del contenido XML (incluyendo el análisis gramatical).
+* el parámetro `nodo` es el tipo de nodo que queremos extraer utilizando patrones determinantes de nodos en el árbol XML
+* el parámetro `xmlValue` extrae el valor del nodo especificado en el archivo `nodoRoot`
 
+```{marginfigure}
+Si el lector piensa que transversar un árbol XML parece complicado, no lo es tanto como que la sintáxis es complicada. La implementación de XML tiene sus pormenores, pero en su expresión más sencilla no dejan de ser archivos de texto con etiquetas para señalar de forma inequívoca su estructura.
+```
+
+Los patrones determinantes son opciones de expresiones que nos permiten conducir la busqueda a través de los nodos del árbol XML. Hay cuatro principales que estaremos utilizando en este texto.
+
+| Expresión                         | Valor                                           |
+|-----------------------------------|-------------------------------------------------|
+| /nodo                             | Nodo Principal                                  |
+| //nodo                            | Nodo en cualquier nivel                         |
+| nodo[@nombre_atributo]            | Nodo con nombre del atributo                    |
+| nodo[@nombre_atributo = 'Carlos'] | Nodo con nombre del atributo y valor específico |
+
+Los siguientes ejemplos sirven para despejar dudas sobre la implemetación de búsquedas transversando un árbol XML.
+
+```{r ejemploReadXML_2, warning=FALSE, message=FALSE}
+library(XML)
+documento <- xmlTreeParse("inventario.xml", useInternal = TRUE)
+DocumentoNodo <- xmlRoot(documento)
+
+# Revisar que carros hay disponibles
+xpathSApply(DocumentoNodo, "//carro", xmlValue)
+
+# Revisar que precios hay disponibles
+xpathSApply(DocumentoNodo, "//precio", xmlValue)
+
+# Revisar que carros hay disponible por precios menores a 3,000
+xpathSApply(DocumentoNodo, "/inventario/carro[precio < 3000]/nombre", xmlValue)
+
+```
+
+Hemos de notar que en todos los ejemplos anteriores la función nos devuelve cadenas de caracteres ( _strings_ ) como respuesta. El analista quizás tenga que transformar tipos de caracteres a numérico para utilizar los valores en otro paso de la cadena de análisis. 
 
 ## Leer Archivos JSON
+JSON (del inglés _JavaScript Object Notation_,  o notación de objeto de JavaScript) es un formato de texto sencillo para el intercambio de datos. Se trata de un subconjunto de la notación literal de objetos de _JavaScript_, aunque, debido a su amplia adopción como alternativa a XML, se considera un formato de lenguaje independiente.
+
+```{marginfigure}
+Si bien se tiende a considerar JSON como una alternativa a XML, lo cierto es que no es infrecuente el uso de JSON y XML en la misma aplicación; así, una aplicación de cliente que integra datos de Google Maps con datos meteorológicos en SOAP necesita hacer uso de ambos formatos.
+```
+
+Hay varias ventajas que han popularizado el uso de JSON como formato de intercambio de data.
+
+* Es una formato de muy bajo peso
+* Tiene un formato común para acumular datos en diferentes API's
+* Tiene una estructura similar a XML pero con sintáxis diferente
+
+Utilicemos como ejemplo el archivo de muestra de la página Wikipedia de JSON [@JSON].
+
+```
+{
+    "menu": {
+        "id": "file",
+        "value": "File",
+        "popup": {
+            "menuitem": [
+                {
+                    "value": "New", "onclick": "CreateNewDoc()"
+                },{
+                    "value": "Open", "onclick": "OpenDoc()"
+                },{
+                    "value": "Close", "onclick": "CloseDoc()"
+                }
+            ]
+        }
+    }
+}
+```
+La forma de leer archivos del tipo *JSON* es con la librería externa `jsonlite` y la función `fromJSON()`, la cual es muy fácil de utilizar simplemente pasando como parámetro el nombre del archivo que se quiere extraer. 
+
+```{r ejemploReadJSON, warning=FALSE, message=FALSE}
+library(jsonlite)
+dataJSON <- fromJSON("ejemploJSON.json")
+names(dataJSON)
+
+str(dataJSON)
+
+dataJSON$menu$popup
+```
 
 
 ## Leer Archivos SQL
