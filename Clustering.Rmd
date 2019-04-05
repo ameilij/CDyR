@@ -1,0 +1,88 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: no
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# CLASIFICACION Y CLUSTERING
+Una tarea común en el mundo de la ciencia de datos es la reducción de información númerica en juegos más pequeños de números. Estos métodos estadísticos no son de mucha ayuda cuando se trata de data categorizada, como por ejemplo aquella que proviene de las encuestas. Algunos métodos buscan convertir variables discretas en númericas, como por ejemplo el uso de variables comodín (en inglés _dummy variables_). Habiendo dicho esto, es preferible pensar detalladamente el diseño de estudio y análisis que tratar de adaptar una metodología matemática a la fuerzas [@daroczi].
+
+Cuando analizamos una muestra y nos enfocamos en un segmento de la población a través de variables categóricas, es probable que no nos interesen los casos particulares sino la tendencia de la masa. Las investigaciones de estudios sociales donde la encuesta es una herramienta del diseño de captación de datos utilizan mucho este enfoque deductivo de pasar de lo general a lo particular. 
+
+El análisis de clustering o agrupamientos es un método de análisis de datos no-supervisado que se utiliza en muchos campos, sobre todo en la farmacología, el reconocimiento de patrones, y las ciencias sociales. El foco del análisis de agrupamiento es la confección de subconjuntos homogeneos llamados _clusters_ dentro de los cuales todos los elementos pertenecientes son similares, pero diferentes entre los otros _clusters_ de la muestra. 
+
+## Clustering Jerárquico
+El análisis de _clusters_ es una de las metodologías más conocidas de agrupamiento. Existen múltiples tipos y algoritmos de agrupamiento, que miden la densidad, puntos centrales, distribución y otros de los puntos de datos. 
+
+El *Agrupamiento Jerárquico* o *Hierarchical Clustering* puede ser aglomerante o divisivo. 
+
+* El agrupamiento aglomerante funciona definiendo el elemento del subgrupo más cercano; luego los demás elementos se van aglomerando de forma iterativa a los otros subgrupos, hasta el punto que no puede haber más optimización. El problema con estos métodos es que la distancia entre elementos se calcula con cada iteración, lo que los hace lentos y caros en recursos (ciclos del procesador, tiempo, etc.) Es poco recomendable utilizar estos métodos en juegos de datos pesados, inclusive con procesadores veloces. 
+
+* El agrupamiento divisivo tiene un enfoque de arriba hacia abajo; comienza con un solo subgrupo y este se subdivide hasta que no queda división posible. 
+
+```{marginfigure}
+A partir de este punto utilizaremos el término _cluster_ en vez de agrupamiento para referirnos a la metodología de clasificación y agrupación solo con el afán de mejor asociarlo con la función `hclust()`.
+```
+
+La librería externa del lenguaje _R_ `stats` contiene la función `hclust()` para la creación de _clusters_. Esta función toma como parámetro no el juego de datos en si, sino la matriz de distancias que se crea con el juego de datos a través de otra función asociada, `dist()`. La función `dist()` toma como parámetros solamente el juego de datos. Veamos un ejemplo con el juego de datos de automóviles `mtcars`. 
+
+```{marginfigure}
+Un dendrograma es un tipo de representación gráfica o diagrama de datos en forma de árbol que organiza los datos en subcategorías que se van dividiendo en otros hasta llegar al nivel de detalle deseado (asemejándose a las ramas de un árbol que se van dividiendo en otras sucesivamente). Este tipo de representación permite apreciar claramente las relaciones de agrupación entre los datos e incluso entre grupos de ellos aunque no las relaciones de similitud o cercanía entre categorías. Observando las sucesivas subdivisiones podemos hacernos una idea sobre los criterios de agrupación de los mismos, la distancia entre los datos según las relaciones establecidas, etc. También podríamos referirnos al dendrograma como la ilustración de las agrupaciones derivadas de la aplicación de un algoritmo de clustering jerárquico (Wikimedia 2019).
+```
+
+
+```{r ejemploHClust, warning=FALSE, message=FALSE}
+library(stats)
+distancia <- dist(mtcars)
+subgrupo <- hclust(distancia)
+subgrupo
+
+# Cuadro de Agrupamiento
+plot(subgrupo)
+
+```
+
+Si bien el dendograma nos da una idea muy completa de los diferentes subgrupos, en la vida real tener demasiados subgrupos no nos puede aportar la solución ideal. Existe una variante de la función `hclust()`, llamada `rect.hclust()` que nos retorne $k$ subgrupos ideales para análisis agregando tan solo un par de parámetros: el valor de $k$ y el color del borde que el gráfico utiliza para visualizar la solución. 
+
+```{r ejemploHClust2, warning=FALSE, message=FALSE}
+library(stats)
+distancia <- dist(mtcars)
+subgrupo <- hclust(distancia)
+plot(subgrupo)
+
+# Cuadro de Agrupamiento con k = 5
+rect.hclust(subgrupo, k = 5, border = "green")
+
+```
+
+Definitivamente la capacidad de imprimir un dendograma es de por sí impresionante, sin embargo cuando las poblaciones y subgrupos crecen, visualmente no hay forma de distinguir o sacar conclusiones claras del cuadro. En tales casos es preferible tabular la pertenencia a subgrupos a través de un vector de la información, de la siguiente manera:
+
+```{r ejemploCutTree, warning=FALSE, message=FALSE}
+library(stats)
+distancia <- dist(mtcars)
+subgrupo <- hclust(distancia)
+
+subgrupo_vector <- cutree(subgrupo, k = 5)
+subgrupo_vector
+
+```
+
+En cualquier momento se puede simplificar el listado de elementos con la función `table()`.
+
+```{r tableHCLust}
+table(subgrupo_vector)
+```
+
+El vector que producimos es mucho más importante para reducir y deducir las diferencias entre subgrupos del árbol. Esto puede no ser muy autoevidente, pero el siguiente código utiliza la función `agregate()` con el parámetro
+
