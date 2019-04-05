@@ -1,6 +1,6 @@
 ---
 title: "Ciencia de Datos y R"
-subtitle: "IntroducciÛn a la Ciencia de Datos con Lenguaje R"
+subtitle: "Introducci√≥n a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
 output: tint::tintHtml
@@ -16,29 +16,29 @@ options(htmltools.dir.version = FALSE)
 ```
 
 # CLASIFICACION Y CLUSTERING
-Una tarea com˙n en el mundo de la ciencia de datos es la reducciÛn de informaciÛn n˙merica en juegos m·s pequeÒos de n˙meros. Estos mÈtodos estadÌsticos no son de mucha ayuda cuando se trata de data categorizada, como por ejemplo aquella que proviene de las encuestas. Algunos mÈtodos buscan convertir variables discretas en n˙mericas, como por ejemplo el uso de variables comodÌn (en inglÈs _dummy variables_). Habiendo dicho esto, es preferible pensar detalladamente el diseÒo de estudio y an·lisis que tratar de adaptar una metodologÌa matem·tica a la fuerzas [@daroczi].
+Una tarea com√∫n en el mundo de la ciencia de datos es la reducci√≥n de informaci√≥n n√∫merica en juegos m√°s peque√±os de n√∫meros. Estos m√©todos estad√≠sticos no son de mucha ayuda cuando se trata de data categorizada, como por ejemplo aquella que proviene de las encuestas. Algunos m√©todos buscan convertir variables discretas en n√∫mericas, como por ejemplo el uso de variables comod√≠n (en ingl√©s _dummy variables_). Habiendo dicho esto, es preferible pensar detalladamente el dise√±o de estudio y an√°lisis que tratar de adaptar una metodolog√≠a matem√°tica a la fuerzas [@daroczi].
 
-Cuando analizamos una muestra y nos enfocamos en un segmento de la poblaciÛn a travÈs de variables categÛricas, es probable que no nos interesen los casos particulares sino la tendencia de la masa. Las investigaciones de estudios sociales donde la encuesta es una herramienta del diseÒo de captaciÛn de datos utilizan mucho este enfoque deductivo de pasar de lo general a lo particular. 
+Cuando analizamos una muestra y nos enfocamos en un segmento de la poblaci√≥n a trav√©s de variables categ√≥ricas, es probable que no nos interesen los casos particulares sino la tendencia de la masa. Las investigaciones de estudios sociales donde la encuesta es una herramienta del dise√±o de captaci√≥n de datos utilizan mucho este enfoque deductivo de pasar de lo general a lo particular. 
 
-El an·lisis de clustering o agrupamientos es un mÈtodo de an·lisis de datos no-supervisado que se utiliza en muchos campos, sobre todo en la farmacologÌa, el reconocimiento de patrones, y las ciencias sociales. El foco del an·lisis de agrupamiento es la confecciÛn de subconjuntos homogeneos llamados _clusters_ dentro de los cuales todos los elementos pertenecientes son similares, pero diferentes entre los otros _clusters_ de la muestra. 
+El an√°lisis de clustering o agrupamientos es un m√©todo de an√°lisis de datos no-supervisado que se utiliza en muchos campos, sobre todo en la farmacolog√≠a, el reconocimiento de patrones, y las ciencias sociales. El foco del an√°lisis de agrupamiento es la confecci√≥n de subconjuntos homogeneos llamados _clusters_ dentro de los cuales todos los elementos pertenecientes son similares, pero diferentes entre los otros _clusters_ de la muestra. 
 
-## Clustering Jer·rquico
-El an·lisis de _clusters_ es una de las metodologÌas m·s conocidas de agrupamiento. Existen m˙ltiples tipos y algoritmos de agrupamiento, que miden la densidad, puntos centrales, distribuciÛn y otros de los puntos de datos. 
+## Clustering Jer√°rquico
+El an√°lisis de _clusters_ es una de las metodolog√≠as m√°s conocidas de agrupamiento. Existen m√∫ltiples tipos y algoritmos de agrupamiento, que miden la densidad, puntos centrales, distribuci√≥n y otros de los puntos de datos. 
 
-El *Agrupamiento Jer·rquico* o *Hierarchical Clustering* puede ser aglomerante o divisivo. 
+El *Agrupamiento Jer√°rquico* o *Hierarchical Clustering* puede ser aglomerante o divisivo. 
 
-* El agrupamiento aglomerante funciona definiendo el elemento del subgrupo m·s cercano; luego los dem·s elementos se van aglomerando de forma iterativa a los otros subgrupos, hasta el punto que no puede haber m·s optimizaciÛn. El problema con estos mÈtodos es que la distancia entre elementos se calcula con cada iteraciÛn, lo que los hace lentos y caros en recursos (ciclos del procesador, tiempo, etc.) Es poco recomendable utilizar estos mÈtodos en juegos de datos pesados, inclusive con procesadores veloces. 
+* El agrupamiento aglomerante funciona definiendo el elemento del subgrupo m√°s cercano; luego los dem√°s elementos se van aglomerando de forma iterativa a los otros subgrupos, hasta el punto que no puede haber m√°s optimizaci√≥n. El problema con estos m√©todos es que la distancia entre elementos se calcula con cada iteraci√≥n, lo que los hace lentos y caros en recursos (ciclos del procesador, tiempo, etc.) Es poco recomendable utilizar estos m√©todos en juegos de datos pesados, inclusive con procesadores veloces. 
 
-* El agrupamiento divisivo tiene un enfoque de arriba hacia abajo; comienza con un solo subgrupo y este se subdivide hasta que no queda divisiÛn posible. 
+* El agrupamiento divisivo tiene un enfoque de arriba hacia abajo; comienza con un solo subgrupo y este se subdivide hasta que no queda divisi√≥n posible. 
 
 ```{marginfigure}
-A partir de este punto utilizaremos el tÈrmino _cluster_ en vez de agrupamiento para referirnos a la metodologÌa de clasificaciÛn y agrupaciÛn solo con el af·n de mejor asociarlo con la funciÛn `hclust()`.
+A partir de este punto utilizaremos el t√©rmino _cluster_ en vez de agrupamiento para referirnos a la metodolog√≠a de clasificaci√≥n y agrupaci√≥n solo con el af√°n de mejor asociarlo con la funci√≥n `hclust()`.
 ```
 
-La librerÌa externa del lenguaje _R_ `stats` contiene la funciÛn `hclust()` para la creaciÛn de _clusters_. Esta funciÛn toma como par·metro no el juego de datos en si, sino la matriz de distancias que se crea con el juego de datos a travÈs de otra funciÛn asociada, `dist()`. La funciÛn `dist()` toma como par·metros solamente el juego de datos. Veamos un ejemplo con el juego de datos de automÛviles `mtcars`. 
+La librer√≠a externa del lenguaje _R_ `stats` contiene la funci√≥n `hclust()` para la creaci√≥n de _clusters_. Esta funci√≥n toma como par√°metro no el juego de datos en si, sino la matriz de distancias que se crea con el juego de datos a trav√©s de otra funci√≥n asociada, `dist()`. La funci√≥n `dist()` toma como par√°metros solamente el juego de datos. Veamos un ejemplo con el juego de datos de autom√≥viles `mtcars`. 
 
 ```{marginfigure}
-Un dendrograma es un tipo de representaciÛn gr·fica o diagrama de datos en forma de ·rbol que organiza los datos en subcategorÌas que se van dividiendo en otros hasta llegar al nivel de detalle deseado (asemej·ndose a las ramas de un ·rbol que se van dividiendo en otras sucesivamente). Este tipo de representaciÛn permite apreciar claramente las relaciones de agrupaciÛn entre los datos e incluso entre grupos de ellos aunque no las relaciones de similitud o cercanÌa entre categorÌas. Observando las sucesivas subdivisiones podemos hacernos una idea sobre los criterios de agrupaciÛn de los mismos, la distancia entre los datos seg˙n las relaciones establecidas, etc. TambiÈn podrÌamos referirnos al dendrograma como la ilustraciÛn de las agrupaciones derivadas de la aplicaciÛn de un algoritmo de clustering jer·rquico (Wikimedia 2019).
+Un dendrograma es un tipo de representaci√≥n gr√°fica o diagrama de datos en forma de √°rbol que organiza los datos en subcategor√≠as que se van dividiendo en otros hasta llegar al nivel de detalle deseado (asemej√°ndose a las ramas de un √°rbol que se van dividiendo en otras sucesivamente). Este tipo de representaci√≥n permite apreciar claramente las relaciones de agrupaci√≥n entre los datos e incluso entre grupos de ellos aunque no las relaciones de similitud o cercan√≠a entre categor√≠as. Observando las sucesivas subdivisiones podemos hacernos una idea sobre los criterios de agrupaci√≥n de los mismos, la distancia entre los datos seg√∫n las relaciones establecidas, etc. Tambi√©n podr√≠amos referirnos al dendrograma como la ilustraci√≥n de las agrupaciones derivadas de la aplicaci√≥n de un algoritmo de clustering jer√°rquico (Wikimedia 2019).
 ```
 
 
@@ -47,42 +47,74 @@ library(stats)
 distancia <- dist(mtcars)
 subgrupo <- hclust(distancia)
 subgrupo
-
 # Cuadro de Agrupamiento
 plot(subgrupo)
-
 ```
 
-Si bien el dendograma nos da una idea muy completa de los diferentes subgrupos, en la vida real tener demasiados subgrupos no nos puede aportar la soluciÛn ideal. Existe una variante de la funciÛn `hclust()`, llamada `rect.hclust()` que nos retorne $k$ subgrupos ideales para an·lisis agregando tan solo un par de par·metros: el valor de $k$ y el color del borde que el gr·fico utiliza para visualizar la soluciÛn. 
+Si bien el dendograma nos da una idea muy completa de los diferentes subgrupos, en la vida real tener demasiados subgrupos no nos puede aportar la soluci√≥n ideal. Existe una variante de la funci√≥n `hclust()`, llamada `rect.hclust()` que nos retorne $k$ subgrupos ideales para an√°lisis agregando tan solo un par de par√°metros: el valor de $k$ y el color del borde que el gr√°fico utiliza para visualizar la soluci√≥n. 
 
 ```{r ejemploHClust2, warning=FALSE, message=FALSE}
 library(stats)
 distancia <- dist(mtcars)
 subgrupo <- hclust(distancia)
 plot(subgrupo)
-
 # Cuadro de Agrupamiento con k = 5
 rect.hclust(subgrupo, k = 5, border = "green")
-
 ```
 
-Definitivamente la capacidad de imprimir un dendograma es de por sÌ impresionante, sin embargo cuando las poblaciones y subgrupos crecen, visualmente no hay forma de distinguir o sacar conclusiones claras del cuadro. En tales casos es preferible tabular la pertenencia a subgrupos a travÈs de un vector de la informaciÛn, de la siguiente manera:
+Definitivamente la capacidad de imprimir un dendograma es de por s√≠ impresionante, sin embargo cuando las poblaciones y subgrupos crecen, visualmente no hay forma de distinguir o sacar conclusiones claras del cuadro. En tales casos es preferible tabular la pertenencia a subgrupos a trav√©s de un vector de la informaci√≥n, de la siguiente manera:
 
 ```{r ejemploCutTree, warning=FALSE, message=FALSE}
 library(stats)
 distancia <- dist(mtcars)
 subgrupo <- hclust(distancia)
-
 subgrupo_vector <- cutree(subgrupo, k = 5)
 subgrupo_vector
-
 ```
 
-En cualquier momento se puede simplificar el listado de elementos con la funciÛn `table()`.
+En cualquier momento se puede simplificar el listado de elementos con la funci√≥n `table()`.
 
 ```{r tableHCLust}
 table(subgrupo_vector)
 ```
 
-El vector que producimos es mucho m·s importante para reducir y deducir las diferencias entre subgrupos del ·rbol. Esto puede no ser muy autoevidente, pero el siguiente cÛdigo utiliza la funciÛn `agregate()` con el par·metro
+El vector que producimos es mucho m√°s importante para reducir y deducir las diferencias entre subgrupos del √°rbol. Esto puede no ser muy autoevidente, pero el siguiente c√≥digo utiliza la funci√≥n `agregate()` con el par√°metro `by = list(subgrupo_vector)` para agrupar y resumir con el mismo n√∫meros de nodos del arbol que elejimos en el agrupamiento jer√°rquico con $k = 5$.
+
+```{marginfigure}
+En los siguientes cap√≠tulos inevitablemente comenzaremos a introducir _hacks_ que no siempre tienen sentido didactico pero funcionan muy bien en el lenguaje _R_. El ejemplo activo utiliza la funci√≥n `round()` simplemente para reducir el n√∫mero de decimales y tener una mejor funci√≥n de impresi√≥n por pantalla. de la misma forma transforma los resultados del vector `subgrupo_vector` en una lista para que pueda ser interpretada por la funci√≥n `aggregate()`, sino fallar√≠a en la selecci√≥n.
+```
+
+```{r ejemploAggregateClustering}
+round(aggregate(mtcars, FUN = mean, by = list(subgrupo_vector)), 1)
+```
+
+Existe una gran cantidad de teor√≠a detr√°s de porque cinco y no cuatro subgrupos para agrupar. Sin embargo el libro se trata de una introducci√≥n, y dejamos al lector con la inquietud por si quiere profundizar en los aspectos matem√°ticos mayores detr√°s del _clustering_ jer√°rquico. 
+
+## K-Means Clustering (K-Medias)
+K-Means (o en castellano K-medias) es un m√©todo de agrupamiento, que tiene como objetivo la partici√≥n de un conjunto de n observaciones en k grupos en el que cada observaci√≥n pertenece al grupo cuyo valor medio es m√°s cercano. Es un m√©todo utilizado en miner√≠a de datos [@k-means]. La ventaja de K-Means sobre el _clustering_ jer√°rquico es una de desempe√±o y velocidad [@daroczi]. A diferencia del _clustering_ jer√°rquico, el an√°lisis de agrupamiento de _K-Means_ requiere que uno seleccione a priori el n√∫mero de subgrupos - _clusters_ - deseado. El algoritmo b√°sicamente corre en cuatro pasos. 
+
+1. Se inicializa un n√∫mero $k$ predefinido de puntos centrales aleatorios en el espacio llamados centroides
+2. Se asigna cada elemento al subgrupo m√°s cercano perteneciente al punto central aleatorio (centroide)
+3. Se vuelven a calcular los puntos centrales (centroides)
+4. Se repite el paso dos y tres hasta llegar al punto convergente
+
+La funci√≥n del lenguaje _R_ que vamos a utilizar para el agrupamiento _K-Means_ es `kmeans()`, tambi√©n del paquete `stats`. Para tal fin la funci√≥n `kmeans()` solo necesita que pasemos como par√°metros el conjunto de datos, y el n√∫mero de subgrupos de inicio. Continuaremos el ejemplo con `mtcars` y $k = 5$.
+
+```{r ejemploKMeans}
+library(stats)
+k_grupos <- kmeans(mtcars, 5)
+k_grupos
+
+```
+
+Siendo un paquete mucho m√°s avanzado, `kmeans()` retorna un an√°lisis completo, incluyendo los promedios de los cinco subgrupos para cada variable, el vector resumido, y algunos indicativos estad√≠sticos adicionales en los que no vamos a profundizar en este libro. Para graficar el resultado del agrupamiento, debemos utilizar la funci√≥n `clusplot()` de la librer√≠a `cluster`. Esta funci√≥n es preferida porque reduce las dimensiones a dos y facilita la visualizaci√≥n. 
+
+```{r graficaKMeans}
+library(cluster)
+clusplot(mtcars, k_grupos$cluster, color = TRUE, shade = TRUE, labels = 2)
+```
+
+
+
+
 
