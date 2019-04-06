@@ -3,7 +3,7 @@ title: "Ciencia de Datos y R"
 subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
-output: tint::tintBook
+output: tint::tintHtml
 bibliography: skeleton.bib
 link-citations: yes
 ---
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
 options(htmltools.dir.version = FALSE)
 ```
 
-#Data Frame
+# Data Frame
 
 ```{marginfigure}
 En cierta forma los data frame son muy similares a una matriz o una lista, pero la mejor analogía a veces es pensar en datos guardados como una pequeña hoja de cálculo. 
@@ -209,3 +209,30 @@ equipo
 
 equipo[-4, ]
 ```
+
+## Creando Tablas Cruzadas con Data Frames
+
+La estructura de los _data frame_ puede ser muy util al momento de crear tablas cruzadas con resultados tabulados de información. Utilicemos el juego de datos de `UCBAdmissions` para tabular el número de personas admitidas y rechazadas por la universidad descriminado por género. Para esto utilizaremos la función `xtabs` que funciona de la siguiente manera:
+
+`xtabs(variable_1 ~ variable2 + variable3 + ... + variableN, data = un_data_frame )`
+
+donde
+
+* la variable `variable1` es la variable sobre la que se va a contar las ocurrencias para armar la tabla cruzada
+* las variable `variable2` es la variable sobre la cual se descriminará la cuenta en las líneas
+* la variable `variable3` es la variable sobre la cual se descriminará la cuenta de las columnas
+* la variable `variableN` son ene variables adicionales de selección 
+* la fuente de datos es un _data frame_ asignado a `data = ...`
+
+Aunque es totalmente válido agregar una relación de más de tres variables en una tabla cruzada, *R* generará una tabla adicional a partir de la cuarta variable que no necesariamente aclara mucho el análisis. A menos que el científico de datos quiera que el lenguaje retorne múltiples tablas cruzadas, esto puede generar más datos que información.   
+
+```{r ejemploCrossTabs}
+data("UCBAdmissions")
+admisiones <- as.data.frame(UCBAdmissions)
+summary(admisiones)
+
+# crear tabla cruzada
+tabla_cruzada <- xtabs(Freq ~ Gender + Admit, data = admisiones)
+tabla_cruzada
+```
+

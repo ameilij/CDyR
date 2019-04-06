@@ -623,11 +623,38 @@ dbDisconnect(ucscDB)
 Varias cosas están pasando en el _script_ anterior, más o menos emocionantes dependiendo de la experiencia del científico con bases de datos relacionales. 
 
 * La primera línea del código instala en memoria la librería externa `RMySQL`
-* abre una conexión a la base de datos de genomas de UCSC 
+* La segunda línea abre una conexión a la base de datos de genomas de UCSC utilizando el usuario y anfitrión (_host_) de acceso público.
+* La tercera línea guarda en la variable `basesDatos` los resultados que arroja la función `dbGetQuery(ucscDB, "show databases")`. Esta función utiliza dos parámetros. El primero es la base de datos con la que se abrió la conexión, y el segundo es el comando _SQL_ que se desea ejecutar. En el fondo la función es muy útil pero no deja de ser un simple interface para correr _queries_ de _SQL_ en _R_.
+* La quinta línea cierra la conexión con la base de datos. 
 
+Probablemente sepamos a ciencia cierta que base de datos queremos acceder, y podemos entonces especificar una base de datos y conseguir todas sus tablas asociadas. 
 
-## Leer Archivos HDF5
+```{r readUCSC2, warning=FALSE, message=FALSE, cache=TRUE}
+library(RMySQL)
+ucscDB_hg19 <- dbConnect(MySQL(), user = "genome", db = "hg19",
+      host = "genome-mysql.cse.ucsc.edu")
+tablas_hg19 <- dbListTables(ucscDB_hg19)
+tablas_hg19[1:5]
+dbDisconnect(ucscDB_hg19)
+```
 
+Lo mismo aplica con la manipulación de cualquier base de datos. La forma de ejecutar un _query_ es construir una conexión con la base de datos, crear un _query_ como un objeto y utilizar la función `fetch()` para recuperar el resultado del _query_ en una variable. Se pueden desocupar los resultados del _query_ con la función `dbClearResult()` o sencillamente finalizar la conexión. El ejemplo siguiente utiliza una de las tablas de la base de datos `hg19` del mismo juego para analizar la distribución de desajustes [@leek]. 
 
-## (Muy) Breve Introducción Web Scraping 
+```{marginfigure}
+NOTA: dado que estamos pasando como objetos _strings_ completos con código _SQL_ es importante no equivocarse y pasar por error intentos de borrar, agregar o unir tablas sin una muy buena razón.
+```
+
+```{r readUCSC3, warning=FALSE, message=FALSE, cache=TRUE}
+library(RMySQL)
+library(ggplot2)
+ucscDB_hg19 <- dbConnect(MySQL(), user = "genome", db = "hg19",
+      host = "genome-mysql.cse.ucsc.edu")
+
+query <- dbSendQuery(ucscDB_hg19, "select * from affyU133Plus2 where
+                     misMatches between 1 and 3")
+
+affydata <- fetch(query)
+qplot(affydata$nCount, affydata$misMatches) + geom_jitter(alpha=0.5)
+dbDisconnect(ucscDB_hg19)
+```
 
