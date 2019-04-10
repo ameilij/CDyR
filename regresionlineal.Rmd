@@ -1,0 +1,308 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# Regresión Lineal
+La regresión lineal es el punto de entrada más sencillo de entender y aplicar en la Ciencia de Datos. Parte de esto se debe a que la regresión lineal es aplicable en muchos casos a una gran gama de problemas de predicción en los cuales el científico de datos cuenta con una base de datos o juego de datos lo suficientemente grande y accesible para entrenar un modelo [@daroczi]. La segunda razón es que un modelo bien entrenado de regresión lineal por lo general nos da una respuesta con cierto grado de precisión que da por cerrado el caso [@leek]. 
+
+El concepto en sí es relativamente sencillo de abstraer y explicar. En una visualización de datos donde un valor $y$ se corresponde con alguna relación del valor $x$, para cada $x$ y $y$, es posible trazar una línea que en cierta forma sea representativa del valor de predicción de $y$ para cada $x$. Esta línea puede no ser perfecta, o puede dejar muchos puntos sin una relación válida (a menos en el papel de gráfico) pero nos da una idea aproximada de la tendencia y evolución de los datos.
+
+```{r viewRegresionLineal}
+library(ggplot2)
+data(mtcars)
+ggplot(aes(y = disp, x = wt), data = mtcars) + 
+  geom_point() + 
+  geom_smooth(formula = y ~ x, method = "lm")
+```
+
+Zumel y Mount describen la regresión lineal como el más común de los métodos de aprendizaje automatizado [@zumelMount]. Para los autores hay una probabilidad muy grande que el método funcione bien con el problema, y si no, es muy fácil verificar cual otro método probar como segunda opción. Para Daroczi, el énfasis está en los modelos de regresión multivariable (una extensión de la regresión lineal simple de un solo predictor y resultado) que construyen el camino para la predicción de fenómenos complejos en la naturaleza y negocios [@daroczi]. Por su parte, Harrington resume los beneficios de la regresión lineal [@harrington] por la facilidad de interpretar los resultados y lo frugal en el uso de ciclos de computación (aunque puede ser menos útil si el fenómeno no es perfectamente lineal).
+
+## Definición de Regresión Lineal
+Downey describe la regresión lineal como aquella que está basada en modelos de funciones lineales [@thinkStats]. Para Mann y Lacke la regresión lineal es aquella que se da como una función lineal entre dos variables, y la cual se puede dibujar en el plano cartesiano como una recta [@intoStats7]. Yau por su lado, define la regresión lineal simple como el modelo que describe la relación entre dos variables, $x$ y $y$, expresada por la ecuación de regresión lineal, donde $\alpha$ y $\beta$ son parámetros y $\epsilon$ es el término de error [@yau]. Para García, López y Calvo, el primer paso para el estudio de la relación entre las variables consiste en la construcción y observación de un diagrama de dispersión. El problema de la regresión se concreta entonces en ajustar una función a la nube de puntos representada en dicho diagrama. Esta función permitirá entonces obtener, al menos de forma aproximada, una estimación del valor de una de las variables a partir del valor que tome la otra [@estadisticaBasica].
+
+La fórmula a la que hacemos referencia en la definición de Yau, y la que utilizan los otros autores, es la siguiente:
+
+\begin{equation}
+	Y_{i} = \beta_{0} + \beta_{1}X_{i} + \epsilon_{i}
+\end{equation}
+
+Dentro del aprendizaje automatizado la regresión tiene su propia interpretación donde se asume que el modelo está definido por un juego de parámetros [@alpaydin]:
+
+\begin{equation}
+	y = g(x \mid \theta)
+\end{equation}
+
+donde $g(.)$ es el modelo y $\theta$ son sus parámetros. $Y$ es un número dentro de una regresión y $g(.)$ es la función de la regresión. El programa de aprendizaje automatizado optimiza los parámetros $\theta$ de forma que el error de aproximación sea mínimo, o en otras palabras, que los valores estimados sean los más cercanos a los valores reales del juego de entrenamiento. 
+
+Los parámetros $\beta_{0}$ y $\beta_{1}$ determinan el punto en el que la función intercepta la la ordenada y la pendiente de la función. Podemos profundizar estos dos puntos aún más:
+
+* el punto de intercepción es la predicción del valor de $y$ cuando $x=0$. 
+* la pendiente $\beta_{1}$ representa la predicción del aumento de $y$ con cada unidad que incrementa $x$
+
+Notemos que las observaciones no están dispuestas en una línea recta, sino que se encuentran dispersas alrededor de esta. Debemos pensar de cada observación $\beta_{0} + \beta_{1}x_{i}$ como la parte sistemática del modelo, y $\epsilon_i$ como el error aleatorio. Este margen de error no es un error per se, pero una desviación del modelo lineal [@hyndman]. Asumimos que el factor de error cumple con los siguientes requisitos. 
+
+1. Tiene media cero
+2. No contiene autocorrelación
+3. No está relacionado con la variable predictor
+
+Se espera que la distribución de los errores sea normal con varianza constante para producir pronósticos precisos. 
+
+## Estimación con Mínimos Cuadrados
+En la práctica se tiene un juego de valores y no los mismos de $\beta_{0}$ y $\beta_{1}$. Estos necesitan ser calculados en base al juego de datos en lo que se conoce como el calce o ajuste de la linea a través de los datos. Hay muchas posibles líneas que calcen en el modelo con diferentes valores para $\beta_{0}$ y $\beta_{1}$. El método de mínimos cuadrados provee una forma de seleccionar valores para $\beta_{0}$ y $\beta_{1}$ minimizando la suma del error cuadrático [estadisticaBasica]:
+
+\begin{equation}
+	\sum_{i=1}^{N} \epsilon_{i}^{2} = \sum_{i=1}^{N}(y_{i} - \beta_{0} - \beta_{1}x_{i})^2
+\end{equation}
+
+Utilizando cálculo matemático, se ha demostrado que los estimados de los mínimos cuadrados son:
+
+\begin{equation}
+\begin{split}
+	\hat{\beta}_{1} &= \frac{\sum_{i=1}{N}(y_{i}-\bar{y})(x_{i} - \bar{x})}{\sum_{i=1}{N}(x_{i}-\bar{x})^2}\\
+	\hat{\beta}_{0} &= \bar{y} - \hat{\beta}_{1} \bar{x}\\
+\end{split}
+\end{equation}
+
+## Limitaciones de la Regresión Lineal
+Aunque el análisis de la regresión lineal y la derivación del coeficiente de correlación parecen un método muy adecuado para estudiar la relación entre dos variables, hay que indicar que tiene importantes debilidades [@estadisticaBasica]. En particular:
+
+* Tanto la recta de regresión como el coeficiente de correlación no son robustos, en el sentido de que resultan muy afectados por medidas particulares que se alejen mucho de la tendencia general.
+* No hay que olvidar que el coeficiente de correlación no es más que una medida resumen. En ningún caso puede substituir al diagrama de dispersión, que siempre habrá que construir para extraer más información. Formas muy diferentes de la nube de puntos pueden conducir al mismo coeficiente de correlación.
+* El que en un caso se obtenga un coeficiente de correlación bajo no significa que no pueda existir correlación entre las variables. De lo único que nos informa es de que la correlación no es lineal (no se ajusta a una recta), pero es posible que pueda existir una buena correlación de otro tipo.
+* Un coeficiente de correlación alto no significa que exista una dependencia directa entre las variables. Es decir, no se puede extraer una conclusión de causa y efecto basándose únicamente en el coeficiente de correlación. En general hay que tener en cuenta que puede existir una tercera variable escondida que puede producir una correlación que, en muchos casos, puede no tener sentido.
+
+## Resolviendo Regresión Lineal en R
+Quizás el primer punto de entrada para resolver problemas de regresión lineal en el lenguaje _R_ es entender, que como muchas cosas en el lenguaje, hay múltiples formas de encarar la solución. Una de las mejores es trabajar con todas las herramientas gráficas del lenguaje para descubrir de forma visual si existe o no una relación entre variables. Vamos a utilizar el juego de datos `cars` que contiene las variables `speed`, la velocidad de los carros, y la variable `dist`, que representa la cantidad de pies que recorrió el carro a dicha distancia para poder frenar. 
+
+```{r viewCars}
+data(cars)
+head(cars)
+```
+
+```{marginfigure}
+La función `qplot()` acepta múltiples parámetros, pero básicamente es una forma de generar un _quick plot_ sin tener que escribir múltiples lineas de capas de `GGPLOT2`. No ofrece gráficos muy complejos, pero lo compensa con poco código y resultados rápidos.
+```
+
+Aún con mucha experiencia ver los números no arroja grandes resultados. Utilicemos la librería `GGPLOT2` y el comando `qplot` que nos permite crear una gráfica rápida sin mucho código. 
+
+```{r warning=FALSE, message=FALSE}
+library(ggplot2)
+data(cars)
+qplot(speed, dist, data = cars) + geom_smooth(method="lm")
+```
+
+La función `qplot()` nos sale muy económica. Como parámetros le hemos pasado las variables de ordenada y abscisa, `speed` y `dist`, y le hemos indicado que busque la información en el juego de datos `cars`. Adicionalmente le hemos pedido una línea de tendencia de regresión lineal con `geom_smooth(method="lm")`. Nótese que hemos forzado que sea regresión lineal con `method="lm"` porque de otra forma la función quizás utilice otro método de regresión no lineal. 
+
+Otra forma de encarar el problema nos la dá el Científico de Datos Selva Prabhakaran, quien sugiere utilizar la función de graficar `scatter` para gráficos de dispersión, agregándole el método de tendencia con `.smooth()`. La gráfica es muy similar, y no hay que llamar a la librería `GGPLOT2`. Cualquier de las dos nos da una muy buena idea de la relación que existe entre ambas variables [@prabhakaran]. 
+
+```{r scatterLR}
+scatter.smooth(x=cars$speed, y=cars$dist, main="Dist ~ Speed")
+```
+
+El problema que enfrentamos es relativamente sencillo. Quizás con miles de puntos de datos se necesite una visualización mucho más compleja o alguna manera de manipular los niveles de transparencia del diagrama de dispersión con la opción de _alpha_. 
+
+Como científicos hemos de notar que en cualquiera de los dos cuadros existen claros indicios de correlación aunque la pendiente de la línea no nos dé una idea muy clara de que tan fuerte. Lo interesante de visualizar primero es descartar de una manera rápida si vale la pena o no extraer un modelo de regresión lineal o desechar la hipotesis en mano. 
+
+```{marginfigure}
+El coeficiente de correlación de Pearson mide la relación lineal entre dos variables aleatorias cuantitativas. La correlación de Pearson es independiente de la escala de medida de las variables, lo que permite tener comparaciones mucho más objetivas independiente del fenómeno estudiado.
+
+De manera menos formal, podemos definir el coeficiente de correlación de Pearson como un índice que puede utilizarse para medir el grado de relación de dos variables siempre y cuando ambas sean cuantitativas.
+
+\[R = \frac{\Sigma(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\Sigma(x_i - \bar{x})^2\Sigma(y_i - \bar{y})^2}}\]
+```
+
+La forma de evaluar la fortaleza de una relación entre dos variables es utilizar el coeficiente de correlación. En el lenguaje _R_ utilizamos la función `cor(y,x)` para rápidamente obtener el coeficiente de Pearson. Esta función sencillamente toma la variable independiente y dependiente para darnos el coeficiente de _Pearson_, también conocido como _valor r_:
+
+```{r coeficientePearson}
+cor(cars$dist, cars$speed)
+```
+
+El coeficiente de correlación en este caso es 0.81, que es un fuerte indicador de correlación entre variables pero no lo suficiente para sostener una hipótesis científica. 
+
+```{marginfigure}
+El coeficiente de determinación - denominado \(R^{2}\) - es un estadístico usado en el contexto de un modelo estadístico cuyo principal propósito es predecir resultados futuros o probar una hipótesis. El coeficiente determina la calidad del modelo para replicar los resultados, y la proporción de variación de los resultados que puede explicarse por el modelo. 
+
+En el caso de regresión lineal, la formula del coeficiente de determinación sigue la siguiente forma:
+
+\[R^{2} = \frac{\sigma^{2}_{XY}}{\sigma^{2}_{X}\sigma^{2}_{Y}}\]
+
+También se lo conoce como coeficiente de _Spearman_.
+```
+
+Otra medida interesante es el coeficiente de determinación o *coeficiente de Spearman*. A diferencia del coeficiente de correlación, este mide que porcentaje del modelo - la fórmula de la regresión lineal - explican las variables que intervienen. Comúnmente referido como $r^2$, nos ayuda a comprender que tanto podemos explicar del modelo con los datos a mano y la relación que extraimos entre variables dependiente e independiente. 
+
+La forma de obtenerlo en _R_ es simplemente elevar al cuadrado el valor de $r$.
+
+```{r coeficienteSpearman}
+cor(cars$dist, cars$speed) ^ 2
+
+```
+
+
+El valor $0.66$ significa que un 66% del modelo puede ser explicado por la variable independiente, o sea, un 66% de la distancia de freno puede ser explicado por la variable velocidad. 
+
+Conocer los coeficientes de correlación y determinación nos llevan a armar el modelo final. Para tal fin el lenguaje _R_ tiene una función que le quita mucho del dolor a tener que extraer el posible modelo a mano (o en hoja de cálculo). Se trata de la función `lm()` cuya sintáxis es la siguiente:
+
+```
+lm(formula, data, subset, weights, na.action,
+   method = "qr", model = TRUE, x = FALSE, y = FALSE, qr = TRUE,
+   singular.ok = TRUE, contrasts = NULL, offset, ...)
+```
+
+A pesar que la función acepta muchos parámetros, solo vamos a utilizar unos pocos, con los cuales podemos resolver el 90% de los problemas que investiguemos. 
+
+* `formula` es la fórmula que explica la relación entre variable dependiente e independiente y se describe en la función como un parámetro del tipo `y ~ x`. La fórmula puede inclusive acomodar una regresión lineal multivariable, agregando regresores con el operador `+` como en `y ~ x1 + x2 + ... + xn`. 
+
+* `data` es el juego de datos para someter al modelo de regresión lineal. 
+
+Altamente recomendamos utilizar solo estos parámetros a menos que el lector tenga un conocimiento profundo matemático y quiera utilizar pesos para modificar el modelo resultante. Los resultados de la función `lm()` es un objeto del tipo _lm_ o modelo lineal, o para múltiples respuestas de la clase `c("mlm", "lm")`. La mejor forma de trabajar con estos objetos en _R_ es asignarlos a una variable que los recoja y de la cual podemos extraer los contenidos de la solución con la función `summary()`.
+
+```{r regresionLineal}
+modelo <- lm(dist ~ speed, cars)
+summary(modelo)
+
+```
+
+Del reporte sumario del modelo de regresión lineal, podemos ver que cuando $x=0$, $y$ intercepta en el valor -17.58. El coeficiente $\beta$ es igual a 3.9324, y así armamos la ecuación de la regresión lineal como:
+
+$y = -17.5791 + (\beta * 3.9324)$
+
+
+El reporte sumario del modelo también nos presenta con información valiosa sobre la precisión estadística del mismo. 
+
+* Para la ordenada al origen (el punto de intercepción) y el coeficiente de la variable independiente, _R_ nos presenta no solo la estimación, sino el error estándar, el valor del estadístico $t$, y el valor de la probabilidad de que se de un valor $t$ de dicha magnitud. Estas últimas probabilidades tienen asociadas un código de tres a una estrella, que indica que nivel de significancia tiene la probabilidad de ser significativa. Recordemos que valores grandes de $t$ denota que es menos probable que el coeficiente no contenga cero meramente por azar. Cuando $t$ es más grande, el valor inferencial del coeficiente aumenta. Lo mismo ocurre cuando el valor $p$ de dicho coeficiente disminuye. Las estrellas denotan el nivel de significancia del valor $p$ para cada coeficiente, e idealmente debieran ser menor que el valor $\alpha$ escogido por el científico de datos para determinar la inferencia total del modelo. 
+
+* El sumario reporta el nivel de $r^2$ y $r^2$ ajustado. Se omite el reporte del valor de $r$ porque al fin y al cabo se obtienen los estadísticos $t$ y los valores $p$ asociados por coeficiente. 
+
+* El valor $p$ del modelo como un todo se reporta al final. 
+
+Muy probablemente nos encontremos en la necesidad de utilizar alguno de los coeficientes, y no todo el reporte sumario. El objeto creado por la función `lm()` contiene dicha información como campos asociados. 
+
+```{r showLMFields}
+modelo <- lm(dist ~ speed, cars)
+
+# coeficientes del modelo
+modelo$coefficients
+
+# formula del modelo
+modelo$call
+
+# valor r2
+summary(modelo)$r.squared
+
+# coeficientes del modelo completo
+summary(modelo)$coefficients
+```
+
+## Como Crear una Visualización de una Regresión Lineal
+Hemos visto como utilizar la librería `GGPLOT2` y el auxiliar de suavización `geom_smooth()`. Pero pudiera existir la necesidad de recrear la gráfica estipulando la fórmula del modelo como la línea de regresión lineal sobre el diagrama de dispersión con la data como fondo. 
+
+La solución es construir el gráfico en capaz. La primera es sencilla ya que solo implica el diagrama de dispersión que sirve de fondo. La segunda es la capa que agrega la recta de la regresión lineal, utilizando como pendiente el coeficiente de pendiente, y como intercepción, el coeficiente de intercepción, ambos que aprendimos a extraer en la sección arriba. El código correcto es el siguiente.  
+
+```{r plotLM}
+library(ggplot2)
+modelo <- lm(dist ~ speed, cars)
+
+ggplot(aes(x = speed, y = dist), data = cars) + 
+  geom_point() + 
+  geom_abline(slope = modelo$coefficients[2], 
+              intercept = modelo$coefficients[1], col = "red")
+
+```
+
+¿Qué tanto difiere hacer la gráfica a mano versus la opción de que _GGPLOT2_ la genere de forma automática? Abajo incluimos la misma gráfica con `geom_smooth()`. 
+
+```{r}
+library(ggplot2)
+modelo <- lm(dist ~ speed, cars)
+
+ggplot(aes(x = speed, y = dist), data = cars) + 
+  geom_point() + geom_smooth(formula = y ~ x, method = "lm")
+
+```
+
+Contrastando las dos gráficas podemos concluir que la diferencia es casi imperceptible, y que al utilizar `geom_smooth()` obtenemos de forma gratuita los intervalos de confidencia de la regresión. 
+
+## Como Visualizar Correlación entre Múltiples Variables
+La regresión lineal no está limitada a una variable dependiente y una sola variable independiente. Puede existir el caso donde una variable dependiente tiene una fuerte correlación con dos o más variables independientes. Esto se llama regresión múltiple. 
+
+Para Downey [@thinkStats], la regresión múltiple es aquella en la cual se utilizan múltiples variables independientes, pero una sola variable dependiente. El Dr. Tattar de la Universidad de Bangalore define que el modelo de regresión línea simple no es realista ni aplicable al mundo practico [@narayanachar]. Para aplicaciones más reales, es casi obligatorio el uso de modelos de regresión múltiple, en los cuales varias variables independientes se conjugan como parámetros de regresión. 
+
+La regresión multivariable no es un tema mayormente complicado en teoría cómo lo es en llevar a la práctica. No todos los ejemplos de regresiones multivariables nos van a llevar a funciones lineales, sino que estamos tocando el limite entre regresión lineal y métodos de regresión general con funciones no lineales que pueden necesitar de transformaciones matemáticas para obtener un modelo apropiado [@daroczi]. Aquí también se aplica la selección de un modelo con múltiples variables independientes y cuales conviene seleccionar [@viswanathan].
+
+La mayor parte de la teoría de esta sección sigue el desarrollo de la fórmula:
+
+\begin{equation}
+	Y_{i} = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \cdots + \epsilon_{i}
+\end{equation}
+
+Para medir el nivel de relación entre una variable de predicción y otra de respuesta sobra el modelo de regresión lineal tradicional. Pero si se trata de modelos modelos más complejos donde una serie de variables pueden estar afectando el resultado, es necesario utilizar un modelo multivariable. Una variable oculta [@estadisticaBasica] o confundidora [@daroczi] es aquella que sesga (incrementa o disminuye) el valor de la asociación que se analiza. En este sentido una variable confundidora siempre está asociada con la respuesta y el predictor. Los modelos de regresión en general se entienden como formas de medir la asociación entre respuestas y predictores controlando el efecto de terceros. Confundidores potenciales se agregan al modelo como predictores adicionales, y el coeficiente de regresión del predictor (el coeficiente parcial) mide el efecto de la regresión ajustada por los confundidores [@daroczi].
+
+Visualizar una regresión múltiple potencial es realmente sencillo con _R_. Existen dos formas muy cómodas de hacerlo. La primera es usando la función `plot()`. Si se trata de un juego de datos cuyas variables son en su mayoría numérica, la función opta por visualizar una matriz de diagramas de dispersión de variables emparejadas, o en otras palabras, múltiples diagramas de dispersión entre las variables que conforman el juego de datos del que resulta fácil ver a simple vista cuales son candidatos en potencia para una regresión múltiple. 
+
+```{r plotMultipleRegression}
+data(mtcars)
+plot(mtcars)
+```
+
+La segunda manera, y quizás por su espectacularidad la favorita de muchos, es usar un correlograma. El correlograma nos permite visualizar los niveles de correlación entre variables emparejadas de un mismo juego de datos, de forma que aquellas con una fuerte correlación saltan a la vista fácilmente. 
+
+```{r}
+library(corrplot)
+data(mtcars)
+correlacion_mtcars <- cor(mtcars)
+corrplot(correlacion_mtcars, method = "color",
+         type="upper",  
+         addCoef.col = "black", # Add coefficient of correlation
+         tl.col="black", tl.srt=45, #Text label color and rotation
+         # hide correlation coefficient on the principal diagonal
+         diag=FALSE
+)
+```
+
+* La forma de utilizar el gráfico correlograma es invocando el paquete `corrplot`. 
+
+* En vez de utilizar como parámetro el juego de datos mismo, pasamos un objeto que es la matriz de correlaciones emparejadas del juego de datos. Si bien esto suena complicado, es tan fácil como invocar `correlacion_mtcars <- cor(mtcars)`. El comando utilizará las capacidades de vectorización del lenguaje para devolver un objeto del tipo _data frame_ con todos los índices de correlación necesarios. 
+
+* En el ejemplo hemos escogido la opción de gráfico en colores con el parámetro `method = "color"`, pero existen varias opciones, desde solo números para una gráfica más sencilla hasta pequeñas gráficas de torta para cada índice. 
+
+* La línea `type="upper"` solo visualiza una mitad de la matriz. En realidad la segunda mitad son las mismas variables pero al reves, por lo que no tiene mucho sentido visualizarlas y en la mayoría de los casos se ignoran. 
+
+* Para poder ver claramente los coeficientes de correlación agregamos la opción `addCoef.col = "black"`. Si no se agrega, el gráfico emite diferentes tonos de color, azul para correlaciones positivas y rojo para correlaciones negativas. La intencidad del color nos da una idea de que tan fuerte es la correlación entre las dos variables. Si la matriz de correlación es grande, quizás convenga solo ver colores y marear al científico con cientos de coeficientes. 
+
+* Los colores de las etiquetas de las variables y el grado de impresión se ajusta con `tl.col="black", tl.srt=45`. En nuestro ejemplo hemos impreso etiquetas en color negro con un ángulo de 45 grados, pero si se omite esta opción la función por lo general imprime las etiquetas de forma sencilla y legible. 
+
+* Finalmente utilizamos la opción `diag=FALSE` para no imprimir la diagonal de las variables emparejadas con si mismas. Esta es la línea de identidad que siempre da 1 y no aporta información útil al análisis. 
+
+## Analizando una Regresión Lineal Multivariable
+Si utilizamos el correlograma o la gráfica de dispersión de variables emparejadas, ¿cómo pasamos de esto a una calzar un modelo con una regresión múltiple? La diferencia entre una regresión con una sola variable y con múltiples variables es como se hace la llamada a la fórmula. En una regresión sencilla expresamos la condición de `y ~ x`, mientras que en una múltiple solo tenemos que agregar los coeficientes adicionales que queremos analizar utilizando la notación `y ~ x1 + x2 + ... + xn`. 
+
+Tomando el correlograma del juego de datos `mtcars` podemos ver que hay una fuerte correlación de desplazamiento (`disp`), la de caballos de fuerza (`hp`) y la de peso (`wt`). Esto no es descabellado, mientras más pesa un motor es probable que más caballos de fuerza tenga y que mayor sea su poder de desplazamiento. Podemos entonces inferir que el desplazamiento es una variable dependiente de las variables independientes de caballos de fuerza y peso. Probemos esta pequeña hipótesis creando un modelo y revisando sus estadísticos. 
+
+```{r testMultipleRegression}
+data(mtcars)
+hipotesis <- lm(disp ~ wt + hp, data = mtcars)
+summary(hipotesis)
+
+```
+
+Cuando revisamos los resultados resumidos del modelo vemos que la fórmula del modelo es:
+
+$disp = -129.9506 + wt(82.1125) + hp(0.6578)$
+
+El coeficiente de determinación o $r^2$ es 0.8635, medianamente alto, y el valor $p$ es de 2.889e-13, lo cual es __muy bajo__, por lo que nuestro modelo múltiple de regresión lineal parece bien encaminado para la predicción futura del desplazamiento de un motor dado su peso y caballos de fuerza. 
+
+
