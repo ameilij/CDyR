@@ -1,0 +1,254 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# Series de Tiempo
+Muchos autores han escrito sobre las series de tiempo, pero es difícil agregar al tema o discutir las ideas del profesor Robert Hyndman, uno de los expertos más respetados en la comunidad de la estadística por su trabajo en las series de tiempo. Hyndman extiende la teoría a las series de tiempo como elementos de pronóstico y su relación con la regresión lineal [@hyndman]. Desde el punto de vista técnico, Hyndman es el creador de varias bibliotecas de funciones de pronostico utilizando series de tiempo y ARIMA en lenguaje _R_. Dentro de la bibliografía, Daroczi es quien agrega detalles sobre la detección temprana de valores atípicos que pueden dificultar, y mucho, el análisis [@daroczi].
+
+## Introducción a las Series de Tiempo
+Las series de datos son muy útiles para pronosticar algo que cambia con el tiempo. Ejemplos de estas cantidades que varían con el tiempo incluyen acciones en la bolsa de valor, cifras de ventas, y otro tipo de información cuantitativa [@hyndman].
+
+Una serie de tiempo es una serie de datos indexada en orden temporal. Comúnmente una serie de datos es una secuencia de datos tomados a puntos sucesivos y equidistantes en el tiempo, lo que la convierte en una secuencia de datos discretos en el tiempo. En forma general cualquier cosa que observamos secuencialmente en el tiempo es una serie de tiempos [@hyndman]. La literatura académica se concentra en series de tiempo que se observan en intervalos regulares de tiempo, aunque aquellas que se observan en intervalos irregulares también existen. 
+
+El análisis de las series de tiempo es el uso de métodos para extraer estadísticas interesantes y otras características de los datos. El pronóstico de series de tiempo es el uso de modelos para predecir valores futuros basados en valores observados en el pasado. En el pronóstico de series de tiempo, la idea principal es estimar cómo la secuencia de observaciones continuará en el futuro. El pronóstico de series de tiempo utiliza solamente información de la variable a ser pronosticada, y no hace intento alguno de descubrir cuales son los factores que motivan este comportamiento (en análisis de regresión diríamos que buscamos las variables de confusión). Por lo tanto el análisis de series de tiempo extrapola la tendencia secular y los patrones cíclicas, pero ignora todo otro tipo de información que puede afectar el movimiento de la variable estudiada, como pueden ser en la vida real efectos de la publicidad en el lanzamiento de un producto, la tasa de cambio en las ventas, o actividades de riesgo en el precio internacional de materias primas. 
+
+Podemos ver un ejemplo de serie de tiempo si tomamos los valores de la TRM (la Tasa Representativa de Mercado, el nombre oficial de la tasa de cambio del dólar en Colombia) en la siguiente gráfica:
+
+![Ejemplo de Pronóstico con Descomposición STL (Fuente Hyndman and Athanasopoulos)](timeSeries1.png)
+
+La línea negra es la variación de la TRM a lo largo del tiempo (en este caso, desde el año 1980 hasta el 2017). La línea azul es el pronóstico del valor de la TRM según la función `forecast()` del lenguaje _R_. La zona gris comprenden el intervalo de confianza del pronóstico, la cual nos da una idea más real de como puede fluctuar el pronóstico dentro del mismo.
+
+La forma de una ecuación de series de tiempo se puede escribir en los siguientes términos:
+
+\[ x_{(t+1)} = f(x_t, x_{t-1}, x_{t-2}, \ldots, error) \]
+
+Es posible utilizar predictores en el pronóstico de series de tiempo, la cual estimamos es el resultado de varios factores:
+
+\[ TRM = f(demandaDolar, tasaInterés,turismo,error) \]
+
+La relación no es exacta, sino que siempre habrá factores por lo cuales el modelo no puede responder. Estas variaciones están previstas en el término error dentro del modelo. Este tipo de modelo se llama _modelo explanatorio_. 
+
+Las series de tiempo se suelen catalogar en aditivas y multiplicativas. 
+
+* Las *series aditivas* son aquellas cuya variación en la estacionalidad, o variación en el ciclo o tendencia secular, no aumentan de forma proporcional al avance del tiempo.
+* Las *series multiplicativas* son aquellas cuya variación en la estacionalidad, o variación en el ciclo o tendencia secular, aumentan de forma proporcional al avance del tiempo. Las series multiplicativas son comunes en ciencias como la economía y finanzas.
+
+## Como Crear Series de Tiempo en R
+El lenguage _R_ nos provee con la función `ts()` para la creación de series de tiempo. La sintáxis de uso es la siguiente. 
+
+```
+una_serie_tiempo <- ts(vector_data, start=c(YYYY, MM), end=c(YYYY, MM), frequency=una_frecuencia)
+```
+
+Una serie de tiempo es un elemento muy sencillo de entender pero quizás la estructura de la misma nos complique visualizar como nacen, ya que las identificaciones de tiempo para cada punto de datos están construidas implicitamente en la serie de tiempo, y no en variables. Si pensamos en una serie de tiempo en una serie de datos que denotan algo importante en el tiempo, por ejemplo los valores de lluvia en la República de Panamá entre los años 2004 al 2013, es solamente un vector de valores, en este caso 10 valores. El puntero que maneja el factor tiempo para cada punto de datos lo maneja como parte de la estructura de datos _R_ al fabricar una serie de tiempos. 
+
+```{r makeTS}
+# PRECIPITACION ANUAL MAXIMA PANAMA 2004 AL 2013
+# FUENTE: Instituto Nacional Estadistica y Censo
+
+precipitacion <- c(7000,6200,6500,5800,6800,
+                   6300,7600,6250,7200,8400)
+
+precipitacion_ts <- ts(precipitacion, start = c(2004,1), 
+                       frequency = 1)
+plot(precipitacion_ts)
+```
+Repasemos la forma en la que hemos construido la serie de tiempo. 
+
+* La génesis fue crear un vector de datos contenido en la variable `precipitacion` donde se alojan las mediciones de precipitación anual en milimetros de lluvia en la República de Panamá para los años 2004 al 2013.
+* Luego creamos una serie de datos llamada `precipitacion_ts` con la función `ts()` y le pasamos como parámetro de datos el vector `precipitacion`. 
+* Para seguir la fabricación de la serie de tiempo debemos especificar el punto de partida. Esto lo hacemos al indicar que es el primer mes del año 2004 con el parámetro `start = (2004, 1)` donde se detalla año y mes. Podemos en cualquier momento utilizar solo un número si queremos un período contenido en una sola categoría (por ejemplo solo nos interesa medir trimestres del uno al cien, no importa el año) o dos cifras para mediciones con dos categorías (trimestre y año, o en nuestro caso año y mes). El punto de partida solo asume dos enteros, por lo tanto las series de tiempo de clase `ts` no aceptan puntos de partida con un dia en específico, aunque si lo registran si la frecuencia son períodos de 365 días. 
+* El toque final es fijar la serie de tiempo como anual (perìodos anuales) con el parámetro de frecuencia. Esto se hace en `frequency = 1` que equivale a decir que cada punto de datos es un punto de la serie de tiempo. Si quisieramos series mensuales, se estipula `frequency = 12`, semanales `frequency = 52`, etc. 
+
+Aquí cabe mencionar que las series de tiempo tienen mucha matemática y estadistica detrás, pero no son flexibles en el sentido que debemos tener información que quepa de forma prolija dentro de las estructuras de las mismas. Por ejemplo, la serie de tiempo sabe cuando un mes tiene 30 o 31 días, sin embargo debemos prever que si no somos cuidadosos, vamos a incurrir en problemas de data faltante, necesidad de imputación de datos, y otros similares. Existen miles de bases de datos en el mundo con series de tiempo públicas, pero no hay garantía en la consistencia de las estructuras o que estén bien hechas. Bien se puede dar el caso de series de datos con estructuras diferentes (que luego se utilizan en tándem y no grafican nada útil) o con datos faltantes (que suelen dar dolores de cabeza cuando se quiere estimar proyecciones).
+
+Si se intenta extraer un período de una serie de tiempo, hay que hacerlo con la función `window()` y no con los métodos tradicionales, ya que es probable que solo obtengamos un vector de números y no un sunconjunto de una serie de datos con punteros de fechas. La función `windows()` tiene un formato similar a la función `ts()`, solo que en vez de tomar como parámetro un vector de datos toma una serie de tiempo para crear un subconjunto. 
+
+```
+subconjunto_ts <- window(serie_original, start=c(YYYY, MM), 
+  end=c(YYYY, MM)) 
+```
+
+```{marginfigure}
+La función `window()` arroja error si alguna de las fechas de comienzo o final son erróneas. Por ejemplo si queremos crear subconjuntos antes o después de las fechas válidas de la serie de tiempo original.
+```
+
+Repasemos los elementos:
+
+* La función `window()` toma como parámetro inicial una serie de tiempos `serie_original`.
+* Las fechas de comienzo y final de ajustan con los parámetros `start=c(YYYY, MM), end=c(YYYY, MM)`
+
+Tomenos la serie original `precipitacion_ts` y veamos como ha sido la precipitación anual del 2005 al 2010 solamente. 
+
+```{marginfigure}
+En todos los ejemplos estamos pasando como fuente de datos una serie de tiempo a la función `plot()` lo cual es una forma rápida aunque no muy estética de visualizar series de tiempo. No existe una manera sencilla de visualizar series de tiempo en `GGPLOT2`. Todos los tutoriales en Internet transforman la serie en formato _data frame_, lo que es funcional pero le quita a la serie de tiempo sus valores intrínsecos de estudio. Sugerimos utilizar la función base hasta el momento del reporte final, y luego transformar una sola vez cuando se tenga en claro que se desea detallar en el gráfico. 
+```
+
+```{r subsetTS}
+# PRECIPITACION ANUAL MAXIMA PANAMA 2004 AL 2013
+# FUENTE: Instituto Nacional Estadistica y Censo
+
+precipitacion <- c(7000,6200,6500,5800,6800,
+                   6300,7600,6250,7200,8400)
+
+precipitacion_ts <- ts(precipitacion, start = c(2004,1), 
+                       frequency = 1)
+
+subconjunto_ts <- window(precipitacion_ts, start = c(2005,1),
+                         end = c(2010,1))
+
+plot(subconjunto_ts)
+
+```
+
+## Patrones
+Los pronósticos con series de tiempo utilizan solamente la información disponible de la variable que se propone pronosticar, sin hacer intento alguno por descubrir los factores adicionales que condicionan su comportamiento. Por lo tanto se extrapolan las tendencias y patrones temporales, pero se ignora toda la información adicional como pueden ser iniciativas de publicidad, actividad de la competencia, cambios en las condiciones económicas y otros [@hyndman].
+
+Las series de tiempo pueden descomponerse según su patrón o tendencia en tres elementos que las componen [Velazco, M., 2017]. A saber:
+
+1. *Tendencia Secular:* la tendencia secular o tendencia a largo plazo de una serie de tiempo es por lo común el resultado de factores a largo plazo. La tendencia no tiene porque ser lineal. Además es común ver que la tendencia cambia de dirección, ascendente o descendente.
+2. *Variación Estacional:* Es el componente de la serie de tiempo que representa la variabilidad de los datos debido a la influencia de las estaciones. El componente de estacionalidad es siempre fijo.
+3. *Variación Irregular:* Esta variación se debe a factores a corto plazo, imprevisibles, y no recurrentes que afectan la serie de tiempo. Algunos autores llaman a estas variaciones _cíclicas_. 
+
+Es importante saber distinguir entre los patrones cíclicos y estacionales. Los patrones estacionales tienen una duración fija y conocida en su extensión, mientras que los patrones cíclicos son mucho más extensos que los patrones estacionales y la duración de su magnitud es variable. La forma más sencilla es identificar los ciclos de estación con el calendario, por ejemplo los aumentos de tráfico en los centros comerciales en las fiestas de fin de año. 
+
+## Descomposición de Series de Tiempo
+La descomposición de las series de tiempo facilita el análisis y la investigación exploratoria de los datos. Una de las formas mas sencillas de lograr esto es la aplicación de promedios móviles, lo cual se facilita mucho en _R_ con el uso de la función `decompose()` [@daroczi].
+
+Pensemos en la serie de tiempo $y_t$ compuesta por tres factores: un componente estacional, un componente de tendencia (que contiene tanto tendencia secular como cíclica) y un último componente que contiene cualquier otro resto de información importante. Podemos entonces escribir una serie de tiempos aditiva como:
+
+\[ y_t = S_t + T_t + E_t \]
+
+donde $y_t$ es la data en el período $t$, $S_t$ es el componente estacional en el período $t$, $T_t$ es el componente de tendencia-ciclo en el período $t$, y $E_t$ es el componente de error en el período $t$. De forma alternativa podemos escribir una ecuación similar para los modelos de series de datos multiplicativos como:
+
+\[ y_t = S_t * T_t * E_t  \]
+
+El modelo aditivo es más apropiado si la magnitud de las fluctuaciones estacionales o la variación alrededor del ciclo o tendencia no varía con los niveles de la serie de tiempo (ejemplo: el avance del tiempo). Cuando la variación se da, o sea es proporcional con el avance del tiempo en la serie, un modelo multiplicativo es más apropiado. Este es el caso de la mayoría de las series de tiempo en la economía.
+
+Existen múltiples métodos de descomposición de series de tiempo. En nuestro marco teórico tocaremos brevemente los de promedios móviles, promedios móviles ponderados, STL, suavizar exponencialmente, y ARIMA. Para analizar series de tiempo en el lenguaje _R_, nos concentraremos solo en _STL_ y _ARIMA_. 
+
+El método _STL_ es muy versátil y robusto para la descomposición de series de tiempo. Su nombre es el acrónimo en inglés de _Seasonal and Trend Descomposition using Loess_, que significa descomposición de estacionalidad y tendencia utilizando Loess. Loess es un método para estimar relaciones no-lineales desarrollado por Cleveland et al [@hyndman]. Las desventajas de _STL_ es su manejo de cierta data financiera (como por ejemplo días de comercio bursátil) y las variaciones de calendario. La biblioteca de _R_ tiene una función que descompone automáticamente una serie de datos utilizando STL, la función _STL()_.
+
+La descomposición STL se utiliza más que nada para estudiar las series de tiempo, pero tiene aplicación en pronosticar. Asumiendo una descomposición aditiva, la serie de tiempo descompuesta se puede escribir como:
+
+\[ y_{t} = \hat{S}_t + \hat{A}_t \]
+
+donde $\hat{A}_t = \hat{T}_t + \hat{E}_t$ es el componente ajustado por estacionalidad. Si se trata de una serie multiplicativa entonces la misma ecuación se puede escribir como: 
+
+\[ y_{t} = \hat{S_t}\hat{A_t}\]
+
+para $\hat{A}_t = \hat{T}_t\hat{E}_t$. 
+
+```{marginfigure}
+La función `stl()` es el acrónimo de __Seasonal Decomposition of Time Series by Loess__ que en inglés significa _descomposición de series de tiempo periódicas por Loess_. Loess a su vez es en realidad LOESS (del inglés __locally estimated scatterplot smoothing__), métodos propuesto por el matemático Cleveland.
+```
+
+El lenguaje _R_ provee una forma sencilla de hacer descomposición de series de tiempo a través de la función `stl()`. Dicha función toma como parámetros una serie de tiempo y la ventana de descomposición. La serie de datos a descomponer se explica por si solo, pero la ventana de descomposición tiene ciertas reglas. 
+
+* La más sencilla es solo colocar "periodic" y dejar que la función utilice el intervalo del período natural de la serie de tiempo. 
+* Para un cálculo más metódico se puede introducir la brecha de retrasos para la extracción. Este número - de acuerdo a las reglas de LOESS - debe ser mayor a 7 e impar.
+
+Todo esto conviene _envolverlo_ en una llamada a la función genérica `plot()` para ver una gráfica. De lo contrario la función arroja varios vectores de cálculo de tendencias y temporadas, pero nada fácil de visualizar y sacar conclusiones. Probemos un ejemplo con el juego de datos __nottem__, que contiene las temperaturas promedio mensuales de Nottingham, entre los años 1920 al 1939.
+
+```{r ejemploSTL}
+data("nottem")
+plot(stl(nottem, "periodic"))
+```
+
+Ahora que tenemos un modelo descompuesto de la serie de tiempo con el método __LOESS__, podemos utilizar este con la librería `forecast` para pronosticar valores futuros de la serie de tiempo. 
+
+```{r forecastSTL}
+library(forecast)
+data("nottem")
+modelo <- stl(nottem, "periodic")
+
+proyeccion <- forecast(modelo, h = 5)
+plot(proyeccion)
+```
+Lo que hemos logrado es utilizar la descomposición STL como modelo predictivo. Con muy pocas líneas de código hemos logrado bastante, por lo que es conveniente explicar a fondo cada una de estas. 
+
+* Primero cargamos la librería `forecast`, trabajo del Dr. Hyndmann [@packageForecast]. Entrar en detalles sobre los elementos disponibles de esta librería cubriría más material que los que podemos incluir en este libro de introducción, por lo que solo tocaremos la superficie del mismo. 
+
+* En segundo lugar cargamos el juego de datos `nottem` y creamos un modelo que es la descomposición STL del mismo juego. 
+
+* En tercer lugar, utilizamos la función `forecast()` del paquete para pronosticar las temperaturas promedio de Nottingham en los próximos cinco meses. Utilizamos como parámetros solamente el modelo y la ventana de protección, en este caso `h = 5` para significar 5 meses. Habremos de notar que el modelo ya incluye los datos del juego de datos, por lo que no hay necesidad de incluirlo como parámetro.
+
+Para revisar el pronóstico sin visualizaciones, es suficiente el siguiente código:
+
+```{r viewForecast}
+proyeccion
+```
+
+
+Los modelos ARIMA son otro enfoque para el pronóstico de series de tiempo. Mientras que la metodología de suavizamiento exponencial busca la descripción de la tendencia y estacionalidad de la data, los modelos ARIMA intentan describir la autocorrelación de la misma. 
+
+Un requisito para el modelar pronósticos con series de tiempo es que las mismas deben ser estacionarias [@srivastava]. Por lo tanto es importante definir la estacionalidad de series de tiempo antes de avanzar con la descomposición de las mismas. 
+
+Definimos **una serie de tiempo estacionaria** como aquella cuyas propiedades no dependen del momento en la cual se la observa. Por lo tanto las series de tiempo con tendencias, o con estacionalidad, no son estacionarias. La tendencia o la estacionalidad afectará el valor de la serie de tiempos en momentos específicos de la misma. Una serie de ruido blanco es un caso de series de tiempo estacionarias. En casos puede ser confuso determinar que es que. Una serie de tiempos puede ser cíclica y estacionaria si cumple con la condición de no tener tendencia o estacionalidad.
+
+Hay tres criterios básicos que debe cumplir una serie de tiempos para catalogarla como estacionaria:
+
+a. El promedio de la serie no debiera ser una función del tiempo sino una constante. Esto es visible a la vista en una serie de tiempos que permanece relativamente horizontal sobre el eje de la abscisa a pesar de fluctuar. 
+b. La varianza de la serie no debiera ser una función del tiempo. Esta propiedad se conoce en matemática como _homocedasticidad_.
+c. La covarianza del término $x_i$ y el término $(x + m)_i$ no debiera ser una función en el tiempo. Esto también posible de ver en una gráfica, a medida que la función disminuye la distancia entre sus ondas, o aumenta la densidad de las mismas proporcional avanza en el tiempo. 
+
+```{marginfigure}
+Todo modelo ARIMA incluye una porción de promedios móviles (la $MA(q)$) y una porción de autocorrelación (la $AR(p)$) que se integran para formar un todo. Llegar a los niveles de promedio moviles y autocorrelación indicados nos permite crear un modelo $ARIMA(p, d, q)$. No es el alcance del libro explicar la matemática detrás de esto, sino presentar la aplicación en la vida real del método. 
+```
+
+El lenguaje incluye una libreria `arima` para pronósticos de modelos _ARIMA_ donde es importante guiar al modelo proveyendo los parámetros $p$, $d$ y $q$ para el modelo $ARIMA(p,d,q)$. Por eso la importancia de poder revisar el gráfico de las funciones de autocorrelación y correlación parcial, que permiten derivar posibles valores para $p$ y $q$. Habiendo dicho esto, podemos simplificar mucho y utilizar la función `auto.arima` de los profesores Hyndmann y Khandakar, incluída en la librería `forecast` [@packageForecast]. 
+
+```{r ejemploARIMA}
+library(forecast)
+data("nottem")
+modelo <- auto.arima(nottem, seasonal = TRUE)
+
+proyeccion2 <- forecast(modelo, h = 5)
+plot(proyeccion2)
+
+```
+La gráfica que obtenemos no es muy diferente del pronóstico con STL, pero ARIMA es poderoso en modelos con clara autoregresión. Los pasos que dimos son idénticos a STL con la excepción de como creamos el modelo ARIMA. Para crear el modelo, utilizamos la función `auto.arima()` y pasamos como parámetros el juego de datos y la bandera `seasonal = TRUE` para que forcemos el uso de estacionalidad en la función. La opción por omisión es `TRUE`, y realmente solo hay necesidad de agregar el parámetro si deseamos setearlo a `FALSE`. 
+
+Si bien las gráficas son muy similares, los valores de la proyección **no lo son.** Podemos ver esto con una sola línea de código:
+
+```{r showProyeccion2}
+proyeccion2
+```
+
+
+## Auto Correlación
+De igual manera que una correlación mide la extensión de una relación linear entre dos variables, la autocorrelación mide la relación linear entre dos valores retrasados de series de tiempo [@hyndman].
+
+El valor de una autocorrelación para un $(r_{k})$ dado es:
+
+\[ r_{k} = \frac{\sum_{t = k + 1}^T(y_{t} - \bar{y})(y_{t - k} - \bar{y})}{\sum_{t = 1}^T(y_{t} - \bar{y})^{2}} \]
+
+donde $T$ es el valor de período temporal de la serie de tiempo. 
+
+El autor Daroczi agrega como metodología para la verificación de autocorrelación en un juego de datos (no solo una serie de tiempos, sino cualquier juego de datos espacial) el _Indice I de Moran_ [@daroczi]. Dicho índice esta dado por la formula:
+
+\[ I = \frac{N}{W} 
+	\frac{\sum{i}\sum{j}w_{ij}(x_{i} - \bar{x})(x_{j} - \bar{x})}{{\sum{i}(x_{i} - \bar{x})^2}} \]
+
+Los coeficientes de autocorrelación se visualizan a través de un gráfico de la función de autocorrelación o ACF (también llamado correlograma). Dicho gráfico analiza las relaciones entre valores retrasados de la serie de tiempo. Podemos utilizar la serie de tiempo representativa de la TRM para visualizar su gráfica de ACF.
+
+```{r ejemploACF/PACF}
+par(mfrow=c(1,2))
+Acf(nottem)
+Pacf(nottem)
+```
+
+Las series de tiempo que no muestran efectos de autocorrelación se denominan _ruido blanco_. En dichas series se espera que los coeficientes de correlación sean cercanos a cero. Esto de por si es difícil, ya que toda serie de tiempo tendrá cierta variación aleatoria, pero en términos matemáticos esperamos que la serie tenga variaciones que 95% del tiempo estén dentro de la región de $\pm2/\sqrt{T}$ donde $T$ es la extensión de la serie de tiempo. Si hay una o más series de magnitud fuera de estos límites, o si el 5% o más de las series están fuera de estos límites, es muy probable que no sea ruido blanco.
