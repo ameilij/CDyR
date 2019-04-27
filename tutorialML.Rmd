@@ -1,0 +1,167 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: no
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# BREVE TUTORIAL DE APRENDIZAJE AUTOMATIZADO
+El mundo del **Aprendizaje Automatizado** no es sencillo. Hay mucho conocimiento y esfuerzo implicito en cualquiera de sus procesos. Es una disciplina más reciente comparada a otras en la matemática, en la cual no todos los autores coinciden en sus notas sobre las aplicaciones de diferentes métodos en un problema específico, llegando al punto que algunos dan soluciones diferentes al mismo problema. 
+
+Es fácil perderse a primeras por lo amplio y complejo del tema. La bibliografía que sustenta la materia es muy diversa, pero los libros más específico atacan los conceptos de manera muy matemática y abstracta, con material que fundamenta la teoría pero da pocas luces sobre la aplicación práctica [@mitchell]. En contraposición, el mundo del Internet contiene miles de tutoriales que explican muy bien la implementación de la solución en el mundo real a una situación específica sin que se entienda la teoría que cimenta la solución - o porqué el científico hace lo hace. 
+
+En la próxima sección estudiaremos un problema de aprendizaje automatizado muy sencillo y detallaremos paso por paso como se llega de una pregunta a un modelo predictivo. Hemos mantenido el ejemplo simple para que el enfoque sea en la comprensión de la solución y no en el problema en si. LLegar a un balance entre teoría y práctica es clave para que el científico de datos materialice el puente entre la teoría, la hipótesis y la búsqueda de la comprobación científica. 
+
+## El Juego de Datos Old Faithful
+El juego de datos _Old Faithful_ contiene solo dos variables: una corresponde con los tiempos de duración de la erupción en minutos (la variable `eruptions`) y la segunda corresponde con los tiempos de espera entre erupciones, también en minutos (la variable `waiting`). Dichas erupciones se midieron y tabularon del geyser **Old Faithful** en el parque Yellowstone National Park, Wyoming, Estados Unidos. 
+
+Podemos cargar los datos en _R_ y ver las primeras líneas con el siguiente código. 
+
+```{r loadFaithful}
+data(faithful)
+head(faithful)
+
+```
+
+Nuestro objetivo como científicos de datos será simple. ¿Podemos utilizar aprendizaje automatizado para predecir dentro de cierto intervalo de confidencia el tiempo en minutos de la próxima erupción basados en un tiempo de espera intermedio $x$? Habiendo correctamente establecido la pregunta de investigación, intentaremos:
+
+* Cargar en el lenguaje el juego de datos.
+* Dividir los datos en un juego de entrenamiento para analizar nuestra posible solución y verificar que tan cerca estamos - o no - de la verdad.
+* Visualizar algunas de las implicaciones del juego de datos y el desempeño de nuestro algoritmo utilizando técnicas de EDA (del inglés _Explorative Data Analysis_).
+* Finalmente utilizar nuestro modelo predictivo entrenado en un juego de datos de evaluación para asegurarnos que estamos en el camino correcto y que nuestras predicciones tienen sentido. 
+
+## Primeros Pasos del Proceso de Aprendizaje Automatizado
+La idea básica en el proceso de aprendizaje automatizado es separar los datos en dos juegos: uno de entrenamiento para nuestro algoritmo de predicción y otro de evaluación del mismo una vez que estemos comodos con el modelo entrenado. Es importante entender estos conceptos cruciales del aprendizaje automatizado.
+
+* Todo el trabajo concerniente a la exploración y análisis visual del juego de datos y la búsqueda del algoritmo correcto para modelar se hace en el juego de entrenamiento, **y solamente en el juego de entrenamiento**. Aquí cabe el mismo rigor científico que predomina en cualquier investigación seria. La palabra clave en la Ciencia de Datos no es Datos, sino Ciencia [@leek]. 
+* Solo utilizaremos el juego de evaluación al final del proceso, una vez nos sentimos cómodos con el modelo entrenado, y solamente al final del proceso. No hemos de cambiar, adaptar, o re-ensamblar nuestro algoritmo de predicción con el juego de datos de evaluación, **no importa que tan grande sea la tentación**.
+
+Habiendo establecido el rigor científico necesario en la utilización correcta de los juegos de entrenamiento y evaluación, retomemos un segundo concepto crucial en el aprendizaje automatizado, el de error dentro y fuera de la muestra. 
+
+```{marginfigure}
+Llamaremos a un modelo de predicción o clasificación que estamos entrenando un _aprendiz_. Esta nomenclatura se expande para cubrir _meta-aprendices_ en modelos ensamblados de aprendizaje automatizado.
+```
+
+* El error de la muestra es el margen de error que se obtiene en el mismo juego de datos que se utilizó para crear un aprendiz. Algunos autores también hablan de error de resubstitución [@pengMatsui]. El error de muestra es muy optimista, ya que el aprendiz puede haber absorbido no solo la señal que transmite un juego de datos sino el ruido del mismo. La identificación de esta combinación es poderosa al punto que puede invalidar el modelo entrenado si se somete a un juego de datos con variación en la lectura. Esto es similar al alumno que solo estudió las preguntas del examen de matemática que aparecen en el libro de clase y sus apuntes, pero que no sabe que contestar si le cambian el problema ligeramente. 
+* El error fuera de muestra es el margen de error que obtenemos cuando medimos el modelo entrenado en un juego de datos de evaluación. Este margen de error es mucho más honesto, ya que determina la funcionalidad del modelo en el mundo real. 
+
+```{marginfigure}
+Una forma de verificar en los datos si existe o no sobreajuste es la visualación de los residuos, ya que por lo general se busca que se cumpla el concepto estadistico de **homocedasticidad**. Se habla de **homocedasticidad** si el error cometido por el modelo tiene siempre la misma varianza. Cuando no se cumple con dicha premisa, se dan situaciones de lo contrario, **heterocedasticidad**, donde los datos tienen varianza diferente, y esto lleva a sobreestimar el calce del modelo, precisión y el coeficiente de Pearson [@yakir].
+```
+
+En el proceso de crear aprendices robustos, nos interesa mucho más el margen de error fuera de muestra que el error muestral (error de la muestra). La razón para esto es el efecto de sobreajuste (del inglés _overfitting_), por el cual el aprendiz llega a niveles tan altos de precisión porque no solo lee la señal sino el ruido también. Una solución con un alto nivel de sobreajuste desempeñará muy bien en un juego de entrenamiento inclusive de buenas proporciones, pero tendrá un pobre desempeño en el juego de evaluación donde la señal y ruido sufre variación. Es importante medir y comparar ambos índices de errores, esperando que un aprendiz robusto tenga un margen de error de muestra superior al nivel de error fuera de muestra. Cuando esto ocurre el aprendiz está generalizando mejor la solución para un amplio espectro de datos, y al generalizar mejor hará predicciones más certeras en situaciones a lo largo de cualquier dato de evaluación que se utilice.
+
+```{marginfigure}
+El nombre _CARET_ proviene de las siglas en inglés de _Classification And REgression Training.
+```
+
+Comencemos con la preparación al proceso de aprendizaje automatizado cargando las librerías necesarias en _R_. La primera en este orden de ideas es la librería _CARET_. El paquete `caret`es la creación del matemático Max Kuhn y tiene una gran cantidad de funciones que ayudan en el proceso de aprendizaje automatizado, incluyendo la aceleración de la creación de juegos de datos de entrenamiento y evaluación. Algunas de las bondades mayores son:
+
+* creación de subonjuntos de datos
+* pre-procesamiento de datos
+* selección de atributos
+* optimización de modelos y muestreo
+* estimación de la importancia de variables
+
+En el siguiente ejemplo cargamos en _R_ la biblioteca _CARET_ junto al juego de datos ´faithful´. También vamos a hacer algo muy importante para apegarnos al método científico: fijar el valor de la variable semilla del sistema para la generación de valores aleatorios en un número fijo. No importa el valor del número siempre y cuando sea siempre el mismo. Al fijar la variable semilla de generación de valores aleatorios estamos asegurando que todos los experimentos sean replicables en el futuro con valores idénticos a los obtenidos por el científico de datos inicial. Dado que mucho de los métodos de aprendizaje automatizado involucran la creación de subconjuntos de datos de forma aleatoria, si no fijamos los valores de la variable semilla aquellos que quieran replicar los pasos en el futuro no tendrán forma de saber como se dividió exactamente la data. 
+
+```{r loadDataCARET}
+data("faithful")
+library(caret)
+
+# fijando variable semilla para reproducibilidad
+set.seed(333)
+```
+
+Antes que comencemos a pensar en diferentes algoritmos de aprendizaje automatizado posibles, tomemos el tiempo necesario para conocer intimamente el juego de datos. Ya hemos establecido que existen dos variables, ambas que miden tiempos en minutos, llamadas `eruptions` y `waiting`. Veamos los rangos de valores en ambas distribuciones (o sea para cada vector de datos).
+
+```{r viewFaithful}
+summary(faithful)
+```
+
+Del reporte sumario podemos comenzar a extraer algunas apreciaciones iniciales.
+
+* Los valores de la variable `eruptions`, el tiempo de duración de las erupciones, van de 1.6 a 5.1 minutos, con un promedio de 3.5 minutos. 
+* Los valores de la variable `waiting`, el tiempo de duración entre erupciones, van de 43 a 96 minutos, con un promedio de 71 minutos. 
+* Para muchos científicos que nunca han ido a Yellowstone es interesante descubrir que las erupciones se dan mucho más seguido de lo que se hubiera pensado, y que duran mucho más de lo que uno predicho. Es factible decir que en el transcurso de espera promedio de una hora y once minutos (71 minutos) uno puede ver una erupción cuya duración promedio es de 3 minutos y medio, suficiente para sacar fotos y registrar el evento. 
+
+```{marginfigure}
+Para mediciones más científicas, ciertamente la información nos permite utilizar una distribución de Poisson utilizando como $\lambda$ el valor promedio de espera de 70.9 minutos. La forma de hacerlo figura en el capítulo de Estadística Básica.
+```
+
+Sin haber hecho un solo cálculo o línea de programación _R_ podemos decir sin base científica pero con cierto sentido común, que la predicción empírica es que en el plazo de una hora y minutos uno viera por lo menos una erupción de tres minutos de duración, y que en el peor de los casos en el lapso de una hora y media uno pudiera ver una erupción de por lo menos un minuto y medio de duración (realmente 96.0 minutos de espera y 1.6 minutos de duración). 
+
+Los valores de la distribución de los rangos parecen compactos. Utilizamos una visualización para contrastar la imagen de la distribución de rangos de los datos con la tabla. 
+
+```{r boxplotFaithful}
+boxplot(faithful)
+```
+
+Lamentablemente la visualización de los rangos de las variables no agrega mucho a lo que ya hemos pensado. El uso de las gráficas de caja nos permite ver la dispersión de los datos, y en el caso de la variable `waiting` vemos que hay algunos puntos extremos de los datos (_outliers_). Quizás vale la pena verificar si hay alguna relación entre los valores de las variables. 
+
+```{r scatterFaithful}
+ggplot(faithful, aes(y=eruptions, x=waiting)) + geom_point(colour = "gray")
+```
+
+La gráfica de dispersión nos muestra una relación lineal en potencia. No vale la pena crear la recta de estimación ya que _R_ la calcula del juego de datos y sabemos que tendrá sobreajuste. Pero es posible con este juego de datos hacer un modelo de regresión lineal donde la variable dependiente (la duración de la erupción) tenga correlación el la variable independiente o regresor (el tiempo de espera entre erupciones).
+
+## Creación los Juegos de Entrenamiento y Evaluación
+Ahora que hemos definido el uso potencial de una regresión lineal como algoritmo de predicción, y que tenemos una teoría detrás de la pregunta del problema, podemos comenzar a crear nuestros juegos de datos de entrenamiento y evaluación. 
+
+Diferentes autores difieren en los porcentajes a utilizar para los juegos de entrenamiento y evaluación. Una regla común es destinar el 70% de los datos a el juego de entrenamiento, ya que haremos de trabajar mucho más con este, y solo el 30% a los datos de evaluación, que al fin y al cabo se utilizan solo una vez al final del proceso [@daroczi]. Otros dan rangos más amplios determinados en la amplitud de datos del juego inicial [@leek]. Para propósitos prácticos de material que sigue, utilizaremos la regla sencilla de separar los datos en dos juegos, cada uno con el 50% de los datos. 
+
+```{marginfigure}
+Utilizaremos la regla común en la ciencia de datos de nombrar los juegos de entrenamiento ínTrain´ y los de evaluación ´inTest´. El lector puede ponerle sin embargo cualquier nombre que quiera, solo sugerimos que los mismos sean descriptivos y entendibles para todos aquellos que quieran replicar los experimentos.
+```
+
+```{r trainFaithful_1}
+inTrain <- createDataPartition(y = faithful$eruptions, p = 0.5, list = FALSE)
+trainFaith <- faithful[inTrain, ]
+testFaith <- faithful[-inTrain, ]
+head(trainFaith)
+```
+
+La primera vez que uno ve la creación de los juegos de entrenamiento y evaluación, el código pudiera parecer un poco críptico. Por esa misma razón analicemos línea por línea lo que acabamos de crear.
+
+La primera línea del código crea la variable `inTrain` a través de la función de _CARET_ `createDataPartition`. La variable `inTrain` no es un juego de datos de entrenamiento, sino un juego de datos de índices para crear el juego de entrenamiento. En otras palabras, no es sino un vector con números, cada número un índice que apunta a una línea del juego de datos original. Lo importante aquí es la forma en la cual la función `createDataPartition` crea dicho vector de índices en base al juego de datos original. Primeramente, la función utiliza el parámetro `y = faithful$eruptions` para crear subconjuntos con la data basado en lo que exista y se pase para proceso. En nuestro caso particular pasamos como parámetro el vector del juego de datos `faithful` con la variable dependiente `eruptions`. Para decidir en el porcentaje de puntos de datos a dividir al juego de entrenamiento, y habiendo establecido que en nuestro caso sería el 50% de los datos disponibles, asignamos el valor 0.5 a la variable $p$ en el parámetro `p = 0.5`. Debemos tener cuidado con el último parámetro, el cual fijamos como `list = FALSE`. Al fijar la opción de lista en falso, la función nos devuelve un vector de índices. Pero si lo fijamos en `TRUE` la función retorna un vector de valores y no de índices. Esto en sí no está mal porque algunos científicos quizás prefieran armar sus juegos de datos de manera más directa creando vectores de datos. No es nuestra metodología pero aclaramos que la opción existe. 
+
+Para aquellos que sientan la curiosidad, revisemos que existe realmente dentro de `inTrain` ya que visualizarlo ayuda mucho.
+
+```{r headInTrain, warning=FALSE}
+head(inTrain)
+```
+
+Como se puede ver es un vector de índices y cada uno se corresponde con un valor dentro de ju juego de datos entre llaves (_brackets_). De esta forma le hemos quitado la mística al uso del juego de índices.
+
+El segundo paso es la verdadera creación del juego de entrenamiento. Llamamos a tal juego `trainFaith` y le asignamos todos los registros del juego original `faithful` con **subsetting**, utilizando como índices de que queda y que no queda los mismos del juego de índices `inTrain` (y ahora queda claro porque usamos índices y fijamos el parámetro de `list = ...`en FALSO). Aquí aprovechamos el poder del lenguaje _R_ en el uso de vectorización y la forma por la cual las asignaciones y reportes de un juego de datos muchas veces nos dan índices y no valores (recordar las cadenas de FALSE y TRUE en vez de resultados de los primeros capítulos). Al ponernos al nivel de idiosincracias de _R_ comenzamos a sacarles fruto y crear juegos de entrenamientos aleatorios, sin sesgo, con tan solo dos líneas de código. 
+
+Verifiquemos si la creación del juego de datos de entrenamiento corresponde con la creación del juego de datos de índices. En otras palabras, el primer registro del juego de entrenamiento debe contener el valor del juego original de datos de aquel registro al que apunta el índice del primer valor del juego de índices. Es un direccionamiento indirecto, que es complicado de abstraer pero mucho más fácil de ver en cada línea particular de datos. 
+
+La tercera línea de `inTrain` apunta al indice 6 del juego original.
+
+```{r}
+inTrain[3,]
+```
+
+La tercera línea del juego de entrenamiento debe entonces contener lo mismo que la sexta línea del juego original de datos, ya que se creo con un puntero que direccionaba directamente a esta. 
+
+```{r}
+trainFaith[3,]
+faithful[6,]
+```
+
+Vemos que ambos resultados son iguales. El trabajo adicional de crear los juegos de datos de esta forma se recompensa al no tener que hacer cambios complicados a mitad de un análisis. Dado que los juegos se crearon en base a un juego de índices, pero que estos en si no se tocan, es mínimo el riesgo de borrarlos por error o tener que empezar de cero cuando se comete algun paso indebido. 
+
+Si la creación del juego de entrenamiento fue simple, la del juego de evaluación lo es aún más, y utilizando **subsetting** indicamos entre llaves leer todos aquellos índices que no estén en el archivo de índices `inTrain` anteponiendo el operador `-`, en la línea `testTain <- faithful[-inTrain, ]`.
+
+La última linea la ponemos solamente como comprobación de lo que hemos obtenido. 
