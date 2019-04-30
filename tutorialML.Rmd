@@ -113,7 +113,7 @@ Lamentablemente la visualización de los rangos de las variables no agrega mucho
 ggplot(faithful, aes(y=eruptions, x=waiting)) + geom_point(colour = "gray")
 ```
 	
-La gráfica de dispersión nos muestra una relación lineal en potencia. No vale la pena crear la recta de estimación ya que _R_ la calcula del juego de datos y sabemos que tendrá sobreajuste. Pero es posible con este juego de datos hacer un modelo de regresión lineal donde la variable dependiente (la duración de la erupción) tenga correlación el la variable independiente o regresor (el tiempo de espera entre erupciones).
+La gráfica de dispersión nos muestra una relación lineal en potencia. Es posible con este juego de datos hacer un modelo de regresión lineal donde la variable dependiente (la duración de la erupción) tenga correlación con la variable independiente o regresor (el tiempo de espera entre erupciones).
 	
 ## Creación los Juegos de Entrenamiento y Evaluación
 Ahora que hemos definido el uso potencial de una regresión lineal como algoritmo de predicción, y que tenemos una teoría detrás de la pregunta del problema, podemos comenzar a crear nuestros juegos de datos de entrenamiento y evaluación. 
@@ -247,5 +247,39 @@ modelo_CARET <- train(eruptions ~ ., method = "lm", data = trainFaith)
 modelo_CARET$finalModel
 ```
 
+El paquete _CARET_ guarda el modelo final en la variable `finalModel` para verificar la fórmula final. El resultado no es diferente del haber hecho el entrenamiento a mano. La pendiente y la ordenada al origen son exactamente iguales. El juego de datos no es muy profundo, y hubiera sido dificil conseguir una mejor regresión lineal que la función de _R_. Más sobre esto al final del capítulo. 
 
+## Validando el Modelo Entrenado con el Juego de Evaluación
+Utilizamos la librería _CARET_ para entrenar de forma rápida nuestro modelo con el juego de datos apropiado. ¿Cómo será el desempeño de nuestro modelo entrenado si lo aplicamos al juego de datos de evaluación? De la misma forma que cuando entrenamos el modelo, superimpusimos el diagrama de dispersión con los datos originales y la recta de regresión con el modelo calzado, vamos a superimponer el gráfico de dispersión del juego de evaluación con la regresión de los valores esperados del juego de evaluación usando como regresor el modelo entrenado. Esto suena más complicado de lo que es, porque en realidad el código cambia muy poco. 
 
+```{r}
+par(mfrow = c(1,2))
+
+plot(trainFaith$waiting, trainFaith$eruptions, pch=19, col="gray",
+     main = "Juego de Entrenamiento")
+lines(trainFaith$waiting, predict(modelo_CARET, trainFaith), lwd=3, col="black")
+
+plot(testFaith$waiting, testFaith$eruptions, pch=19, col="blue", 
+     main = "Juego de Evaluación")
+lines(testFaith$waiting, predict(modelo_CARET, testFaith), lwd=3, col="black")
+```
+
+Si el valor de $R^2$ del modelo entrenado es de 0.81, ¿cuál es el valor de $R^2$ del modelo entrenado cuando se le aplica el juego de datos de evaluación? La teoría indica que el valor fuera de muestra es casi más importante que el valor dentro de muestra. Podemos hacer el cálculo a mano de la siguiente manera.
+
+```{r}
+a <- sum((predict(modelo_CARET, testFaith) - mean(testFaith$eruptions))^2)
+b <- sum((testFaith$eruptions - mean(testFaith$eruptions))^2)
+print(a/b)
+```
+
+El valor del $R^2$ del modelo de evaluación es 0.87, superior al modelo de entrenamiento, lo que significa que el modelo es mucho más robusto de lo que esperabamos y generaliza de forma superior. Otra forma de evaluar el alcance del modelo entrenado es comparado el error cuadrático medio de cada uno (en inglés **RMSE**). 
+
+```{r RMSE}
+# RMSE de juego de entrenamiento
+sqrt(sum((modelo_CARET$finalModel$fitted.values - trainFaith$eruptions) ^2))
+
+# RMSE de juego de entrenamiento
+sqrt(sum((predict(modelo_CARET, testFaith) - testFaith$eruptions) ^2))
+```
+
+El error cuadrático del modelo entrenado es de 5.792106, mientras que en el juego de datos de evaluación baja a 5.753229, mejorando su calidad de predicción. 
