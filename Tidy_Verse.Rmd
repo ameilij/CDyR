@@ -4,65 +4,65 @@ author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
 output: tint::tintHtml
 link-citations: yes
-subtitle: IntroducciÃ³n a la Ciencia de Datos con Lenguaje R
+subtitle: Introducción a la Ciencia de Datos con Lenguaje R
 bibliography: skeleton.bib
 ---
 
 # Un Universo Limpio
-`r tint::newthought('El concepto de Tidy Verse es la creaciÃ³n de Hadley Wickham')` y gira entorno a la idea de una colecciÃ³n de paquetes de *R* altamente opinionados. Todos los paquetes giran entorno a una filosofÃ¬a de diseÃ±o, gramÃ¡tica y estructuras de datos. Podemos instalar el paquete `tidyverse` de la siguiente manera. 
+`r tint::newthought('El concepto de Tidy Verse es la creación de Hadley Wickham')` y gira entorno a la idea de una colección de paquetes de *R* altamente opinionados. Todos los paquetes giran entorno a una filosofía de diseño, gramática y estructuras de datos. Podemos instalar el paquete `tidyverse` de la siguiente manera. 
 
 ```install.packages("tidyverse")```
 
-Al ser una colecciÃ³n de paquetes, hay algunos que se han tratado en este texto de forma separada, como la biblioteca de grÃ¡ficos *GGPLOT2*. La colecciÃ³n total incluye los paquetes:
+Al ser una colección de paquetes, hay algunos que se han tratado en este texto de forma separada, como la biblioteca de gráficos *GGPLOT2*. La colección total incluye los paquetes:
 
-* `ggplot2`, para grÃ¡ficos avanzados.
+* `ggplot2`, para gráficos avanzados.
 * `dplyr`, para transformar y resumir contenidos de _data frames_.
 * `tidyr`, para transformar (o mejor dicho limpiar) la estructura de datos de un _data frame_
-* `purrr`, un paquete relativamente nuevo que le agrega mayor funcionalidad de programaciÃ³n al lenguaje *R*
+* `purrr`, un paquete relativamente nuevo que le agrega mayor funcionalidad de programación al lenguaje *R*
 * `tibble`, una nueva forma mejorada de _data frame_.
 
-Hemos de concentrarnos en esta introducciÃ³n al concepto de datos limpios (del inglÃ©s _tidy data_) mÃ¡s que en el universo completo. Al hablar de datos limpios hablamos de un juego de datos que cumple las siguientes condiciones. 
+Hemos de concentrarnos en esta introducción al concepto de datos limpios (del inglés _tidy data_) más que en el universo completo. Al hablar de datos limpios hablamos de un juego de datos que cumple las siguientes condiciones. 
 
 1. Cada variable forma una columna
-2. Cada observaciÃ³n de datos conforma una lÃ­nea
-3. Cada tabla de datos, juego de datos o archivo de datos contiene datos de un tipo de observaciÃ³n
+2. Cada observación de datos conforma una línea
+3. Cada tabla de datos, juego de datos o archivo de datos contiene datos de un tipo de observación
 
-En un mundo moderno y mÃ¡s o menos organizado, muchos datos cumplirÃ¡n con estos requisitos. Empero, es probable que el investigador se encuentre con juegos de datos mÃ¡s antiguos que no los cumple (por ejemplo, una antigua base de datos utilizada por un banco cuyos programas se diseÃ±aron en COBOL) o un hÃ­brido de datos mÃ¡s o menos moderno que los cumple a medias (de esto Ãºltimo las hojas de cambio son un buen ejemplo). 
+En un mundo moderno y más o menos organizado, muchos datos cumplirán con estos requisitos. Empero, es probable que el investigador se encuentre con juegos de datos más antiguos que no los cumple (por ejemplo, una antigua base de datos utilizada por un banco cuyos programas se diseñaron en COBOL) o un híbrido de datos más o menos moderno que los cumple a medias (de esto último las hojas de cambio son un buen ejemplo). 
 
 ## Transformado (Derritiendo) un Data Frame 
-Es difÃ­cil explicar el concepto de derretir un _data frame_ utilizando la funciÃ³n `melt()` sin antes explicar bien por quÃ© uno quisiera llegar a tal punto. En la vida real del investigador la necesidad de convertir un formato de datos en otro, simplemente para facilitar la exploraciÃ³n, hace que valga la pena el trabajo que esto implica. El cientÃ­fico de datos usualmente invierte el 70% de su tiempo en convertir, limpiar y validar un juego de datos, por lo que saber transformar los mismos de forma programÃ¡tica es una herramienta importante en el arsenal de la Ciencia de Datos.
+Es difícil explicar el concepto de derretir un _data frame_ utilizando la función `melt()` sin antes explicar bien por qué uno quisiera llegar a tal punto. En la vida real del investigador la necesidad de convertir un formato de datos en otro, simplemente para facilitar la exploración, hace que valga la pena el trabajo que esto implica. El científico de datos usualmente invierte el 70% de su tiempo en convertir, limpiar y validar un juego de datos, por lo que saber transformar los mismos de forma programática es una herramienta importante en el arsenal de la Ciencia de Datos.
 
-Para entender el tema de manera mÃ¡s prÃ¡ctica, tomemos el ejemplo del juego de datos `mtcars`.
+Para entender el tema de manera más práctica, tomemos el ejemplo del juego de datos `mtcars`.
 
 ```{r}
 data(mtcars)
 head(mtcars)
 ```
 
-En el juego de datos original, cada lÃ­nea corresponde a un modelo de carro y mÃºltiples columnas de variables contienen una pluralidad de valores. Esto no cumple con los requisitos del modelo de data limpia del _tidyverse_ pero por ahora vamos a simplificar estos y crear un juego de datos que cumpla con otros diferentes: 
+En el juego de datos original, cada línea corresponde a un modelo de carro y múltiples columnas de variables contienen una pluralidad de valores. Esto no cumple con los requisitos del modelo de data limpia del _tidyverse_ pero por ahora vamos a simplificar estos y crear un juego de datos que cumpla con otros diferentes: 
 
 * el juego de datos original debe ser `mtcars`
 * deben haber columnas identificadoras para las variables de `carname`, `gear` y `cyl`
-* las variables que queremos medir serÃ¡n `mpg` y `hp`
+* las variables que queremos medir serán `mpg` y `hp`
 
-Si bien no es la Ãºnica, la mejor forma de conseguir esto es con el comando `melt()` para _derretir_ el _data frame_ actual en uno de nuevas dimensiones. El uso de la funciÃ³n es:
+Si bien no es la única, la mejor forma de conseguir esto es con el comando `melt()` para _derretir_ el _data frame_ actual en uno de nuevas dimensiones. El uso de la función es:
 
 `melt(datos_originales, id = c("n1", ..., "nX"), measure.vars = c("var1", ..., "varN"))`
 
 donde:
 
 * `datos_originales` es el juego de datos original del cual queremos extraer las observaciones
-* `id = c("n1", ..., "nX")` es un arreglo de nombre de columnas del juego de datos original que se trasladarÃ¡ como identificadores al nuevo juego de datos derretido
-* `measure.vars = c("var1", ..., "varN")` en un arreglo de nombre de columnas del juego de datos original que serÃ¡ derretido en variables de mediciÃ³n, un valor por observaciÃ³n, en el nuevo juego de datos
+* `id = c("n1", ..., "nX")` es un arreglo de nombre de columnas del juego de datos original que se trasladará como identificadores al nuevo juego de datos derretido
+* `measure.vars = c("var1", ..., "varN")` en un arreglo de nombre de columnas del juego de datos original que será derretido en variables de medición, un valor por observación, en el nuevo juego de datos
 
-La funciÃ³n `melt()` no se encuentra en el paquete base de *R*, sino que hay que invocarla desde el paquete `reshape2`. Si aplicamos toda la teorÃ­a al caso mencionado arriba, el cÃ³digo queda de la siguiente forma. 
+La función `melt()` no se encuentra en el paquete base de *R*, sino que hay que invocarla desde el paquete `reshape2`. Si aplicamos toda la teoría al caso mencionado arriba, el código queda de la siguiente forma. 
 
 ```{r ejemploMelt}
 library(reshape2)
 data("mtcars")
 
 # Â¡los identificadores de mtcars no son variables!
-# en realidad son los nombres de lÃ­neas (rownames)
+# en realidad son los nombres de líneas (rownames)
 # hay que extraerlos y guardarlos en el data frame
 mtcars$nombres <- rownames(mtcars)
 
@@ -74,14 +74,14 @@ head(carros_derretido, n = 5)
 tail(carros_derretido, n = 5)
 ```
 
-Hemos listado las primeras cinco lÃ­neas y las Ãºltimas cinco para entender como varÃ­a el valor de variable de `mpg` a `hp` y como la columna `value` siempre lleva el valor correspondiente. 
+Hemos listado las primeras cinco líneas y las últimas cinco para entender como varía el valor de variable de `mpg` a `hp` y como la columna `value` siempre lleva el valor correspondiente. 
 
 ## El Paquete DPLYR
 ```{marginfigure}
-El paquete DPLYR fue diseÃ±ado por Hadley Wickham para utilizar dentro del entorno de programaciÃ³n RStudio. En realidad DPLYR es el esfuerzo y optimizaciÃ³n de un paquete anterior llamado PLYR. Aunque no agrega funcionalidad nueva provee una buena dosis de simplificaciÃ³n al uso de las funciones, ademÃ¡s de una grmÃ¡tica comÃºn para la manipulaciÃ³n de data.
+El paquete DPLYR fue diseñado por Hadley Wickham para utilizar dentro del entorno de programación RStudio. En realidad DPLYR es el esfuerzo y optimización de un paquete anterior llamado PLYR. Aunque no agrega funcionalidad nueva provee una buena dosis de simplificación al uso de las funciones, además de una grmática común para la manipulación de data.
 ```
 
-El paquete `dplyr` es una gramÃ¡tica de manipulaciÃ³n de datos que provee un juego de verbos consistentes para administrar las tareas mÃ¡s comunes - y por lo general mÃ¡s desafiantes - de la manipulaciÃ³n de datos.
+El paquete `dplyr` es una gramática de manipulación de datos que provee un juego de verbos consistentes para administrar las tareas más comunes - y por lo general más desafiantes - de la manipulación de datos.
 
 Hay cinco verbos principales que forman parte del paquete:
 
@@ -89,29 +89,29 @@ Hay cinco verbos principales que forman parte del paquete:
 |--------------|-------------------------------------------------------------|
 | select()     | selecciona variables basadas en su nombre                   |
 | filter()     | filtra casos basados en un valor                            |
-| arrange()    | modifica el orden de las lÃ­neas                             |
+| arrange()    | modifica el orden de las líneas                             |
 | mutate()     | agrega nuevas variables que son funciones de las existentes |
-| summarize()  | reduce el nÃºmero de valores mÃºltiples a uno resumido        |
+| summarize()  | reduce el número de valores múltiples a uno resumido        |
 
-Todos estos verbos se combinan de manera natural con el argumento `group_by()` que permite ejecutar la operaciÃ³n sobre un juego agrupado de datos. Sin embargo el uso de `dplyr` estÃ¡ sujeto a ciertas propiedades:
+Todos estos verbos se combinan de manera natural con el argumento `group_by()` que permite ejecutar la operación sobre un juego agrupado de datos. Sin embargo el uso de `dplyr` está sujeto a ciertas propiedades:
 
 * el primer argumento siempre debe ser un _data frame_
 * los nombres de las variables debe ir sin el identificador de variable *$*
-* el resultado de la operaciÃ³n siempre serÃ¡ un nuevo _data frame_
+* el resultado de la operación siempre será un nuevo _data frame_
 
 ```{marginfigure}
 Aquellos lectores que provengan de ambientes Unix o Linux reconoceran el uso de canales con el caracter `|`
 ```
 
 ### Utilizando Flujos de Comandos
-El uso de la biblioteca `dplyr` conlleva el uso de flujos de comandos. Los flujos de comandos no son sino notaciones del lenguaje que permite concatenar una serie de comandos de programaciÃ³n de forma ordenada y sucinta sin tener que repetir tanto cÃ³digo. Esto se hace canalizando los mismos a traves del uso del carÃ¡cter de canal, que en *R* es la cadena `%>%`. Hay cuatro razones importantes para utilizar canales de flujo de comandos:
+El uso de la biblioteca `dplyr` conlleva el uso de flujos de comandos. Los flujos de comandos no son sino notaciones del lenguaje que permite concatenar una serie de comandos de programación de forma ordenada y sucinta sin tener que repetir tanto código. Esto se hace canalizando los mismos a traves del uso del carácter de canal, que en *R* es la cadena `%>%`. Hay cuatro razones importantes para utilizar canales de flujo de comandos:
 
-1. Facilita la estructura del flujo del cÃ³digo de izquierda a derecha, en vez de adentro hacia afuera
+1. Facilita la estructura del flujo del código de izquierda a derecha, en vez de adentro hacia afuera
 2. Ayuda a eliminar llamadas a funciones anidadas
-3. Facilita agregar pasos al proceso en cualquier punto del cÃ³digo
-4. Minimiza el uso de variables locales y definiciÃ³n de funciones
+3. Facilita agregar pasos al proceso en cualquier punto del código
+4. Minimiza el uso de variables locales y definición de funciones
 
-En su concepciÃ³n mÃ¡s bÃ¡sica, cualquier funciÃ³n que toma un argumento del tipo `funciÃ³n(argumento)` puede ser escrito en *R* como `argumento %>% funciÃ³n()`. O dicho aÃºn en palabras mÃ¡s simples:
+En su concepción más básica, cualquier función que toma un argumento del tipo `función(argumento)` puede ser escrito en *R* como `argumento %>% función()`. O dicho aún en palabras más simples:
 
 `f(x) = x %>% f()`
 
@@ -119,9 +119,9 @@ De la misma forma
 
 `f(x, y) = x %>% f(y)`
 
-De tal manera, podemos escribir un programa en *R* donde los valores de cada lÃ­nea se van pasando de una a la siguiente siguiendo un flujo designado por el canal. El intÃ©rprete del lenguaje procederÃ¡ a procesar cada lÃ­nea y pasar el valor de los resultados a travÃ©s del flujo, siempre y cuando exista un marcador del canal (el `%>%`) que le indique que sigue algo mÃ¡s por hacer en la siguiente lÃ­nea. 
+De tal manera, podemos escribir un programa en *R* donde los valores de cada línea se van pasando de una a la siguiente siguiendo un flujo designado por el canal. El intérprete del lenguaje procederá a procesar cada línea y pasar el valor de los resultados a través del flujo, siempre y cuando exista un marcador del canal (el `%>%`) que le indique que sigue algo más por hacer en la siguiente línea. 
 
-Pensemos en un proceso matemÃ¡tico cualquiera, en el cual hay que seguir varios pasos. Por ejemplo, utilizaremos el juego de datos `cars` que contiene la distancia y velocidad de freno de mÃºltiples observaciones de carros, y graficaremos todas aquellas instancias en las cuales la velocidad superÃ³ las 15 millas por hora. 
+Pensemos en un proceso matemático cualquiera, en el cual hay que seguir varios pasos. Por ejemplo, utilizaremos el juego de datos `cars` que contiene la distancia y velocidad de freno de múltiples observaciones de carros, y graficaremos todas aquellas instancias en las cuales la velocidad superó las 15 millas por hora. 
 
 ```{r ejemploFC_0, fig.width=6, fig.height=6, cache=TRUE}
 # Juego de datos de distancia y velocidad de freno
@@ -138,7 +138,7 @@ plot(cars_nuevo)
 ```
 
 
-Sigamos el siguiente ejemplo que utiliza un flujo de canal para reducir la complejidad del cÃ³digo:
+Sigamos el siguiente ejemplo que utiliza un flujo de canal para reducir la complejidad del código:
 
 ```{r ejemploFC_1, fig.width=6, fig.height=6, cache=TRUE}
 library(dplyr)
@@ -150,11 +150,11 @@ cars_nuevo <- cars[cars$speed > 15, ] %>%
 ```
 
 ### El Verbo SELECT
-El verbo `select()` nos permite seleccionar una o mÃ¡s variable para retornar de un juego de datos original. Por lo general la intenciÃ³n es generar un juego de datos mÃ¡s pequeÃ±o y compacto con solo las variables que le interesan al cientÃ­fico de datos, y no todo el juego original. La forma de invocarlo es:
+El verbo `select()` nos permite seleccionar una o más variable para retornar de un juego de datos original. Por lo general la intención es generar un juego de datos más pequeño y compacto con solo las variables que le interesan al científico de datos, y no todo el juego original. La forma de invocarlo es:
 
 `select(datos, columna_1, ..., columna_N)`
 
-donde `datos` es el juego de datos original, `columna_1` es la primera (y quizÃ¡s la Ãºnica) columna que debemos retornar, y asÃ­ hasta `columna_N` de existir mÃ¡s de una. Para poder utilizar ejemplos del verbo, utilizaremos el juego de datos `iris`. Este juego reune medidas de sÃ©palos y pÃ©talos de 50 flores de tres especies diferentes de flor de iris. Supongamos que solo nos interesa analizar el ancho de los sÃ©palos de cada flor, pero tambiÃ©n queremos retener la especie. 
+donde `datos` es el juego de datos original, `columna_1` es la primera (y quizás la única) columna que debemos retornar, y así hasta `columna_N` de existir más de una. Para poder utilizar ejemplos del verbo, utilizaremos el juego de datos `iris`. Este juego reune medidas de sépalos y pétalos de 50 flores de tres especies diferentes de flor de iris. Supongamos que solo nos interesa analizar el ancho de los sépalos de cada flor, pero también queremos retener la especie. 
 
 ```{r ejemploSELECT_1}
 library(dplyr)
@@ -163,7 +163,7 @@ iris %>% select(Sepal.Width, Species) %>%
   head()
 ```
 
-Podemos utilizar la notaciÃ³n `comienzo:final` de *R* para seleccionar un rango de variables.
+Podemos utilizar la notación `comienzo:final` de *R* para seleccionar un rango de variables.
 
 ```{r ejemploSELECT_2}
 library(dplyr)
@@ -172,7 +172,7 @@ iris %>% select(Sepal.Length:Petal.Length, Species) %>%
   head()
 ```
 
-Inclusive podemos utilizar el signo menos para excluir columnas del juego de datos si es mÃ¡s cÃ³modo que incluirlas. Para que el cÃ³digo corra correctamente encerrar el rango en una colecciÃ³n con la funciÃ³n `c()`.
+Inclusive podemos utilizar el signo menos para excluir columnas del juego de datos si es más cómodo que incluirlas. Para que el código corra correctamente encerrar el rango en una colección con la función `c()`.
 
 ```{r ejemploSELECT_3}
 library(dplyr)
@@ -182,15 +182,15 @@ iris %>% select(-c(Sepal.Length:Petal.Length)) %>%
 ```
 
 ### El Verbo FILTER
-El verbo `filter()` permite filtrar juegos de datos para crear subconjuntos de datos. La diferencia grande entre `select()` y `filter()` es que mientras el primero selecciona todas las observaciones (filas) de las columnas especificadas en los parametros asignados, el segundo filtra todas las observaciones (filas) que cumplen con las condiciones de filtro asignadas a cada variable categÃ³rica (columnas). El modelo tÃ­pico de la funciÃ³n es:
+El verbo `filter()` permite filtrar juegos de datos para crear subconjuntos de datos. La diferencia grande entre `select()` y `filter()` es que mientras el primero selecciona todas las observaciones (filas) de las columnas especificadas en los parametros asignados, el segundo filtra todas las observaciones (filas) que cumplen con las condiciones de filtro asignadas a cada variable categórica (columnas). El modelo típico de la función es:
 
-`filter(datos, condiciÃ³n_1, ..., condiciÃ³n_n)`
+`filter(datos, condición_1, ..., condición_n)`
 
 donde:
 
 * `datos` es el juego de datos
-* `condicion_1` es la primera condiciÃ³n para filtrar
-* `condicion_n` es la enÃ©sima condiciÃ³n para filtrar; pueden haber tantas condiciones como sean necesarias para el anÃ¡lisis, aunque demasiadas condiciones pueden enredar el cÃ³digo fuente si en algÃºn momento un colega decide revisarlo (o en tal caso, uno mismo como cientÃ­fico meses despuÃ©s).
+* `condicion_1` es la primera condición para filtrar
+* `condicion_n` es la enésima condición para filtrar; pueden haber tantas condiciones como sean necesarias para el análisis, aunque demasiadas condiciones pueden enredar el código fuente si en algún momento un colega decide revisarlo (o en tal caso, uno mismo como científico meses después).
 
 Retomemos los ejemplos con el juego `iris` y veamos como se aplican las condiciones de filtro. 
 
@@ -203,7 +203,7 @@ iris %>% filter(Species == "setosa") %>%
   head()
 ```
 
-Por supuesto, podemos tener filtros compuestos con ejemplos mÃ¡s complicados.
+Por supuesto, podemos tener filtros compuestos con ejemplos más complicados.
 
 ```{r ejemploVerboFILTER_2}
 library(dplyr)
@@ -215,28 +215,28 @@ iris %>% filter(Species == "versicolor", Sepal.Length < 5.0) %>%
 ```
 
 ```{marginfigure}
-Hemos de notas que de por si la coma que separa las diferentes condiciones de filtro es equivalente a un operador lÃ³gico Y (AND) y por lo tanto especificarlo es interesante para entender la lÃ³gica del filtro pero no es necesario. No es lo mismo con cualquier otro operador lÃ³gico como O (OR) o casos de negaciones.
+Hemos de notas que de por si la coma que separa las diferentes condiciones de filtro es equivalente a un operador lógico Y (AND) y por lo tanto especificarlo es interesante para entender la lógica del filtro pero no es necesario. No es lo mismo con cualquier otro operador lógico como O (OR) o casos de negaciones.
 ```
 
-TambiÃ©n se puede combinar el uso de operadores lÃ³gicos *Y* y *O* dentro de las condiciones del filtro. 
+También se puede combinar el uso de operadores lógicos *Y* y *O* dentro de las condiciones del filtro. 
 
 ```{r ejemploVerboFILTER_3}
 library(dplyr)
 data(iris)
 
-# un ejemplo de filtro con operador lÃ³gico OR
+# un ejemplo de filtro con operador lógico OR
 iris %>% filter(Species == "versicolor" | Sepal.Length < 5.0) %>%
   tail()
 ```
 
 ### El Verbo ARRANGE
-El verbo `arrange()` se utiliza para ordenar de alguna manera particular el juego de datos, utilizando un valor como condiciÃ³n. El formato bÃ¡sico de utilizaciÃ³n depende de si queremos ordernar de forma ascendente (valor por omisiÃ³n) o descendente.
+El verbo `arrange()` se utiliza para ordenar de alguna manera particular el juego de datos, utilizando un valor como condición. El formato básico de utilización depende de si queremos ordernar de forma ascendente (valor por omisión) o descendente.
 
-`arrange(datos, condiciÃ³n)`
+`arrange(datos, condición)`
 
-o tambiÃ©n:
+o también:
 
-`arrange(datos, desc(condiciÃ³n))`
+`arrange(datos, desc(condición))`
 
 Aunque de por si es un verbo sencillo de utilizar, veamos un ejemplo para clarificar dudas.
 
@@ -251,4 +251,97 @@ mtcars %>% select(mpg) %>%
 ```
 
 ### El Verbo MUTATE
-El verbo `mutate()` es muy interesante porque nos permite crear variables nuevas - o sea columnas nuevas - basadas en las existentes en el juego de datos. 
+El verbo `mutate()` es muy interesante porque nos permite crear variables nuevas - o sea columnas nuevas - basadas en las existentes en el juego de datos. Un ejemplo que ya hemos visto en otra parte del libro es la conversión de unidades, por ejemplo de kilos a toneladas métricas. Utilizar esta función es muy sencillo ya que tiene una sintáxis muy poco complicada:
+
+`mutate(datos, ...)`
+
+donde `datos` es la fuente de datos original y los puntos suspensivos toman el espacio de la transformación de las variables con el nombre de la nueva variable a agregar, seguido del símbolo de asignación, y una fórmula a utilizar para la misma. Veamos un ejemplo transformando del juego de datos `mtcars` la variable de peso `wt` a toneladas métricas.
+
+```{r mutateExample}
+data(mtcars)
+data_cars <- mtcars
+head(mutate(data_cars, wt_TM = wt * 1000 / 2204.6)[ ,c(6,12)])
+```
+
+### El Verbo SUMMARIZE
+La función del verbo `summarize()` es la de collapsar todos los datos de una columna de un juego de datos en una medición significativa, por ejemplo tomar el promedio de todos los pesos de los motores del juego de datos `mtcars`. La sintáxis para utilizar el verbo es la siguiente:
+
+`summarize(datos, nueva_variable = ...)`
+
+donde:
+
+* `datos` es la fuente de datos original
+* `nueva_variable` es un nombre significativo para la nueva variable a crear con la reducción de datos
+* los puntos suspensivos son la transformación en si utilizando alguna función estadística
+
+Si queremos recrear el planteamiento de tomar el promedio de todos los motores del juego `mtcars`, el código toma esta forma:
+
+```{r summarizeEjemplo1}
+data(mtcars)
+summarize(mtcars, promedio_peso_motor = mean(wt))
+
+```
+
+El resultado es exactamente el mismo que haber ejecutado `mean(mtcars$wt)`. Sin embargo el poder del verbo es mucho más evidente cuando se conjuga con la agrupación de categorías utilizando la función `group_by()`. Supongamos que queremos nuevamente resumir el peso promedio de los motores del juego `mtcars` pero esta vez queremos resumenes parciales por número de cilindros del motor. Podemos conseguir este cálculo a través del código a continuación.
+
+```{r}
+data(mtcars)
+
+mtcars %>%
+  group_by(cyl) %>%
+  summarize(mean_wt = mean(wt))
+```
+
+## Ampliando y Reduciendo Datos con TIDYR
+La librería `tidyr` se puede cargar de forma separada, y su razón principal de ser es limpiar la data al momento de trabajar con la misma, sobre todo si se desea pasar de formatos de tabla anchos a angosto y viceversa. Hay dos verbos dentro de la librería que hacen el 90% del trabajo:
+
+* `gather()` toma múltiples columnas y las reduce en una dupla de índices-valores; en otras palabras hacer de la data ancha data larga. 
+
+* `spread()` toma dos columnas de índices y valores y las distribuye en varias columnas, justo lo inverso del verbo `gather()`; en otras palabras, hace de la data larga data ancha. 
+
+El formato preferido del universo limpio es justo juegos de datos largos, pero a veces nos vemos en la necesidad de formatos anchos por razones de reducción y análisis. La librería `tidyr` también provee los verbos `separate()` y `extract()` que facilitan la extracción de datos de una columna que representa múltiples variables. El complemento del verbo `separate()` es `unite()`.
+
+La transformación de formatos anchos a largo y viceversa es algo que se dá de forma muy común en el análisis de datos. La librería `tidyr()` es una solución poderosa por su velocidad y gestión, aunque a veces la forma de utilizar los parámetros es un tanto críptica (como lo son muchas cosas en el lenguaje _R_). Pensemos en un salón de clases donde el único registro de notas es el siguiente tomado a mano:
+
+```{r}
+clase <- data.frame(nota = c("A", "B", "C"), hombre = c(1,5,3), mujer = c(4,0,3))
+clase
+
+```
+
+El resumen de las notas no está mal, pero para un análisis con herramientas de _R_ necesitamos ver la cuenta desglosada de formato limpio, una línea para cada instancia, una variable para cada columna. Recurrimos al verbo `gather()` para esto, cuya sintáxis resumida es la siguiente:
+
+`gather(data, key = "clave", value = "valor", ..., na.rm = FALSE, ...)`
+
+donde:
+
+* `data` es la fuenta de datos original
+* `key = "clave"` es la clave de índice del nuevo arreglo
+* `value = "valor"` es la fórmula del arreglo
+* `na.rm = FALSE` es el valor por omisión de registros con datos del tipo `NA`
+
+Para transformar nuestro juego de datos de clase de ancho a largo utilizamos como clave y valor expresiones que _R_ transforma en formulaciones. No vamos a entrar en profundidad en las expresiones en sí, basta decir que _R_ entiende que el sufijo _att_ habla del atributo de una serie de datos y los intrepeta como escalares. Por eso en el código a continuación podemos pedir agrupar por `key = genero_att` y _R_ entiende perfectamente que se trata de agrupar en una sola columna hombres y mujeres, aunque no le damos estas variables. Lo mismo aplica para la formulación de valor, donde pasamos como parámetro `value = cuenta, hombre, mujer` y _R_ utiliza la cuenta de las notas por hombre y mujer para armar el arreglo, inclusive utiliza la variable cuenta como etiqueta de la columna cuyos datos no son identificadores de la línea dentro del juego de datos. 
+
+```{r}
+library(tidyr)
+clase <- data.frame(nota = c("A", "B", "C"), hombre = c(1,5,3), mujer = c(4,0,3))
+clase
+
+gather(clase, key = genero_att, value = cuenta, hombre, mujer)
+```
+
+Dado que `spread()` es lo opuesto de `gather()`, su uso toma un juego de datos en formato largo y lo devuelve como formato ancho, especificanco la siguiente sintaxis de uso.
+
+`spread(data, variable_1, ..., variable_n)`
+
+donde `data` es la fuente de datos original y variables uno a ene son las variables por la cual vamos a resumir. Su uso se ejemplifica a continuación:
+
+```{r}
+library(tidyr)
+clase_2 <- gather(clase, key = genero_att, value = cuenta, hombre, mujer)
+clase_2
+
+spread(clase_2, genero_att, cuenta)
+
+```
+
