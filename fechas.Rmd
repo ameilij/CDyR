@@ -1,0 +1,173 @@
+---
+title: "Ciencia de Datos y R"
+subtitle: "Introducción a la Ciencia de Datos con Lenguaje R"
+author: "Ariel E. Meilij"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+```
+
+# FECHAS Y TIEMPO
+`r tint::newthought('Las fechas y estampillas de horario son un tema complicado no en un lenguaje de programación en particular sino en un mundo donde cada lenguaje utiliza un formato disímil.')` Tan solo hay que comparar dos fechas, una de Latinoamérica y otra de Estados Unidos, por ejemplo **04-06-2019**. ¿Es el formato latino y se refiere al 4 de junio del 2019 (énfasis en que junio va con mínuscula)? ¿O es el formato norteamericano y se refiere a **April 6, 2019** (énfasis que en inglés los meses comienzan con mayúscula)? Este problema es evidente en el uso de hojas de cálculo donde las fechas se transforman en números y muchas veces la ambiguedad del formato no permite vislumbrar cual es la fecha real. 
+
+El lenguaje _R_ sufre un poco de estas ambiguedades, y si bien en el momento de programar se puede especificar con mucha claridad que tipo de formato de fecha se está utilizando, el hecho de que la Ciencia de Datos accede a fuentes amplias, distintas, universales y algunas crípticas, no le hace el trabajo más fácil al investigador. 
+
+## Introducción a Formatos de Fecha y Tiempo
+El lenguaje _R_ ha desarrollado una manera especial de representar las fechas y los tiempos. 
+
+* Las fechas están representadas por la clase `Date`. Las mismas se archivan en memoria como el número de días que han pasado desde el 1 de enero de 1970 (01-01-1970). 
+* Los tiempos están representados por dos clases, `POSiXct` y `POSiXlt`. Los horarios POSIXct se acumulan internamente como el número de segundos que han pasado desde la fecha 01-01-1970. Pero los horarios POSIXlt se acumulan en memoria como el número de segundos, minutos y horas. 
+
+En cualquier momento se puede solicitar la fecha del sistema con la función `Sys.Date()`. Esta función imprime en cónsola o devuelve como valor un objeto del tipo fecha con la fecha exacta del momento de solicitud. 
+
+```{r}
+fecha <- Sys.Date()
+fecha
+
+class(fecha)
+unclass(fecha)
+```
+
+De forma similar existe la función `Sys.time()`, pero por alguna razón devuelve un poco más de lo que se le solicita.
+
+```{r getTime}
+hora <- Sys.time()
+hora
+
+class(hora)
+unclass(hora)
+```
+
+Los formatos POSIXct son enteros y más fáciles de manipular. Los formatos POSIXlt guardan información en múltiples formatos (dia, semana, etc.)
+
+La creación de una fecha se logra con la ayuda de la función ´as.Date()´, pasando como parámetro una cadena literal con la fecha deseada. Por ejemplo, creamos la fecha "20-08-1970":
+
+```{r}
+una_fecha <- as.Date("20-08-1970")
+```
+
+La creación de horarios depende de si se quiere crear un horario POSIXCt o un horario POSIXlt. La creación es similar pero los resultados no lo son. De hecho, involucra pasar fecha y horario para la creación correcta.
+
+```{r createTime}
+un_horario <- as.POSIXct("1985-09-19 12:00:00")
+un_horario
+
+months(un_horario)
+
+# Lo siguiente es un ERROR!
+# otro_horario <- as.POSIXct("14:30:00")
+# otro_horario
+```
+
+El formato POSIXlt es similar pero al desagrupar la clase nos devuelve múltiples objetos.
+
+```{r getTime_2}
+este_horario <- as.POSIXlt("1985-09-19 12:00:00")
+este_horario
+
+months(este_horario)
+
+unclass(este_horario)
+```
+
+## Cómo Extraer Información Útil de Fechas y Horarios
+Es muy probable que necesitemos manipular variables de fechas y horarios y extraer de las mismas información específica, como que día de la semana fue el "20-08-1970". Para tal uso el lenguaje _R_ nos provee de varios comandos muy útiles.
+
+```{marginfigure}
+Lamentablemente no hay una función para extraer el año tan sencilla como `year()`.
+```
+
+* `weekdays(X)` extrae el día de la semana de cualquier fecha que se utilice como parámetro X.
+* `months(X)` extrae el mes de cualquier fecha que se utilice como parámetro X.
+* `quarters(X)` extrae el trimestre del año de cualquier fecha que se utilice como parámetro X.
+
+```{r extractDate}
+fecha = as.Date("20-08-1970")
+weekdays(fecha)
+months(fecha)
+quarters(fecha)
+```
+
+Si nos pasan una fecha cualquiera, podemos utilizar las funciones de extracción para recrearla a la necesidad del investigador. Los formatos disponibles para la mismas son:
+
+%d ??? día en forma de número (0-31)
+
+%a ??? día de la semana abreviado en inglés (Tue)
+
+%A ??? día de la semana completo en inglés (Tuesday)
+
+%m ??? mes en número (00-12)
+
+%b ??? mes abreviado en inglés ??? Feb
+
+%B ??? mes sin abreviar en inglés (February)
+
+%y ??? año en 2 dígitos (16)
+
+%Y ??? año en 4 dígitos (2016)
+
+La función que nos facilita la labor es `format()`.
+
+```{r}
+fecha_origen_desconocido <- as.Date("1985-06-09")
+fecha_conocida <- format(fecha_origen_desconocido, format="%d-%m-%y")
+fecha_conocida
+```
+
+También es útil para crear fechas de formatos específicos e inequívocos.
+
+```{r}
+fecha_inequivoca <- format(as.Date(c("1990-10-10")), format="%d-%m-%Y")
+fecha_inequivoca
+
+# El siguiente ejemplo da ERROR!
+# fecha_inequivoca_2 <- format(as.Date(c("1990-15-10")), format="%d-%m-%Y")
+```
+
+Lo mismo aplica para los horarios con los siguientes formatos de extracción.
+
+%H - hora
+
+%M - minutos
+
+%S - segundos
+
+El uso es similar:
+
+```{r}
+m <- Sys.time()
+m
+
+# solo minutos
+format(m, "%M")
+
+# solo segundos
+format(m, "%S")
+```
+
+## Cómo Cálcular Diferencias de Fechas y Horas
+La función `difftime()` facilita el cálculo de dos fechas con horas, incluyendo que porción de los datos nos interesa más. La sintáxis de uso es la siguiente.
+
+
+`difftime(fecha_1, fecha_2, units = "secs, mins, hours, days, weeks, auto")`
+
+donde `fecha_1` y `fecha_2` son las dos fechas a procesar, y `units = "..."` es algún valor en especial que nos interese de la lista (la opción por omisión es auto). 
+
+```{r}
+n <- Sys.time()
+
+# diferencia en segundos
+difftime(m, n, units = "secs")
+
+# diferencia en minutos
+difftime(m, n, units = "mins")
+```
+
