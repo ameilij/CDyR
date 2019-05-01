@@ -1,13 +1,13 @@
 ---
 title: "Ciencia de Datos y R"
-subtitle: "Introducci√≥n a la Ciencia de Datos con Lenguaje R"
+subtitle: "IntroducciÛn a la Ciencia de Datos con Lenguaje R"
 author: "Ariel E. Meilij"
 date: "`r Sys.Date()`"
 output: tint::tintHtml
 bibliography: skeleton.bib
-link-citations: no
+link-citations: yes
 ---
-	
+
 ```{r setup, include=FALSE}
 library(tint)
 # invalidate cache when the package version changes
@@ -16,16 +16,16 @@ options(htmltools.dir.version = FALSE)
 ```
 	
 # BREVE TUTORIAL DE APRENDIZAJE AUTOMATIZADO
-El mundo del **Aprendizaje Automatizado** no es sencillo. Hay mucho conocimiento y esfuerzo implicito en cualquiera de sus procesos. Es una disciplina m√°s reciente comparada a otras en la matem√°tica, en la cual no todos los autores coinciden en sus notas sobre las aplicaciones de diferentes m√©todos en un problema espec√≠fico, llegando al punto que algunos dan soluciones diferentes al mismo problema. 
+El mundo del **Aprendizaje Automatizado** no es sencillo. Hay mucho conocimiento y esfuerzo implicito en cualquiera de sus procesos. Es una disciplina reciente comparada a otras en la matem·tica, en la cual no todos los autores coinciden en sus notas sobre las aplicaciones de diferentes mÈtodos en un problema especÌfico, llegando al punto que algunos dan soluciones diferentes al mismo problema. 
 	
-Es f√°cil perderse a primeras por lo amplio y complejo del tema. La bibliograf√≠a que sustenta la materia es muy diversa, pero los libros m√°s espec√≠fico atacan los conceptos de manera muy matem√°tica y abstracta, con material que fundamenta la teor√≠a pero da pocas luces sobre la aplicaci√≥n pr√°ctica [@mitchell]. En contraposici√≥n, el mundo del Internet contiene miles de tutoriales que explican muy bien la implementaci√≥n de la soluci√≥n en el mundo real a una situaci√≥n espec√≠fica sin que se entienda la teor√≠a que cimenta la soluci√≥n - o porqu√© el cient√≠fico hace lo hace. 
+Es f·cil perderse a primeras por lo amplio y complejo del tema. La bibliografÌa que sustenta la materia es muy diversa, pero los libros m·s especÌfico atacan los conceptos de manera muy matem·tica y abstracta, con material que fundamenta la teorÌa pero da pocas luces sobre la aplicaciÛn pr·ctica [@mitchell]. En contraposiciÛn, el mundo del Internet contiene miles de tutoriales que explican muy bien la implementaciÛn de la soluciÛn en el mundo real a una situaciÛn especÌfica sin que se entienda la teorÌa que cimenta la soluciÛn - o porquÈ el cientÌfico hace lo hace. 
 	
-En la pr√≥xima secci√≥n estudiaremos un problema de aprendizaje automatizado muy sencillo y detallaremos paso por paso como se llega de una pregunta a un modelo predictivo. Hemos mantenido el ejemplo simple para que el enfoque sea en la comprensi√≥n de la soluci√≥n y no en el problema en si. LLegar a un balance entre teor√≠a y pr√°ctica es clave para que el cient√≠fico de datos materialice el puente entre la teor√≠a, la hip√≥tesis y la b√∫squeda de la comprobaci√≥n cient√≠fica. 
+En la prÛxima secciÛn estudiaremos un problema de aprendizaje automatizado muy sencillo y detallaremos paso por paso como se llega de una pregunta a un modelo predictivo. Hemos mantenido el ejemplo simple para que el enfoque sea en la comprensiÛn de la soluciÛn y no en el problema en si. LLegar a un balance entre teorÌa y pr·ctica es clave para que el cientÌfico de datos materialice el puente entre la teorÌa, la hipÛtesis y la b˙squeda de la comprobaciÛn cientÌfica. 
 	
 ## El Juego de Datos Old Faithful
-El juego de datos _Old Faithful_ contiene solo dos variables: una corresponde con los tiempos de duraci√≥n de la erupci√≥n en minutos (la variable `eruptions`) y la segunda corresponde con los tiempos de espera entre erupciones, tambi√©n en minutos (la variable `waiting`). Dichas erupciones se midieron y tabularon del geyser **Old Faithful** en el parque Yellowstone National Park, Wyoming, Estados Unidos. 
+El juego de datos _Old Faithful_ contiene solo dos variables: una corresponde con los tiempos de duraciÛn de la erupciÛn en minutos (la variable `eruptions`) y la segunda corresponde con los tiempos de espera entre erupciones, tambiÈn en minutos (la variable `waiting`). Dichas erupciones se midieron y tabularon del geyser **Old Faithful** en el parque Yellowstone National Park, Wyoming, Estados Unidos. 
 	
-Podemos cargar los datos en _R_ y ver las primeras l√≠neas con el siguiente c√≥digo. 
+Podemos cargar los datos en _R_ y ver las primeras lÌneas con el siguiente cÛdigo. 
 	
 ```{r loadFaithful}
 data(faithful)
@@ -33,49 +33,49 @@ head(faithful)
 	
 ```
 	
-Nuestro objetivo como cient√≠ficos de datos ser√° simple. ¬øPodemos utilizar aprendizaje automatizado para predecir dentro de cierto intervalo de confidencia el tiempo en minutos de la pr√≥xima erupci√≥n basados en un tiempo de espera intermedio $x$? Habiendo correctamente establecido la pregunta de investigaci√≥n, intentaremos:
+Nuestro objetivo como cientÌficos de datos ser· simple. øPodemos utilizar aprendizaje automatizado para predecir dentro de cierto intervalo de confidencia el tiempo en minutos de la prÛxima erupciÛn basados en un tiempo de espera intermedio $x$? Habiendo correctamente establecido la pregunta de investigaciÛn, intentaremos:
 	
 * Cargar en el lenguaje el juego de datos.
-* Dividir los datos en un juego de entrenamiento para analizar nuestra posible soluci√≥n y verificar que tan cerca estamos - o no - de la verdad.
-* Visualizar algunas de las implicaciones del juego de datos y el desempe√±o de nuestro algoritmo utilizando t√©cnicas de EDA (del ingl√©s _Explorative Data Analysis_).
-* Finalmente utilizar nuestro modelo predictivo entrenado en un juego de datos de evaluaci√≥n para asegurarnos que estamos en el camino correcto y que nuestras predicciones tienen sentido. 
+* Dividir los datos en un juego de entrenamiento para analizar nuestra posible soluciÛn y verificar que tan cerca estamos - o no - de la verdad.
+* Visualizar algunas de las implicaciones del juego de datos y el desempeÒo de nuestro algoritmo utilizando tÈcnicas de EDA (del inglÈs _Explorative Data Analysis_).
+* Finalmente utilizar nuestro modelo predictivo entrenado en un juego de datos de evaluaciÛn para asegurarnos que estamos en el camino correcto y que nuestras predicciones tienen sentido. 
 	
 ## Primeros Pasos del Proceso de Aprendizaje Automatizado
-La idea b√°sica en el proceso de aprendizaje automatizado es separar los datos en dos juegos: uno de entrenamiento para nuestro algoritmo de predicci√≥n y otro de evaluaci√≥n del mismo una vez que estemos comodos con el modelo entrenado. Es importante entender estos conceptos cruciales del aprendizaje automatizado.
+La idea b·sica en el proceso de aprendizaje automatizado es separar los datos en dos juegos: uno de entrenamiento para nuestro algoritmo de predicciÛn y otro de evaluaciÛn del mismo una vez que estemos comodos con el modelo entrenado. Es importante entender estos conceptos cruciales del aprendizaje automatizado.
 	
-* Todo el trabajo concerniente a la exploraci√≥n y an√°lisis visual del juego de datos y la b√∫squeda del algoritmo correcto para modelar se hace en el juego de entrenamiento, **y solamente en el juego de entrenamiento**. Aqu√≠ cabe el mismo rigor cient√≠fico que predomina en cualquier investigaci√≥n seria. La palabra clave en la Ciencia de Datos no es Datos, sino Ciencia [@leek]. 
-* Solo utilizaremos el juego de evaluaci√≥n al final del proceso, una vez nos sentimos c√≥modos con el modelo entrenado, y solamente al final del proceso. No hemos de cambiar, adaptar, o re-ensamblar nuestro algoritmo de predicci√≥n con el juego de datos de evaluaci√≥n, **no importa que tan grande sea la tentaci√≥n**.
+* Todo el trabajo concerniente a la exploraciÛn y an·lisis visual del juego de datos y la b˙squeda del algoritmo correcto para modelar se hace en el juego de entrenamiento, **y solamente en el juego de entrenamiento**. AquÌ cabe el mismo rigor cientÌfico que predomina en cualquier investigaciÛn seria. La palabra clave en la Ciencia de Datos no es Datos, sino Ciencia [@leek]. 
+* Solo utilizaremos el juego de evaluaciÛn al final del proceso, una vez nos sentimos cÛmodos con el modelo entrenado, y solamente al final del proceso. No hemos de cambiar, adaptar, o re-ensamblar nuestro algoritmo de predicciÛn con el juego de datos de evaluaciÛn, **no importa que tan grande sea la tentaciÛn**.
 	
-Habiendo establecido el rigor cient√≠fico necesario en la utilizaci√≥n correcta de los juegos de entrenamiento y evaluaci√≥n, retomemos un segundo concepto crucial en el aprendizaje automatizado, el de error dentro y fuera de la muestra. 
-	
-```{marginfigure}
-Llamaremos a un modelo de predicci√≥n o clasificaci√≥n que estamos entrenando un _aprendiz_. Esta nomenclatura se expande para cubrir _meta-aprendices_ en modelos ensamblados de aprendizaje automatizado.
-```
-	
-* El error de la muestra es el margen de error que se obtiene en el mismo juego de datos que se utiliz√≥ para crear un aprendiz. Algunos autores tambi√©n hablan de error de resubstituci√≥n [@pengMatsui]. El error de muestra es muy optimista, ya que el aprendiz puede haber absorbido no solo la se√±al que transmite un juego de datos sino el ruido del mismo. La identificaci√≥n de esta combinaci√≥n es poderosa al punto que puede invalidar el modelo entrenado si se somete a un juego de datos con variaci√≥n en la lectura. Esto es similar al alumno que solo estudi√≥ las preguntas del examen de matem√°tica que aparecen en el libro de clase y sus apuntes, pero que no sabe que contestar si le cambian el problema ligeramente. 
-* El error fuera de muestra es el margen de error que obtenemos cuando medimos el modelo entrenado en un juego de datos de evaluaci√≥n. Este margen de error es mucho m√°s honesto, ya que determina la funcionalidad del modelo en el mundo real. 
+Habiendo establecido el rigor cientÌfico necesario en la utilizaciÛn correcta de los juegos de entrenamiento y evaluaciÛn, retomemos un segundo concepto crucial en el aprendizaje automatizado, el de error dentro y fuera de la muestra. 
 	
 ```{marginfigure}
-Una forma de verificar en los datos si existe o no sobreajuste es la visualaci√≥n de los residuos, ya que por lo general se busca que se cumpla el concepto estadistico de **homocedasticidad**. Se habla de **homocedasticidad** si el error cometido por el modelo tiene siempre la misma varianza. Cuando no se cumple con dicha premisa, se dan situaciones de lo contrario, **heterocedasticidad**, donde los datos tienen varianza diferente, y esto lleva a sobreestimar el calce del modelo, precisi√≥n y el coeficiente de Pearson [@yakir].
+Llamaremos a un modelo de predicciÛn o clasificaciÛn que estamos entrenando un _aprendiz_. Esta nomenclatura se expande para cubrir _meta-aprendices_ en modelos ensamblados de aprendizaje automatizado.
 ```
 	
-En el proceso de crear aprendices robustos, nos interesa mucho m√°s el margen de error fuera de muestra que el error muestral (error de la muestra). La raz√≥n para esto es el efecto de sobreajuste (del ingl√©s _overfitting_), por el cual el aprendiz llega a niveles tan altos de precisi√≥n porque no solo lee la se√±al sino el ruido tambi√©n. Una soluci√≥n con un alto nivel de sobreajuste desempe√±ar√° muy bien en un juego de entrenamiento inclusive de buenas proporciones, pero tendr√° un pobre desempe√±o en el juego de evaluaci√≥n donde la se√±al y ruido sufre variaci√≥n. Es importante medir y comparar ambos √≠ndices de errores, esperando que un aprendiz robusto tenga un margen de error de muestra superior al nivel de error fuera de muestra. Cuando esto ocurre el aprendiz est√° generalizando mejor la soluci√≥n para un amplio espectro de datos, y al generalizar mejor har√° predicciones m√°s certeras en situaciones a lo largo de cualquier dato de evaluaci√≥n que se utilice.
+* El error de la muestra es el margen de error que se obtiene en el mismo juego de datos que se utilizÛ para crear un aprendiz. Algunos autores tambiÈn hablan de error de resubstituciÛn [@pengMatsui]. El error de muestra es muy optimista, ya que el aprendiz puede haber absorbido no solo la seÒal que transmite un juego de datos sino el ruido del mismo. La identificaciÛn de esta combinaciÛn es poderosa al punto que puede invalidar el modelo entrenado si se somete a un juego de datos con variaciÛn en la lectura. Esto es similar al alumno que solo estudiÛ las preguntas del examen de matem·tica que aparecen en el libro de clase y sus apuntes, pero que no sabe que contestar si le cambian el problema ligeramente. 
+* El error fuera de muestra es el margen de error que obtenemos cuando medimos el modelo entrenado en un juego de datos de evaluaciÛn. Este margen de error es mucho m·s honesto, ya que determina la funcionalidad del modelo en el mundo real. 
 	
 ```{marginfigure}
-El nombre _CARET_ proviene de las siglas en ingl√©s de _Classification And REgression Training.
+Una forma de verificar en los datos si existe o no sobreajuste es la visualaciÛn de los residuos, ya que por lo general se busca que se cumpla el concepto estadistico de **homocedasticidad**. Se habla de **homocedasticidad** si el error cometido por el modelo tiene siempre la misma varianza. Cuando no se cumple con dicha premisa, se dan situaciones de lo contrario, **heterocedasticidad**, donde los datos tienen varianza diferente, y esto lleva a sobreestimar el calce del modelo, precisiÛn y el coeficiente de Pearson [@yakir].
 ```
 	
-Comencemos con la preparaci√≥n al proceso de aprendizaje automatizado cargando las librer√≠as necesarias en _R_. La primera en este orden de ideas es la librer√≠a _CARET_. El paquete `caret`es la creaci√≥n del matem√°tico Max Kuhn y tiene una gran cantidad de funciones que ayudan en el proceso de aprendizaje automatizado, incluyendo la aceleraci√≥n de la creaci√≥n de juegos de datos de entrenamiento y evaluaci√≥n. Algunas de las bondades mayores son:
+En el proceso de crear aprendices robustos, nos interesa mucho m·s el margen de error fuera de muestra que el error muestral (error de la muestra). La razÛn para esto es el efecto de sobreajuste (del inglÈs _overfitting_), por el cual el aprendiz llega a niveles tan altos de precisiÛn porque no solo lee la seÒal sino el ruido tambiÈn. Una soluciÛn con un alto nivel de sobreajuste desempeÒar· muy bien en un juego de entrenamiento inclusive de buenas proporciones, pero tendr· un pobre desempeÒo en el juego de evaluaciÛn donde la seÒal y ruido sufre variaciÛn. Es importante medir y comparar ambos Ìndices de errores, esperando que un aprendiz robusto tenga un margen de error de muestra superior al nivel de error fuera de muestra. Cuando esto ocurre el aprendiz est· generalizando mejor la soluciÛn para un amplio espectro de datos, y al generalizar mejor har· predicciones m·s certeras en situaciones a lo largo de cualquier dato de evaluaciÛn que se utilice.
 	
-* creaci√≥n de subonjuntos de datos
+```{marginfigure}
+El nombre _CARET_ proviene de las siglas en inglÈs de _Classification And REgression Training.
+```
+	
+Comencemos con la preparaciÛn al proceso de aprendizaje automatizado cargando las librerÌas necesarias en _R_. La primera en este orden de ideas es la librerÌa _CARET_. El paquete `caret`es la creaciÛn del matem·tico Max Kuhn y tiene una gran cantidad de funciones que ayudan en el proceso de aprendizaje automatizado, incluyendo la aceleraciÛn de la creaciÛn de juegos de datos de entrenamiento y evaluaciÛn. Algunas de las bondades mayores son:
+	
+* creaciÛn de subonjuntos de datos
 * pre-procesamiento de datos
-* selecci√≥n de atributos
-* optimizaci√≥n de modelos y muestreo
-* estimaci√≥n de la importancia de variables
+* selecciÛn de atributos
+* optimizaciÛn de modelos y muestreo
+* estimaciÛn de la importancia de variables
 
-En el siguiente ejemplo cargamos en _R_ la biblioteca _CARET_ junto al juego de datos ¬¥faithful¬¥. Tambi√©n vamos a hacer algo muy importante para apegarnos al m√©todo cient√≠fico: fijar el valor de la variable semilla del sistema para la generaci√≥n de valores aleatorios en un n√∫mero fijo. No importa el valor del n√∫mero siempre y cuando sea siempre el mismo. Al fijar la variable semilla de generaci√≥n de valores aleatorios estamos asegurando que todos los experimentos sean replicables en el futuro con valores id√©nticos a los obtenidos por el cient√≠fico de datos inicial. Dado que mucho de los m√©todos de aprendizaje automatizado involucran la creaci√≥n de subconjuntos de datos de forma aleatoria, si no fijamos los valores de la variable semilla aquellos que quieran replicar los pasos en el futuro no tendr√°n forma de saber como se dividi√≥ exactamente la data. 
+En el siguiente ejemplo cargamos en _R_ la biblioteca _CARET_ junto al juego de datos ¬¥faithful¬¥. TambiÈn vamos a hacer algo muy importante para apegarnos al mÈtodo cientÌfico: fijar el valor de la variable semilla del sistema para la generaciÛn de valores aleatorios en un n˙mero fijo. No importa el valor del n˙mero siempre y cuando sea siempre el mismo. Al fijar la variable semilla de generaciÛn de valores aleatorios estamos asegurando que todos los experimentos sean replicables en el futuro con valores idÈnticos a los obtenidos por el cientÌfico de datos inicial. Dado que mucho de los mÈtodos de aprendizaje automatizado involucran la creaciÛn de subconjuntos de datos de forma aleatoria, si no fijamos los valores de la variable semilla aquellos que quieran replicar los pasos en el futuro no tendr·n forma de saber como se dividiÛ exactamente la data. 
 	
-```{r loadDataCARET}
+```{r loadDataCARET, warning=FALSE, message=FALSE}
 data("faithful")
 library(caret)
 
@@ -91,37 +91,37 @@ summary(faithful)
 	
 Del reporte sumario podemos comenzar a extraer algunas apreciaciones iniciales.
 	
-* Los valores de la variable `eruptions`, el tiempo de duraci√≥n de las erupciones, van de 1.6 a 5.1 minutos, con un promedio de 3.5 minutos. 
-* Los valores de la variable `waiting`, el tiempo de duraci√≥n entre erupciones, van de 43 a 96 minutos, con un promedio de 71 minutos. 
-* Para muchos cient√≠ficos que nunca han ido a Yellowstone es interesante descubrir que las erupciones se dan mucho m√°s seguido de lo que se hubiera pensado, y que duran mucho m√°s de lo que uno predicho. Es factible decir que en el transcurso de espera promedio de una hora y once minutos (71 minutos) uno puede ver una erupci√≥n cuya duraci√≥n promedio es de 3 minutos y medio, suficiente para sacar fotos y registrar el evento. 
+* Los valores de la variable `eruptions`, el tiempo de duraciÛn de las erupciones, van de 1.6 a 5.1 minutos, con un promedio de 3.5 minutos. 
+* Los valores de la variable `waiting`, el tiempo de duraciÛn entre erupciones, van de 43 a 96 minutos, con un promedio de 71 minutos. 
+* Para muchos cientÌficos que nunca han ido a Yellowstone es interesante descubrir que las erupciones se dan mucho m·s seguido de lo que se hubiera pensado, y que duran mucho m·s de lo que uno predicho. Es factible decir que en el transcurso de espera promedio de una hora y once minutos (71 minutos) uno puede ver una erupciÛn cuya duraciÛn promedio es de 3 minutos y medio, suficiente para sacar fotos y registrar el evento. 
 	
 ```{marginfigure}
-Para mediciones m√°s cient√≠ficas, ciertamente la informaci√≥n nos permite utilizar una distribuci√≥n de Poisson utilizando como $\lambda$ el valor promedio de espera de 70.9 minutos. La forma de hacerlo figura en el cap√≠tulo de Estad√≠stica B√°sica.
+Para mediciones m·s cientÌficas, ciertamente la informaciÛn nos permite utilizar una distribuciÛn de Poisson utilizando como $\lambda$ el valor promedio de espera de 70.9 minutos. La forma de hacerlo figura en el capÌtulo de EstadÌstica B·sica.
 ```
 	
-Sin haber hecho un solo c√°lculo o l√≠nea de programaci√≥n _R_ podemos decir sin base cient√≠fica pero con cierto sentido com√∫n, que la predicci√≥n emp√≠rica es que en el plazo de una hora y minutos uno viera por lo menos una erupci√≥n de tres minutos de duraci√≥n, y que en el peor de los casos en el lapso de una hora y media uno pudiera ver una erupci√≥n de por lo menos un minuto y medio de duraci√≥n (realmente 96.0 minutos de espera y 1.6 minutos de duraci√≥n). 
+Sin haber hecho un solo c·lculo o lÌnea de programaciÛn _R_ podemos decir sin base cientÌfica pero con cierto sentido com˙n, que la predicciÛn empÌrica es que en el plazo de una hora y minutos uno viera por lo menos una erupciÛn de tres minutos de duraciÛn, y que en el peor de los casos en el lapso de una hora y media uno pudiera ver una erupciÛn de por lo menos un minuto y medio de duraciÛn (realmente 96.0 minutos de espera y 1.6 minutos de duraciÛn). 
 	
-Los valores de la distribuci√≥n de los rangos parecen compactos. Utilizamos una visualizaci√≥n para contrastar la imagen de la distribuci√≥n de rangos de los datos con la tabla. 
+Los valores de la distribuciÛn de los rangos parecen compactos. Utilizamos una visualizaciÛn para contrastar la imagen de la distribuciÛn de rangos de los datos con la tabla. 
 	
 ```{r boxplotFaithful}
 boxplot(faithful)
 ```
 	
-Lamentablemente la visualizaci√≥n de los rangos de las variables no agrega mucho a lo que ya hemos pensado. El uso de las gr√°ficas de caja nos permite ver la dispersi√≥n de los datos, y en el caso de la variable `waiting` vemos que hay algunos puntos extremos de los datos (_outliers_). Quiz√°s vale la pena verificar si hay alguna relaci√≥n entre los valores de las variables. 
+Lamentablemente la visualizaciÛn de los rangos de las variables no agrega mucho a lo que ya hemos pensado. El uso de las gr·ficas de caja nos permite ver la dispersiÛn de los datos, y en el caso de la variable `waiting` vemos que hay algunos puntos extremos de los datos (_outliers_). Quiz·s vale la pena verificar si hay alguna relaciÛn entre los valores de las variables. 
 	
 ```{r scatterFaithful}
 ggplot(faithful, aes(y=eruptions, x=waiting)) + geom_point(colour = "gray")
 ```
 	
-La gr√°fica de dispersi√≥n nos muestra una relaci√≥n lineal en potencia. Es posible con este juego de datos hacer un modelo de regresi√≥n lineal donde la variable dependiente (la duraci√≥n de la erupci√≥n) tenga correlaci√≥n con la variable independiente o regresor (el tiempo de espera entre erupciones).
+La gr·fica de dispersiÛn nos muestra una relaciÛn lineal en potencia. Es posible con este juego de datos hacer un modelo de regresiÛn lineal donde la variable dependiente (la duraciÛn de la erupciÛn) tenga correlaciÛn con la variable independiente o regresor (el tiempo de espera entre erupciones).
 	
-## Creaci√≥n los Juegos de Entrenamiento y Evaluaci√≥n
-Ahora que hemos definido el uso potencial de una regresi√≥n lineal como algoritmo de predicci√≥n, y que tenemos una teor√≠a detr√°s de la pregunta del problema, podemos comenzar a crear nuestros juegos de datos de entrenamiento y evaluaci√≥n. 
+## CreaciÛn los Juegos de Entrenamiento y EvaluaciÛn
+Ahora que hemos definido el uso potencial de una regresiÛn lineal como algoritmo de predicciÛn, y que tenemos una teorÌa detr·s de la pregunta del problema, podemos comenzar a crear nuestros juegos de datos de entrenamiento y evaluaciÛn. 
 	
-Diferentes autores difieren en los porcentajes a utilizar para los juegos de entrenamiento y evaluaci√≥n. Una regla com√∫n es destinar el 70% de los datos a el juego de entrenamiento, ya que haremos de trabajar mucho m√°s con este, y solo el 30% a los datos de evaluaci√≥n, que al fin y al cabo se utilizan solo una vez al final del proceso [@daroczi]. Otros dan rangos m√°s amplios determinados en la amplitud de datos del juego inicial [@leek]. Para prop√≥sitos pr√°cticos de material que sigue, utilizaremos la regla sencilla de separar los datos en dos juegos, cada uno con el 50% de los datos. 
+Diferentes autores difieren en los porcentajes a utilizar para los juegos de entrenamiento y evaluaciÛn. Una regla com˙n es destinar el 70% de los datos a el juego de entrenamiento, ya que haremos de trabajar mucho m·s con este, y solo el 30% a los datos de evaluaciÛn, que al fin y al cabo se utilizan solo una vez al final del proceso [@daroczi]. Otros dan rangos m·s amplios determinados en la amplitud de datos del juego inicial [@leek]. Para propÛsitos pr·cticos de material que sigue, utilizaremos la regla sencilla de separar los datos en dos juegos, cada uno con el 50% de los datos. 
 	
 ```{marginfigure}
-Utilizaremos la regla com√∫n en la ciencia de datos de nombrar los juegos de entrenamiento `√≠nTrain` y los de evaluaci√≥n `inTest`. El lector puede ponerle sin embargo cualquier nombre que quiera, solo sugerimos que los mismos sean descriptivos y entendibles para todos aquellos que quieran replicar los experimentos.
+Utilizaremos la regla com˙n en la ciencia de datos de nombrar los juegos de entrenamiento `ÌnTrain` y los de evaluaciÛn `inTest`. El lector puede ponerle sin embargo cualquier nombre que quiera, solo sugerimos que los mismos sean descriptivos y entendibles para todos aquellos que quieran replicar los experimentos.
 ```
 	
 ```{r trainFaithful_1}
@@ -131,9 +131,9 @@ testFaith <- faithful[-inTrain, ]
 head(trainFaith)
 ```
 	
-La primera vez que uno ve la creaci√≥n de los juegos de entrenamiento y evaluaci√≥n, el c√≥digo pudiera parecer un poco cr√≠ptico. Por esa misma raz√≥n analicemos l√≠nea por l√≠nea lo que acabamos de crear.
+La primera vez que uno ve la creaciÛn de los juegos de entrenamiento y evaluaciÛn, el cÛdigo pudiera parecer un poco crÌptico. Por esa misma razÛn analicemos lÌnea por lÌnea lo que acabamos de crear.
 	
-La primera l√≠nea del c√≥digo crea la variable `inTrain` a trav√©s de la funci√≥n de _CARET_ `createDataPartition`. La variable `inTrain` no es un juego de datos de entrenamiento, sino un juego de datos de √≠ndices para crear el juego de entrenamiento. En otras palabras, no es sino un vector con n√∫meros, cada n√∫mero un √≠ndice que apunta a una l√≠nea del juego de datos original. Lo importante aqu√≠ es la forma en la cual la funci√≥n `createDataPartition` crea dicho vector de √≠ndices en base al juego de datos original. Primeramente, la funci√≥n utiliza el par√°metro `y = faithful$eruptions` para crear subconjuntos con la data basado en lo que exista y se pase para proceso. En nuestro caso particular pasamos como par√°metro el vector del juego de datos `faithful` con la variable dependiente `eruptions`. Para decidir en el porcentaje de puntos de datos a dividir al juego de entrenamiento, y habiendo establecido que en nuestro caso ser√≠a el 50% de los datos disponibles, asignamos el valor 0.5 a la variable $p$ en el par√°metro `p = 0.5`. Debemos tener cuidado con el √∫ltimo par√°metro, el cual fijamos como `list = FALSE`. Al fijar la opci√≥n de lista en falso, la funci√≥n nos devuelve un vector de √≠ndices. Pero si lo fijamos en `TRUE` la funci√≥n retorna un vector de valores y no de √≠ndices. Esto en s√≠ no est√° mal porque algunos cient√≠ficos quiz√°s prefieran armar sus juegos de datos de manera m√°s directa creando vectores de datos. No es nuestra metodolog√≠a pero aclaramos que la opci√≥n existe. 
+La primera lÌnea del cÛdigo crea la variable `inTrain` a travÈs de la funciÛn de _CARET_ `createDataPartition`. La variable `inTrain` no es un juego de datos de entrenamiento, sino un juego de datos de Ìndices para crear el juego de entrenamiento. En otras palabras, no es sino un vector con n˙meros, cada n˙mero un Ìndice que apunta a una lÌnea del juego de datos original. Lo importante aquÌ es la forma en la cual la funciÛn `createDataPartition` crea dicho vector de Ìndices en base al juego de datos original. Primeramente, la funciÛn utiliza el par·metro `y = faithful$eruptions` para crear subconjuntos con la data basado en lo que exista y se pase para proceso. En nuestro caso particular pasamos como par·metro el vector del juego de datos `faithful` con la variable dependiente `eruptions`. Para decidir en el porcentaje de puntos de datos a dividir al juego de entrenamiento, y habiendo establecido que en nuestro caso serÌa el 50% de los datos disponibles, asignamos el valor 0.5 a la variable $p$ en el par·metro `p = 0.5`. Debemos tener cuidado con el ˙ltimo par·metro, el cual fijamos como `list = FALSE`. Al fijar la opciÛn de lista en falso, la funciÛn nos devuelve un vector de Ìndices. Pero si lo fijamos en `TRUE` la funciÛn retorna un vector de valores y no de Ìndices. Esto en sÌ no est· mal porque algunos cientÌficos quiz·s prefieran armar sus juegos de datos de manera m·s directa creando vectores de datos. No es nuestra metodologÌa pero aclaramos que la opciÛn existe. 
 	
 Para aquellos que sientan la curiosidad, revisemos que existe realmente dentro de `inTrain` ya que visualizarlo ayuda mucho.
 	
@@ -141,78 +141,78 @@ Para aquellos que sientan la curiosidad, revisemos que existe realmente dentro d
 head(inTrain)
 ```
 	
-Como se puede ver es un vector de √≠ndices y cada uno se corresponde con un valor dentro de ju juego de datos entre llaves (_brackets_). De esta forma le hemos quitado la m√≠stica al uso del juego de √≠ndices.
+Como se puede ver es un vector de Ìndices y cada uno se corresponde con un valor dentro de ju juego de datos entre llaves (_brackets_). De esta forma le hemos quitado la mÌstica al uso del juego de Ìndices.
 	
-El segundo paso es la verdadera creaci√≥n del juego de entrenamiento. Llamamos a tal juego `trainFaith` y le asignamos todos los registros del juego original `faithful` con **subsetting**, utilizando como √≠ndices de que queda y que no queda los mismos del juego de √≠ndices `inTrain` (y ahora queda claro porque usamos √≠ndices y fijamos el par√°metro de `list = ...`en FALSO). Aqu√≠ aprovechamos el poder del lenguaje _R_ en el uso de vectorizaci√≥n y la forma por la cual las asignaciones y reportes de un juego de datos muchas veces nos dan √≠ndices y no valores (recordar las cadenas de FALSE y TRUE en vez de resultados de los primeros cap√≠tulos). Al ponernos al nivel de idiosincracias de _R_ comenzamos a sacarles fruto y crear juegos de entrenamientos aleatorios, sin sesgo, con tan solo dos l√≠neas de c√≥digo. 
+El segundo paso es la verdadera creaciÛn del juego de entrenamiento. Llamamos a tal juego `trainFaith` y le asignamos todos los registros del juego original `faithful` con **subsetting**, utilizando como Ìndices de que queda y que no queda los mismos del juego de Ìndices `inTrain` (y ahora queda claro porque usamos Ìndices y fijamos el par·metro de `list = ...`en FALSO). AquÌ aprovechamos el poder del lenguaje _R_ en el uso de vectorizaciÛn y la forma por la cual las asignaciones y reportes de un juego de datos muchas veces nos dan Ìndices y no valores (recordar las cadenas de FALSE y TRUE en vez de resultados de los primeros capÌtulos). Al ponernos al nivel de idiosincracias de _R_ comenzamos a sacarles fruto y crear juegos de entrenamientos aleatorios, sin sesgo, con tan solo dos lÌneas de cÛdigo. 
 	
-Verifiquemos si la creaci√≥n del juego de datos de entrenamiento corresponde con la creaci√≥n del juego de datos de √≠ndices. En otras palabras, el primer registro del juego de entrenamiento debe contener el valor del juego original de datos de aquel registro al que apunta el √≠ndice del primer valor del juego de √≠ndices. Es un direccionamiento indirecto, que es complicado de abstraer pero mucho m√°s f√°cil de ver en cada l√≠nea particular de datos. 
+Verifiquemos si la creaciÛn del juego de datos de entrenamiento corresponde con la creaciÛn del juego de datos de Ìndices. En otras palabras, el primer registro del juego de entrenamiento debe contener el valor del juego original de datos de aquel registro al que apunta el Ìndice del primer valor del juego de Ìndices. Es un direccionamiento indirecto, que es complicado de abstraer pero mucho m·s f·cil de ver en cada lÌnea particular de datos. 
 	
-La tercera l√≠nea de `inTrain` apunta al indice 6 del juego original.
+La tercera lÌnea de `inTrain` apunta al indice 6 del juego original.
 	
 ```{r}
 inTrain[3,]
 ```
 	
-La tercera l√≠nea del juego de entrenamiento debe entonces contener lo mismo que la sexta l√≠nea del juego original de datos, ya que se creo con un puntero que direccionaba directamente a esta. 
+La tercera lÌnea del juego de entrenamiento debe entonces contener lo mismo que la sexta lÌnea del juego original de datos, ya que se creo con un puntero que direccionaba directamente a esta. 
 	
 ```{r}
 trainFaith[3,]
 faithful[6,]
 ```
 	
-Vemos que ambos resultados son iguales. El trabajo adicional de crear los juegos de datos de esta forma se recompensa al no tener que hacer cambios complicados a mitad de un an√°lisis. Dado que los juegos se crearon en base a un juego de √≠ndices, pero que estos en si no se tocan, es m√≠nimo el riesgo de borrarlos por error o tener que empezar de cero cuando se comete algun paso indebido. 
+Vemos que ambos resultados son iguales. El trabajo adicional de crear los juegos de datos de esta forma se recompensa al no tener que hacer cambios complicados a mitad de un an·lisis. Dado que los juegos se crearon en base a un juego de Ìndices, pero que estos en si no se tocan, es mÌnimo el riesgo de borrarlos por error o tener que empezar de cero cuando se comete algun paso indebido. 
 	
-Si la creaci√≥n del juego de entrenamiento fue simple, la del juego de evaluaci√≥n lo es a√∫n m√°s, y utilizando **subsetting** indicamos entre llaves leer todos aquellos √≠ndices que no est√©n en el archivo de √≠ndices `inTrain` anteponiendo el operador `-`, en la l√≠nea `testTain <- faithful[-inTrain, ]`.
+Si la creaciÛn del juego de entrenamiento fue simple, la del juego de evaluaciÛn lo es a˙n m·s, y utilizando **subsetting** indicamos entre llaves leer todos aquellos Ìndices que no estÈn en el archivo de Ìndices `inTrain` anteponiendo el operador `-`, en la lÌnea `testTain <- faithful[-inTrain, ]`.
 	
-La √∫ltima linea la ponemos solamente como comprobaci√≥n de lo que hemos obtenido. 
+La ˙ltima linea la ponemos solamente como comprobaciÛn de lo que hemos obtenido. 
 
-Es v√°lido pensar que al pasar del juego completo de datos a un juego de entrenamiento con el 50% de los datos, la relaci√≥n lineal inicial se puede haber perdido. Para verificar que todav√≠a estamos apuntalados en nuestra teor√≠a inicial, visualizamos ambas variables nuevamente. 
+Es v·lido pensar que al pasar del juego completo de datos a un juego de entrenamiento con el 50% de los datos, la relaciÛn lineal inicial se puede haber perdido. Para verificar que todavÌa estamos apuntalados en nuestra teorÌa inicial, visualizamos ambas variables nuevamente. 
 
 ```{r graphTrainLR}
 plot(trainFaith$waiting, trainFaith$eruptions, pch=19, col="gray")
 
 ```
 
-La gr√°fica de dispersi√≥n evidencia que a pesar de tener menos puntos de datos, la tendencia hacia una relaci√≥n lineal sigue en pie (y en muy buena forma es la raz√≥n por la cual la ciencia de datos triunfa, la tendencia o patr√≥n de relaciones de la data comienza a ser visible con una cantidad m√≠nima de datos y solo se solidifica con la agregaci√≥n de los mismos). 
+La gr·fica de dispersiÛn evidencia que a pesar de tener menos puntos de datos, la tendencia hacia una relaciÛn lineal sigue en pie (y en muy buena forma es la razÛn por la cual la ciencia de datos triunfa, la tendencia o patrÛn de relaciones de la data comienza a ser visible con una cantidad mÌnima de datos y solo se solidifica con la agregaciÛn de los mismos). 
 
 ## Construyendo un Regresor a Mano
-Los modelos de regresi√≥n lineal y regresi√≥n general son uno de los mejores para utilizar en el aprendizaje automatizado [@zumelMount]. Si bien no son tan avanzados como otros modelos de aprendizaje automatizado (o inclusive no son tan glamorosos) nos permiten construir modelos predictivos robustos y generalmente precisos [@daroczi]. Inicialmente hab√≠amos decidido no crear una regresi√≥n lineal porque probablemente el modelo simple tendr√≠a mucho sobreajuste y no generalizar√≠a bien. Pero por prop√≥sitos pedag√≥gicos, vamos a hacerlo y luego comparar los resultados con el m√©todo de aprendizaje automatizado. 
+Los modelos de regresiÛn lineal y regresiÛn general son uno de los mejores para utilizar en el aprendizaje automatizado [@zumelMount]. Si bien no son tan avanzados como otros modelos de aprendizaje automatizado (o inclusive no son tan glamorosos) nos permiten construir modelos predictivos robustos y generalmente precisos [@daroczi]. Inicialmente habÌamos decidido no crear una regresiÛn lineal porque probablemente el modelo simple tendrÌa mucho sobreajuste y no generalizarÌa bien. Pero por propÛsitos pedagÛgicos, vamos a hacerlo y luego comparar los resultados con el mÈtodo de aprendizaje automatizado. 
 
-Construimos un regresor en _R_ con el siguiente c√≥digo que ya hemos visto en el cap√≠tulo de Regresi√≥n Lineal.
+Construimos un regresor en _R_ con el siguiente cÛdigo que ya hemos visto en el capÌtulo de RegresiÛn Lineal.
 
 ```{r buildSimpleRegresor}
 lm1 <- lm(eruptions ~ waiting, data = trainFaith)
 summary(lm1)
 ```
 
-_R_ construye nuestro modelo lineal en segundos con la funci√≥n `lm()`, a la cual le instru√≠mos que haga predicciones de la variable `eruptions` basada en la variable `waiting` con el juego de datos de entrenamiento `trainFaith`. El reporte sumario nos dice que el modelo tiene una pendiente de la variable independiente de 0.076930 y una ordenada al origen de -1.964020. Esto significa que si tuvieramos que estimar la duraci√≥n de cualquier erupci√≥n, te√≥ricamente pudieramos hacer una muy buena estimaci√≥n utilizando un tiempo de espera entre erupciones cualquier, multiplicando este por 0.076930, y restando 1.964020. Hagamos justamente esto en _R_ usando los coeficientes del modelo. 
+_R_ construye nuestro modelo lineal en segundos con la funciÛn `lm()`, a la cual le instruÌmos que haga predicciones de la variable `eruptions` basada en la variable `waiting` con el juego de datos de entrenamiento `trainFaith`. El reporte sumario nos dice que el modelo tiene una pendiente de la variable independiente de 0.076930 y una ordenada al origen de -1.964020. Esto significa que si tuvieramos que estimar la duraciÛn de cualquier erupciÛn, teÛricamente pudieramos hacer una muy buena estimaciÛn utilizando un tiempo de espera entre erupciones cualquier, multiplicando este por 0.076930, y restando 1.964020. Hagamos justamente esto en _R_ usando los coeficientes del modelo. 
 
 ```{r rushCalcLM}
 espera <- 80
 coef(lm1)[1] + coef(lm1)[2] * espera
 ```
 
-Seg√∫n nuestro pron√≥stico a las apuros, si el tiempo entre erupciones es de 80 minutos, lo probable es que el tiempo de erupci√≥n del geyser sea 4.19 minutos. Podemos comparar esto con la realidad de todo el juego de datos (no es el m√©todo cient√≠fico pero por ahora solo estamos analizando profundamente como funcionan las cosas). 
+Seg˙n nuestro pronÛstico a las apuros, si el tiempo entre erupciones es de 80 minutos, lo probable es que el tiempo de erupciÛn del geyser sea 4.19 minutos. Podemos comparar esto con la realidad de todo el juego de datos (no es el mÈtodo cientÌfico pero por ahora solo estamos analizando profundamente como funcionan las cosas). 
 
 ```{r}
 faithful[faithful$waiting == 80, ]
 mean(faithful[faithful$waiting == 80, 1])
 ```
 
-Los tiempos de erupci√≥n abarcan el rango de 3.817 a 4.833 minutos para cada intervalo de 80 minutos entre erupciones, con un promedio de 4.4645 minutos. Nuestra estimaci√≥n de 4.19 parece acertado, sobre todo cuando el valor del √≠ndice de $R^2$ del modelo es de 0.81, medianamente aceptable. Podemos agilizar un poco los c√°lculos con la funci√≥n `predict()`, la cual tiene la siguiente sint√°xis.
+Los tiempos de erupciÛn abarcan el rango de 3.817 a 4.833 minutos para cada intervalo de 80 minutos entre erupciones, con un promedio de 4.4645 minutos. Nuestra estimaciÛn de 4.19 parece acertado, sobre todo cuando el valor del Ìndice de $R^2$ del modelo es de 0.81, medianamente aceptable. Podemos agilizar un poco los c·lculos con la funciÛn `predict()`, la cual tiene la siguiente sint·xis.
 
 `predict(modelo, valor_para_estimar)`
 
-donde el modelo es cualquier modelo que hayamos extra√≠do en _R_ y el `valor_para_estimar` uno o m√°s valores para utilizar como variables independientes. En nuestro caso el c√≥digo correcto ser√≠a:
+donde el modelo es cualquier modelo que hayamos extraÌdo en _R_ y el `valor_para_estimar` uno o m·s valores para utilizar como variables independientes. En nuestro caso el cÛdigo correcto serÌa:
 
 ```{r}
 valores_para_estimar <- data.frame(waiting = 80)
 predict(lm1, valores_para_estimar)
 ```
 
-La funci√≥n espera como par√°metro de datos a evaluar un objeto del tipo _data frame_ y por eso convertimos el dato de forma explicita. Noten que lo nombramos con la etiqueta `waiting` ya que eso espera el modelo, no solo un valor `80`. Si lo de utilizar la etiqueta `waiting` es confuso, solo recuerden que la llamada del reporte sumario del modelo sencillo `lm1` tiene como llamada `lm(formula = eruptions ~ waiting, data = trainFaith)`. La funci√≥n espera que el nombre de las variables se respeten y que si queremos estimar `eruptions` pasemos alg√∫n valor para `waiting` con ese mismo nombre. 
+La funciÛn espera como par·metro de datos a evaluar un objeto del tipo _data frame_ y por eso convertimos el dato de forma explicita. Noten que lo nombramos con la etiqueta `waiting` ya que eso espera el modelo, no solo un valor `80`. Si lo de utilizar la etiqueta `waiting` es confuso, solo recuerden que la llamada del reporte sumario del modelo sencillo `lm1` tiene como llamada `lm(formula = eruptions ~ waiting, data = trainFaith)`. La funciÛn espera que el nombre de las variables se respeten y que si queremos estimar `eruptions` pasemos alg˙n valor para `waiting` con ese mismo nombre. 
 
-Si continuamos probando, tenemos muchos valores que usar para estimar el tiempo de erupciones. Tomemos uno m√°s cualquiera, como por ejemplo la l√≠nea 55. Revisemos el valor real del tiempo entre erupciones y la erupci√≥n registrada, y luego utilicemos nuestro modelo improvisado para predecir la duraci√≥n de una erupci√≥n con ese tiempo de espera entre erupciones. 
+Si continuamos probando, tenemos muchos valores que usar para estimar el tiempo de erupciones. Tomemos uno m·s cualquiera, como por ejemplo la lÌnea 55. Revisemos el valor real del tiempo entre erupciones y la erupciÛn registrada, y luego utilicemos nuestro modelo improvisado para predecir la duraciÛn de una erupciÛn con ese tiempo de espera entre erupciones. 
 
 ```{r}
 # revisar record 55
@@ -222,7 +222,7 @@ trainFaith[55, ]
 predict(lm1, trainFaith[55, ])
 ```
 
-Con una duraci√≥n de 2.57 nuestra predicci√≥n est√° bastante lejos de la verdad (1.7). Nuestro modelo de regresi√≥n lineal es bueno, pero no tanto como para cubrir todos los puntos con la misma predici√≥n. Podemos ver su desempe√±o si visualizamos la dispersi√≥n de los datos originales, y la recta de regresi√≥n lineal utilizando los valores de calce del modelo que se guardan en la meta-variable `$fitted`. 
+Con una duraciÛn de 2.57 nuestra predicciÛn est· bastante lejos de la verdad (1.7). Nuestro modelo de regresiÛn lineal es bueno, pero no tanto como para cubrir todos los puntos con la misma prediciÛn. Podemos ver su desempeÒo si visualizamos la dispersiÛn de los datos originales, y la recta de regresiÛn lineal utilizando los valores de calce del modelo que se guardan en la meta-variable `$fitted`. 
 
 ```{r}
 plot(trainFaith$waiting, trainFaith$eruptions, pch=19, col="gray")
@@ -230,27 +230,27 @@ lines(trainFaith$waiting, lm1$fitted.values, lwd=3, col="black")
 ```
 
 ## Construyendo un Regresor con Entrenamiento de Datos
-El proceso de construir un regresor con aprendizaje automatizado involucra muy poco trabajo en contraposici√≥n de hacerlo a mano. La librer√≠a _CARET_ le quita mucho del misterio y la iteracci√≥n de correr el mismo modelo miles de veces, ajustando par√°metros y pesos de las variables utilizando an√°lisis combinatorio, hasta que las iteracciones no logren disminuir el margen de error del juego de entrenamiento de forma que valga la pena continuar. Para nuestro caso en particular, utilizaremos la funci√≥n `train()` con la siguientes sint√°xis:
+El proceso de construir un regresor con aprendizaje automatizado involucra muy poco trabajo en contraposiciÛn de hacerlo a mano. La librerÌa _CARET_ le quita mucho del misterio y la iteracciÛn de correr el mismo modelo miles de veces, ajustando par·metros y pesos de las variables utilizando an·lisis combinatorio, hasta que las iteracciones no logren disminuir el margen de error del juego de entrenamiento de forma que valga la pena continuar. Para nuestro caso en particular, utilizaremos la funciÛn `train()` con la siguientes sint·xis:
 
 `train(formula, method = "un_metodo", data = "alguna_data")`
 
 donde:
 
-* `formula` es la formula que buscamos de variable dependiente e independiente, utilizando la notaci√≥n conocida con `~` para establecer las relaciones. 
-* `method =` recibe un literal con el tipo de m√©todo a utilizar. Se puede dejar en blanco y _CARET_ prueba con diferentes m√©todos hasta dar con aquel que tiene el menor margen de error. Esto es conveniente en juegos de datos peque√±os pero puede utilizar recursos del CPU y llevar horas en juegos grandes dependiendo del poder del computador y espacio libre en memoria. 
-* `data =` recibe como par√°metro la fuente original de datos. 
+* `formula` es la formula que buscamos de variable dependiente e independiente, utilizando la notaciÛn conocida con `~` para establecer las relaciones. 
+* `method =` recibe un literal con el tipo de mÈtodo a utilizar. Se puede dejar en blanco y _CARET_ prueba con diferentes mÈtodos hasta dar con aquel que tiene el menor margen de error. Esto es conveniente en juegos de datos pequeÒos pero puede utilizar recursos del CPU y llevar horas en juegos grandes dependiendo del poder del computador y espacio libre en memoria. 
+* `data =` recibe como par·metro la fuente original de datos. 
 
-Lo ideal en un modelo de regresi√≥n es probar primero con todas las variables usando `eruptions ~ .`, pero como en nuestro caso solo hay dos, hubiera sido similar a poner como formula `eruptions ~ waiting`. Queremos revisar con regresi√≥n lineal, por lo que seremos espec√≠ficos en el m√©todo de `lm`. Nuestro c√≥digo queda entonces de la siguiente manera.
+Lo ideal en un modelo de regresiÛn es probar primero con todas las variables usando `eruptions ~ .`, pero como en nuestro caso solo hay dos, hubiera sido similar a poner como formula `eruptions ~ waiting`. Queremos revisar con regresiÛn lineal, por lo que seremos especÌficos en el mÈtodo de `lm`. Nuestro cÛdigo queda entonces de la siguiente manera.
 
 ```{r trainLM}
-modelo_CARET <- train(eruptions ~ ., method = "lm", data = trainFaith)
+modelo_CARET <- train(eruptions ~ waiting, method = "lm", data = trainFaith)
 modelo_CARET$finalModel
 ```
 
-El paquete _CARET_ guarda el modelo final en la variable `finalModel` para verificar la f√≥rmula final. El resultado no es diferente del haber hecho el entrenamiento a mano. La pendiente y la ordenada al origen son exactamente iguales. El juego de datos no es muy profundo, y hubiera sido dificil conseguir una mejor regresi√≥n lineal que la funci√≥n de _R_. M√°s sobre esto al final del cap√≠tulo. 
+El paquete _CARET_ guarda el modelo final en la variable `finalModel` para verificar la fÛrmula final. El resultado no es diferente del haber hecho el entrenamiento a mano. La pendiente y la ordenada al origen son exactamente iguales. El juego de datos no es muy profundo, y hubiera sido dificil conseguir una mejor regresiÛn lineal que la funciÛn de _R_. M·s sobre esto al final del capÌtulo. 
 
-## Validando el Modelo Entrenado con el Juego de Evaluaci√≥n
-Utilizamos la librer√≠a _CARET_ para entrenar de forma r√°pida nuestro modelo con el juego de datos apropiado. ¬øC√≥mo ser√° el desempe√±o de nuestro modelo entrenado si lo aplicamos al juego de datos de evaluaci√≥n? De la misma forma que cuando entrenamos el modelo, superimpusimos el diagrama de dispersi√≥n con los datos originales y la recta de regresi√≥n con el modelo calzado, vamos a superimponer el gr√°fico de dispersi√≥n del juego de evaluaci√≥n con la regresi√≥n de los valores esperados del juego de evaluaci√≥n usando como regresor el modelo entrenado. Esto suena m√°s complicado de lo que es, porque en realidad el c√≥digo cambia muy poco. 
+## Validando el Modelo Entrenado con el Juego de EvaluaciÛn
+Utilizamos la librerÌa _CARET_ para entrenar de forma r·pida nuestro modelo con el juego de datos apropiado. øCÛmo ser· el desempeÒo de nuestro modelo entrenado si lo aplicamos al juego de datos de evaluaciÛn? De la misma forma que cuando entrenamos el modelo, superimpusimos el diagrama de dispersiÛn con los datos originales y la recta de regresiÛn con el modelo calzado, vamos a superimponer el gr·fico de dispersiÛn del juego de evaluaciÛn con la regresiÛn de los valores esperados del juego de evaluaciÛn usando como regresor el modelo entrenado. Esto suena m·s complicado de lo que es, porque en realidad el cÛdigo cambia muy poco. 
 
 ```{r}
 par(mfrow = c(1,2))
@@ -260,11 +260,11 @@ plot(trainFaith$waiting, trainFaith$eruptions, pch=19, col="gray",
 lines(trainFaith$waiting, predict(modelo_CARET, trainFaith), lwd=3, col="black")
 
 plot(testFaith$waiting, testFaith$eruptions, pch=19, col="blue", 
-     main = "Juego de Evaluaci√≥n")
+     main = "Juego de EvaluaciÛn")
 lines(testFaith$waiting, predict(modelo_CARET, testFaith), lwd=3, col="black")
 ```
 
-Si el valor de $R^2$ del modelo entrenado es de 0.81, ¬øcu√°l es el valor de $R^2$ del modelo entrenado cuando se le aplica el juego de datos de evaluaci√≥n? La teor√≠a indica que el valor fuera de muestra es casi m√°s importante que el valor dentro de muestra. Podemos hacer el c√°lculo a mano de la siguiente manera.
+Si el valor de $R^2$ del modelo entrenado es de 0.81, øcu·l es el valor de $R^2$ del modelo entrenado cuando se le aplica el juego de datos de evaluaciÛn? La teorÌa indica que el valor fuera de muestra es casi m·s importante que el valor dentro de muestra. Podemos hacer el c·lculo a mano de la siguiente manera.
 
 ```{r}
 a <- sum((predict(modelo_CARET, testFaith) - mean(testFaith$eruptions))^2)
@@ -272,7 +272,7 @@ b <- sum((testFaith$eruptions - mean(testFaith$eruptions))^2)
 print(a/b)
 ```
 
-El valor del $R^2$ del modelo de evaluaci√≥n es 0.87, superior al modelo de entrenamiento, lo que significa que el modelo es mucho m√°s robusto de lo que esperabamos y generaliza de forma superior. Otra forma de evaluar el alcance del modelo entrenado es comparado el error cuadr√°tico medio de cada uno (en ingl√©s **RMSE**). 
+El valor del $R^2$ del modelo de evaluaciÛn es 0.87, superior al modelo de entrenamiento, lo que significa que el modelo es mucho m·s robusto de lo que esperabamos y generaliza de forma superior. Otra forma de evaluar el alcance del modelo entrenado es comparado el error cuadr·tico medio de cada uno (en inglÈs **RMSE**). 
 
 ```{r RMSE}
 # RMSE de juego de entrenamiento
@@ -282,4 +282,43 @@ sqrt(sum((modelo_CARET$finalModel$fitted.values - trainFaith$eruptions) ^2))
 sqrt(sum((predict(modelo_CARET, testFaith) - testFaith$eruptions) ^2))
 ```
 
-El error cuadr√°tico del modelo entrenado es de 5.792106, mientras que en el juego de datos de evaluaci√≥n baja a 5.753229, mejorando su calidad de predicci√≥n. 
+El error cuadr·tico del modelo entrenado es de 5.792106, mientras que en el juego de datos de evaluaciÛn baja a 5.753229, mejorando su calidad de predicciÛn. 
+
+## DetecciÛn Autom·tica de la Mejor OpciÛn de Aprendizaje Automatizado
+Cuando hicimos la regresiÛn manual versus la regresiÛn a travÈs de aprendizaje automatizado, no conseguimos una diferencia notable (no notable en el nivel de mantisa que estabamos trabajando). La respuesta a esto es que el mejor mÈtodo de aprendizaje automatizado no es regresiÛn lineal para este caso, sino **Random Forest**. La funciÛn `predict()` lo puede detectar de forma autom·tica si se deja en blanco el par·metro para mÈtodo. El cÛdigo y resultado es el siguiente.
+
+```{marginfigure}
+Si bien la funciÛn `predict()` puede detectar de forma autom·tica el mejor mÈtodo de aprendizaje automatizado para un juego de datos dado, esto viene a un costo de computaciÛn alto. El problema en mano tiene menos de 300 puntos de datos y la soluciÛn autom·tica tarda varios minutos en un port·til poderoso (o por lo menos poderoso en el aÒo de publicaciÛn de este libro). Problemas con miles de puntos de datos pueden llevar horas y llevar la temperatura del CPU y GPU a niveles peligrosos. Dejar la soluciÛn en manos de la biblioteca _CARET_ es una proposiciÛn cara en recursos para la soluciÛn de un problema, y totalmente impractica en cÛdigo de producciÛn.
+```
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+modelo_CARET_auto <- train(eruptions ~ waiting, data = trainFaith)
+modelo_CARET_auto$finalModel
+```
+
+El modelo `modelo_CARET_auto` tiene un poder de explicar la variaciÛn inherente de los datos del 0.86, m·s alto que nuestro 0.81 del `modelo_CARET`. Una forma sencilla de verlo es comparar los primeros seis resultados de ambos modelos contra la data actual del juego de evaluaciÛn. 
+
+```{r buildTest, message=FALSE, warning=FALSE}
+library(data.table)
+library(dplyr)
+library(formattable)
+library(tidyr)
+
+data_points <- 1:6
+data_original <- trainFaith$eruptions[1:6]
+pred_regresion <- predict(modelo_CARET, newdata = trainFaith[1:6, ])
+pred_auto <- predict(modelo_CARET_auto, newdata = trainFaith[1:6, ])
+
+tabla_data <- data.frame(puntos = data_points, original = data_original,
+                         regresion = pred_regresion, auto = pred_auto)
+
+formattable(tabla_data,
+            align =c("l","c","c","c"), 
+            list(`Indicator Name` = formatter(
+              "span", style = ~ style(color = "grey",font.weight = "bold")) 
+))
+```
+
+De la siguiente tabla podemos validar que en los puntos de datos 1, 2, 3, 5, y 6 el modelo autom·tico que utiliza **Random Forest** hace mejores predicciones que el modelo de regresiÛn lineal. Solamente en el punto 4 el modelo de regresiÛn lineal tiene un desempeÒo superior. øPor quÈ entonces no seleccionamos la metodologÌa de _random forest_ desde el comienzo? Recordando la teorÌa, la regresiÛn lineal es un buen punto de entrada para comenzar a analizar opciones. Solamente cuando no podemos optimizar el algoritmo para conseguir una soluciÛn Ûptima, avanzamos a mÈtodos m·s complejos. En nuestro caso hubiera sido importante tener un modelo cuyo poder de predicciÛn fuera igual o superior a $p<0.05$. No era posible optimizar la regresiÛn lineal del modelo ya que solo contabamos con un regresor, pero a la vez el modelo de _random forest_ tampoco cumple esa condiciÛn. Como todo problema de ciencia de datos, serÌa importante recaudar m·s puntos de datos para complementar los modelos o ver que otras variables pueden infuir en las erupciones, como por ejemplo la temperatura ambiente, la presiÛn baromÈtrica, o movimientos tel˙ricos que modifiquen la trama del subsuelo, causando anomalidades en la cadencia.
+
+
